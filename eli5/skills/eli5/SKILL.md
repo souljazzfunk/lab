@@ -151,7 +151,17 @@ Reference implementation to include in every artifact:
 <script>
   (function(){
     var root=document.documentElement,btns=document.querySelectorAll('.lang-toggle button');
-    function set(l){root.setAttribute('data-lang',l);btns.forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});try{localStorage.setItem('eli5-lang',l)}catch(e){}}
+    var enSpans=document.querySelectorAll('svg tspan[lang="en"]');
+    function set(l){
+      root.setAttribute('data-lang',l);
+      btns.forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});
+      // SVG labels: CSS display:block does nothing for <tspan>, so in Both mode
+      // drop the EN tspan onto a second line under the JA one.
+      enSpans.forEach(function(t){var x=t.parentNode.getAttribute('x');
+        if(l==='both'){t.setAttribute('x',x);t.setAttribute('dy','1.15em');t.style.fontSize='0.8em';t.style.opacity='.75'}
+        else{t.removeAttribute('x');t.removeAttribute('dy');t.style.fontSize='';t.style.opacity=''}});
+      try{localStorage.setItem('eli5-lang',l)}catch(e){}
+    }
     var saved='both';try{saved=localStorage.getItem('eli5-lang')||'both'}catch(e){}
     set(saved);
     btns.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.lang)})});
@@ -162,5 +172,5 @@ Reference implementation to include in every artifact:
 Rules:
 - In **Both** mode, JA appears first with EN directly beneath it in a slightly smaller, lighter style.
 - Inline `<span lang>` pairs inside a heading or paragraph should render as separate lines in Both mode (the `display:block` rule above handles this); in single-language mode only one line shows.
-- SVG labels also need both languages: use two `<text>` elements with `lang` attributes, or keep pictures label-free.
+- SVG labels also need both languages. Write each label as one `<text x=".." y="..">` holding two `<tspan lang="ja">` / `<tspan lang="en">` children (`x` must be on the `<text>` element; the script copies it onto the EN tspan). The script above stacks the EN tspan under the JA one in Both mode, so leave roughly 1.2em of empty space below every label in the viewBox so the second line does not collide with shapes. `display:none` from the CSS already hides the other tspan in single-language modes.
 - Use sans-serif fonts only (system-ui stack with Hiragino Sans / Noto Sans JP fallbacks for Japanese).
