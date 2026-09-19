@@ -114,3 +114,53 @@ For **business audiences** (managers, directors):
 - When explaining code, always explain the *purpose* first, then the mechanism. Nobody cares about syntax until they know why it exists.
 - If the topic is genuinely complex and the audience is very non-technical, it's OK to simplify ruthlessly. Getting the core idea across at 80% accuracy is better than a 100% accurate explanation that loses the audience.
 - Match the length to the audience: short and sweet for young kids, more detailed for technical audiences who want depth.
+
+## Step 4: Deliver as a Bilingual HTML Artifact
+
+Always deliver the explanation as an HTML artifact (via the Artifact tool), not as plain chat text. Big pictures (inline SVG), few words, sans-serif fonts only.
+
+### Bilingual content
+Write every piece of text in **both Japanese and English**. Wrap each language in an element carrying `lang="ja"` or `lang="en"`. Keep the two versions parallel: same structure, same number of sections, same images.
+
+```html
+<h1><span lang="ja">データベースのインデックスとは？</span><span lang="en">What is a database index?</span></h1>
+<p><span lang="ja">とても大きな本を想像してみて…</span><span lang="en">Imagine a huuuge book...</span></p>
+```
+
+### Language toggle (top right)
+Put a fixed three-way toggle in the top-right corner with the options **JA / EN / Both**. Default to **Both**. Remember the choice in `localStorage` (wrapped in try/catch) so it persists across visits.
+
+Reference implementation to include in every artifact:
+
+```html
+<div class="lang-toggle" role="group" aria-label="Language">
+  <button data-lang="ja">JA</button>
+  <button data-lang="en">EN</button>
+  <button data-lang="both" class="active">Both</button>
+</div>
+<style>
+  .lang-toggle{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:10;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--toggle-bg,#e5e7eb);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif}
+  .lang-toggle button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer;color:inherit}
+  .lang-toggle button.active{background:var(--toggle-active,#fff);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  html[data-lang="ja"] [lang="en"]{display:none}
+  html[data-lang="en"] [lang="ja"]{display:none}
+  html[data-lang="both"] [lang="en"]{display:block;opacity:.75;font-size:.92em;margin-top:.15em}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--toggle-bg:#374151;--toggle-active:#111827}}
+  :root[data-theme="dark"]{--toggle-bg:#374151;--toggle-active:#111827}
+</style>
+<script>
+  (function(){
+    var root=document.documentElement,btns=document.querySelectorAll('.lang-toggle button');
+    function set(l){root.setAttribute('data-lang',l);btns.forEach(function(b){b.classList.toggle('active',b.dataset.lang===l)});try{localStorage.setItem('eli5-lang',l)}catch(e){}}
+    var saved='both';try{saved=localStorage.getItem('eli5-lang')||'both'}catch(e){}
+    set(saved);
+    btns.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.lang)})});
+  })();
+</script>
+```
+
+Rules:
+- In **Both** mode, JA appears first with EN directly beneath it in a slightly smaller, lighter style.
+- Inline `<span lang>` pairs inside a heading or paragraph should render as separate lines in Both mode (the `display:block` rule above handles this); in single-language mode only one line shows.
+- SVG labels also need both languages: use two `<text>` elements with `lang` attributes, or keep pictures label-free.
+- Use sans-serif fonts only (system-ui stack with Hiragino Sans / Noto Sans JP fallbacks for Japanese).
