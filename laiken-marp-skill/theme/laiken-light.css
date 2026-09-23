@@ -1,0 +1,312 @@
+/* @theme laiken-light */
+
+@import 'default';
+
+/* ===================================================
+   Light Theme - Terracotta Accent
+   生成り（クリーム）の地 + テラコッタのアクセント
+   基準: 本文 36pt（48px）、下限 24pt（32px）。
+   これ未満のサイズを足さない（ページ番号だけは客席の読み物ではないので例外）
+   =================================================== */
+
+:root {
+  --bg: #faf9f5;       /* 地 */
+  --ink: #29261f;      /* 本文 */
+  --accent: #c9602a;   /* 強調・中心ノード・見出しの下線 */
+  --accent-ink: #a8501f; /* 32px前後の小さい文字をアクセント色にするとき */
+  --accent2: #7a6a52;  /* h2・キャプション */
+  --soft: #f0ece2;     /* 淡い面 */
+  --line: #d9d2c2;     /* 罫線・箱の枠 */
+  --sub: #6d675a;      /* 補足の文字 */
+}
+
+/* ===== ベーススタイル ===== */
+section {
+  background: var(--bg);
+  color: var(--ink);
+  /* サンセリフのみ。macOS はヒラギノ角ゴ、Windows は游ゴシック、Linux は Noto Sans CJK で表示される */
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Noto Sans CJK JP',
+    'Yu Gothic UI', 'Yu Gothic', Meiryo, sans-serif;
+  font-size: 36pt;
+  line-height: 1.35;
+  padding: 52px 68px 64px;
+  align-content: start;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 見出し ===== */
+h1 {
+  color: var(--ink);
+  font-size: 45pt;
+  line-height: 1.2;
+  font-weight: 700;
+  border-bottom: 5px solid var(--accent);
+  padding-bottom: 12px;
+  margin: 0 0 16px;
+}
+
+h2 {
+  color: var(--accent2);
+  font-size: 30pt;
+}
+
+h3 {
+  color: var(--accent2);
+  font-size: 30pt;
+}
+
+/* ===== 本文 ===== */
+p, li {
+  color: var(--ink);
+  font-size: 36pt;
+  line-height: 1.35;
+}
+
+li li {
+  font-size: 30pt;
+  color: #4c4638;
+}
+
+strong {
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+em {
+  color: var(--accent2);
+  font-style: normal;
+  font-weight: 700;
+}
+
+a {
+  color: var(--accent-ink);
+  text-decoration: underline;
+}
+
+/* 箇条書きの直後に続く締めの文は、1行ぶん離す */
+ul + p, ol + p {
+  margin-top: 40px;
+}
+
+/* ===== リスト ===== */
+ul, ol {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+li + li {
+  margin-top: 10px;
+}
+
+ul li::marker,
+ol li::marker {
+  color: var(--accent);
+}
+
+/* ===== コード ===== */
+code {
+  font-family: 'SFMono-Regular', Consolas, Menlo, 'Noto Sans Mono CJK JP', monospace;
+  font-size: .85em;
+  background: var(--soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1px 7px;
+}
+
+pre {
+  background: #ffffff !important;
+  border: 3px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 28px;
+  box-shadow: none;
+}
+
+pre code {
+  font-size: 24pt;
+  line-height: 1.3;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--ink);
+}
+
+/* シンタックスハイライトは抑えめ。要点だけに色が乗る */
+pre .hljs-keyword,
+pre .hljs-selector-tag,
+pre .hljs-built_in { color: var(--accent-ink); }
+pre .hljs-string,
+pre .hljs-attr { color: #4f6f3a; }
+pre .hljs-comment,
+pre .hljs-quote { color: var(--sub); }
+pre .hljs-number,
+pre .hljs-literal,
+pre .hljs-title,
+pre .hljs-title.function_ { color: var(--accent2); }
+
+/* ===== 表（ヘッダ + 本文5行まで。24pt が下限） ===== */
+section table {
+  display: table;   /* default テーマは display:block で、幅が中身に縮む */
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 24pt;
+  line-height: 1.3;
+}
+
+table thead, table tbody, table tr {
+  background: transparent;
+}
+
+/* default テーマの section table th/td（padding 6px 13px）より強く当てる */
+section table th,
+section table td {
+  border: 1px solid var(--line);
+  padding: 8px 18px;
+  text-align: left;
+  vertical-align: top;
+}
+
+section table th {
+  background: var(--soft);
+  color: var(--accent2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+section table td {
+  background: #ffffff;
+  color: var(--ink);
+}
+
+section table td:first-child {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+section table tr:nth-child(even) td {
+  background: #f6f3ea;
+}
+
+/* ===== 引用 ===== */
+blockquote {
+  border-left: 6px solid var(--accent);
+  padding: 12px 24px;
+  background: var(--soft);
+  color: var(--ink);
+  font-style: normal;
+  margin: 1em 0;
+}
+
+/* ===== 水平線 ===== */
+hr {
+  border: none;
+  border-top: 3px solid var(--line);
+}
+
+/* ===== ページ番号 / ヘッダー / フッター ===== */
+section::after {
+  color: #a89f8c;
+  font-size: 14pt;
+}
+
+header, footer {
+  color: var(--sub);
+  font-size: 14pt;
+}
+
+/* ======================================================
+   レイアウトクラス
+   ====================================================== */
+
+/* ---------------------------------------------------
+   top: タイトルスライド
+   中央寄せ、タイトルの下にアクセント色の短い帯、右下へ淡いグラデーション
+   --------------------------------------------------- */
+section.top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(160deg, #faf9f5 62%, #f3e8dc 100%);
+}
+
+section.top h1 {
+  font-size: 57pt;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+section.top h1::after {
+  content: "";
+  display: block;
+  width: 200px;
+  height: 7px;
+  background: var(--accent);
+  margin: 26px auto 0;
+  border-radius: 4px;
+}
+
+section.top p {
+  font-size: 30pt;
+  color: #4c4638;
+  margin: 26px 0 0;
+}
+
+section.top::after {
+  display: none;
+}
+
+/* ---------------------------------------------------
+   crosshead: 中扉
+   上下中央、下線なし、ページ番号なし。聞き手の心の声を1行で
+   --------------------------------------------------- */
+section.crosshead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--soft);
+}
+
+section.crosshead h1 {
+  font-size: 50pt;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin: 0;
+}
+
+section.crosshead::after {
+  display: none;
+}
+
+/* ---------------------------------------------------
+   image-full: 見出し + 大きな画像・図
+   --------------------------------------------------- */
+section.image-full p {
+  text-align: center;
+  margin: 0;
+}
+
+section.image-full img {
+  display: block;
+  margin: 0 auto;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+/* ---------------------------------------------------
+   split: 左に本文、右に画像
+   Marp組み込みの bg right:40% と組み合わせて使う
+
+   <!-- _class: split -->
+   # 見出し
+   本文...
+   ![bg right:40% contain](./image.png)
+   --------------------------------------------------- */
+section.split p,
+section.split li {
+  font-size: 32pt;
+}
