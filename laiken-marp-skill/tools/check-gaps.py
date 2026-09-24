@@ -54,7 +54,7 @@ for i, f in enumerate(pages, 1):
         if y1 - y0 < BLOCK:
             continue
         for nb in (merged[k - 1] if k > 0 else None, merged[k + 1] if k + 1 < len(merged) else None):
-            if nb is None or nb[1] - nb[0] < 30: continue  # 図の中のラベルや画像の縁（30px 未満）は本文ではない
+            if nb is None or nb[1] - nb[0] < 40: continue  # 図のラベル（32px の1行は 40px 未満）や画像の縁は本文ではない
             gap = (y0 - nb[1]) if nb[1] <= y0 else (nb[0] - y1)
             if 0 <= gap < MIN_GAP:
                 ng += 1
