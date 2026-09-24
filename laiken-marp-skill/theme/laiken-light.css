@@ -119,6 +119,7 @@ pre {
   border: 3px solid var(--line);
   border-radius: 18px;
   padding: 20px 28px;
+  margin: 24px 0 40px;   /* 下に続く本文と36px以上あける */
   box-shadow: none;
 }
 
