@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" font-family="'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif">
+<circle cx="120" cy="120" r="88" fill="#ffffff" stroke="#9e2f28" stroke-width="22"/>
+<path d="M78 96 A52 52 0 0 1 128 66" fill="none" stroke="#dcd1c6" stroke-width="12" stroke-linecap="round"/>
+<line x1="186" y1="186" x2="268" y2="268" stroke="#241e1c" stroke-width="34" stroke-linecap="round"/>
+</svg>

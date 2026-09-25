@@ -1,0 +1,15 @@
+laiken-marp-skill
+Copyright 2026 らいけん (X: @thunder_bark)
+
+This product is a modified version of minorun-marp-skill
+(https://github.com/minorun365/minorun-marp-skill),
+Copyright 2026 Minoru Onda, licensed under the Apache License 2.0.
+
+Modifications by らいけん (2026-09):
+- Replaced the dark theme (minorun-dark) with a light theme (laiken-light):
+  cream background, terracotta accent, sans-serif fonts only, 36pt body / 24pt minimum.
+- Renamed the skills to laiken-slide-story / laiken-slide-figures / laiken-slide-design
+  and rewrote them for the light theme, adding the "understandable by a 5-year-old" principle.
+- Generalized the inspection tools to detect the page background color
+  (check-dark-margins.py -> check-margins.py, check-dark-gaps.py -> check-gaps.py).
+- Rewrote the sample and broken example decks and figures for the new theme.

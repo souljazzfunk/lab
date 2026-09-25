@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 110" font-family="'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif">
+<rect x="10" y="10" width="360" height="90" rx="45" fill="#efe9e2"/>
+<text x="190" y="68" text-anchor="middle" font-size="36" font-weight="700" fill="#56704f">① 1つに絞る</text>
+<rect x="390" y="10" width="360" height="90" rx="45" fill="#9e2f28"/>
+<text x="570" y="68" text-anchor="middle" font-size="36" font-weight="700" fill="#ffffff">② 大きく見せる</text>
+<rect x="770" y="10" width="360" height="90" rx="45" fill="#efe9e2"/>
+<text x="950" y="68" text-anchor="middle" font-size="36" font-weight="700" fill="#56704f">③ 色は1色</text>
+</svg>

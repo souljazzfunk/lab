@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 480" font-family="'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif">
+<text x="170" y="88" text-anchor="end" font-size="40" font-weight="700" fill="#241e1c">東京</text>
+<rect x="200" y="40" width="820" height="70" rx="8" fill="#9e2f28"/>
+<text x="170" y="198" text-anchor="end" font-size="40" font-weight="700" fill="#655b55">大阪</text>
+<rect x="200" y="150" width="560" height="70" rx="8" fill="#dcd1c6"/>
+<text x="170" y="308" text-anchor="end" font-size="40" font-weight="700" fill="#655b55">名古屋</text>
+<rect x="200" y="260" width="430" height="70" rx="8" fill="#dcd1c6"/>
+<text x="170" y="418" text-anchor="end" font-size="40" font-weight="700" fill="#655b55">福岡</text>
+<rect x="200" y="370" width="300" height="70" rx="8" fill="#dcd1c6"/>
+<line x1="200" y1="20" x2="200" y2="470" stroke="#ad9f94" stroke-width="3"/>
+</svg>
