@@ -16,6 +16,9 @@ render() {
   # ブラウザで見る用の HTML。リポジトリには入れず、CI の成果物として残す
   (cd "$1" && marp --no-stdin deck.md --html --theme "$THEME" -o deck.html >/dev/null 2>&1) \
     || { echo "NG $1: Marp の書き出し（HTML）に失敗"; fail=1; return 1; }
+  # 右上の EN / JA / Both と、左下のダーク / ライトの切り替えを足す
+  python3 "$TOOLS/add-toggles.py" "$1/deck.html" >/dev/null \
+    || { echo "NG $1: 切り替えを足せない"; fail=1; return 1; }
 }
 
 # 検査を1本走らせ、終了コードを返す。出力は字下げして残す
@@ -50,6 +53,21 @@ for d in $GOOD; do
     if [ "$code" -eq 0 ]; then echo "OK   $name"; else echo "FAIL $name"; fi
   done
   grep -v '^    ' /tmp/ci-result.log | awk '$2 != 0 {exit 1}' || fail=1
+done
+
+# 二か国語のデッキ（lang: mul）は、EN だけ・JA だけの版も書き出して測る
+for d in $GOOD; do
+  grep -q '^lang: mul' "$d/deck.md" || continue
+  for l in en ja; do
+    echo "## $d（lang: $l）"
+    sed "s/^lang: mul/lang: $l/" "$d/deck.md" > "$d/deck.$l.md"
+    (cd "$d" && marp --no-stdin "deck.$l.md" --pdf --html --theme "$THEME" --allow-local-files -o "deck.$l.pdf" >/dev/null 2>&1) \
+      || { echo "NG $d: Marp の書き出し（lang: $l）に失敗"; fail=1; rm -f "$d/deck.$l.md"; continue; }
+    rm -f "$d/deck.$l.md"
+    for c in margins gaps figure-text; do
+      if run "$d" python3 "$TOOLS/check-$c.py" "deck.$l.pdf"; then echo "OK   $c"; else echo "FAIL $c"; fail=1; fi
+    done
+  done
 done
 
 for d in $BAD; do

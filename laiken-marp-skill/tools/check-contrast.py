@@ -3,6 +3,7 @@
 
 使い方: python3 tools/check-contrast.py [theme/laiken-light.css]
 仕組み: テーマの :root に並ぶ色の変数（--bg など）を読み、下の RULES の組み合わせで比を計算する。
+       section[data-scheme="dark"] の変数があれば、:root に上書きしてダークモードも同じ規則で測る。
        配色を差し替えたときに、読めない組み合わせを入れないための検査。PDF は作らない。
 """
 import re, sys
@@ -40,12 +41,9 @@ def ratio(a, b):
     return (y + 0.05) / (x + 0.05)
 
 
-def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else 'theme/laiken-light.css'
-    css = open(path, encoding='utf-8').read()
-    root = re.search(r':root\s*\{(.*?)\}', css, re.S).group(1)
-    v = dict(re.findall(r'--([\w-]+):\s*(#[0-9a-fA-F]{6})', root))
+def check(v, label):
     ng = 0
+    print(f'## {label}')
     for fg, bg, need, use in RULES:
         if fg not in v or bg not in v:
             ng += 1
@@ -56,7 +54,23 @@ def main():
         if r < need:
             ng += 1
         print(f'{mark} {r:5.2f}（下限 {need:g}） --{fg} {v[fg]} / --{bg} {v[bg]}  {use}')
-    print(f'{len(RULES)} 組を検査、NG {ng} 件')
+    return ng
+
+
+def colors(block):
+    return dict(re.findall(r'--([\w-]+):\s*(#[0-9a-fA-F]{6})', block))
+
+
+def main():
+    path = sys.argv[1] if len(sys.argv) > 1 else 'theme/laiken-light.css'
+    css = open(path, encoding='utf-8').read()
+    light = colors(re.search(r':root\s*\{(.*?)\}', css, re.S).group(1))
+    schemes = [('ライト', light)]
+    dark = re.search(r'section\[data-scheme="dark"\]\s*\{(.*?)\}', css, re.S)
+    if dark:
+        schemes.append(('ダーク', {**light, **colors(dark.group(1))}))
+    ng = sum(check(v, label) for label, v in schemes)
+    print(f'{len(RULES) * len(schemes)} 組を検査、NG {ng} 件')
     sys.exit(1 if ng else 0)
 
 
