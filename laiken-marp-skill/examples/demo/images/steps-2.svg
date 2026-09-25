@@ -5,8 +5,8 @@
   <polygon points="418,130 394,117 394,143" fill="#ad9f94"/>
   <rect x="420" y="40" width="300" height="180" rx="18" fill="#9e2f28"/>
   <text x="570" y="144" text-anchor="middle" font-size="40" font-weight="700" fill="#ffffff">大きく見せる</text>
-  <line x1="732" y1="130" x2="806" y2="130" stroke="#e6ddd4" stroke-width="6"/>
-  <polygon points="828,130 804,117 804,143" fill="#e6ddd4"/>
+  <line x1="732" y1="130" x2="806" y2="130" stroke="#dcd1c6" stroke-width="6"/>
+  <polygon points="828,130 804,117 804,143" fill="#dcd1c6"/>
   <rect x="830" y="40" width="300" height="180" rx="18" fill="#efe9e2"/>
   <text x="980" y="144" text-anchor="middle" font-size="40" font-weight="700" fill="#dcd1c6">？</text>
 </svg>

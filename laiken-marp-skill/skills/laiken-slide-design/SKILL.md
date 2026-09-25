@@ -149,6 +149,10 @@ ratio('#9e2f28', '#f8f6f1')   # 6.73
 
 公式サイトのCSSから色コードを取る。ブランド色をそのまま小さい文字に使うと明るい地では読みづらいので、コントラスト比を測って用途で明度を変える。表紙の帯と主役の面は、ブランド色そのままでよい。
 
+### 配色を変えたら、コントラスト比を測る
+
+`python3 tools/check-contrast.py` が、テーマの :root の色を読み、役割ごとの下限（本文7、小さい文字4.5、線2.5 など）を確かめる。配色を差し替えたら、まずこれを通す。
+
 ### 候補は実物のページに当てて見せる
 
 色見本や数字だけでは決まらない。同じページを候補の数だけ書き出して、2×2のグリッドに並べる。本文の強調が乗るスライドと、図の中で使われるスライドの2つで比べる。
@@ -251,6 +255,7 @@ Marpは、版面からコンテンツがあふれてもエラーを出さない�
 ```bash
 marp --no-stdin deck.md --pdf --theme theme/laiken-light.css --allow-local-files
 
+python3 tools/check-static.py .                   # 24pt未満の指定、<marker>、テーマにない色、見出しの語尾
 python3 tools/check-margins.py deck.pdf           # 中身の下端と右端の空き。60px未満でNG
 python3 tools/check-gaps.py deck.pdf              # 画像、図、コードの箱と隣の本文の間隔。36px未満でNG
 python3 tools/check-figure-text.py deck.pdf       # 24pt未満の文字、箱の縁まで14px未満の文字

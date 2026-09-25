@@ -46,7 +46,20 @@ python3 tools/check-gaps.py deck.pdf            # 図や箱と、隣の本文の
 python3 tools/check-figure-text.py deck.pdf     # 24pt未満の文字、箱の縁に詰まった文字
 node tools/check-svg-box-fit.mjs images/*.svg   # SVGの文字が箱に収まっているか
 python3 tools/check-reuse-diff.py new.md old.md # 流用したスライドの、見出しと図の対応
+python3 tools/check-contrast.py                 # テーマの配色のコントラスト比
+python3 tools/check-static.py <デッキのディレクトリ> # 文字サイズ・矢印・配色・見出しの語尾
 ```
+
+## CI
+
+`.github/workflows/laiken-marp-skill.yml` が、`laiken-marp-skill/` を変えたプルリクエストで次を走らせます。
+
+| ジョブ | 内容 |
+|---|---|
+| `static` | `check-contrast.py` と `check-static.py`。崩した版（`examples/broken`）を検出できることも確かめる |
+| `decks` | `tools/ci-decks.sh`。見本・デモ・カタログを書き出して検査4本が NG 0 件、崩した版では4本とも NG が出ること |
+
+手元で同じことをするなら、`laiken-marp-skill/` で `sh tools/ci-decks.sh` を実行します。
 
 検査スクリプトが使うもの:
 

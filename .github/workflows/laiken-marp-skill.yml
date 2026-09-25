@@ -1,0 +1,62 @@
+name: laiken-marp-skill
+
+on:
+  pull_request:
+    paths:
+      - 'laiken-marp-skill/**'
+      - '.github/workflows/laiken-marp-skill.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'laiken-marp-skill/**'
+      - '.github/workflows/laiken-marp-skill.yml'
+
+defaults:
+  run:
+    working-directory: laiken-marp-skill
+
+jobs:
+  # PDF を作らずに済む検査。数秒で終わる
+  static:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 配色のコントラスト比
+        run: python3 tools/check-contrast.py
+      - name: スキルの決まり（文字サイズ・矢印・配色・見出しの語尾・スキルの設定）
+        run: python3 tools/check-static.py examples/sample examples/demo examples/catalog --skills skills
+      - name: 崩した版を静的検査が検出すること
+        run: '! python3 tools/check-static.py examples/broken'
+
+  # 見本デッキを書き出して実測する
+  decks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 道具を入れる
+        run: |
+          sudo apt-get update -q
+          # 字幅が変わると余白の実測がずれるので、フォントは Noto Sans CJK に固定する
+          sudo apt-get install -y -q poppler-utils mupdf-tools fonts-noto-cjk
+          fc-cache -f
+          pip install pillow==12.3.0
+          npm install -g @marp-team/marp-cli@4.5.1
+      - name: デッキを書き出して検査4本を通す
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: sh tools/ci-decks.sh
+      - name: 書き出した PDF を残す
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: decks-pdf
+          path: laiken-marp-skill/examples/*/deck.pdf
