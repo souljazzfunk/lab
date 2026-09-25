@@ -12,7 +12,10 @@ fail=0
 
 render() {
   (cd "$1" && marp --no-stdin deck.md --pdf --html --theme "$THEME" --allow-local-files -o deck.pdf >/dev/null 2>&1) \
-    || { echo "NG $1: Marp の書き出しに失敗"; fail=1; return 1; }
+    || { echo "NG $1: Marp の書き出し（PDF）に失敗"; fail=1; return 1; }
+  # ブラウザで見る用の HTML。リポジトリには入れず、CI の成果物として残す
+  (cd "$1" && marp --no-stdin deck.md --html --theme "$THEME" -o deck.html >/dev/null 2>&1) \
+    || { echo "NG $1: Marp の書き出し（HTML）に失敗"; fail=1; return 1; }
 }
 
 # 検査を1本走らせ、終了コードを返す。出力は字下げして残す
@@ -42,7 +45,7 @@ for d in $GOOD; do
   echo "## $d（NG 0 件であること）"
   render "$d" || continue
   checks "$d" > /tmp/ci-result.log
-  cat /tmp/ci-result.log | grep '^    '
+  grep '^    ' /tmp/ci-result.log
   grep -v '^    ' /tmp/ci-result.log | while read -r name code; do
     if [ "$code" -eq 0 ]; then echo "OK   $name"; else echo "FAIL $name"; fi
   done

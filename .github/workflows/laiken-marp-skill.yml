@@ -16,6 +16,29 @@ defaults:
     working-directory: laiken-marp-skill
 
 jobs:
+  # tools/ のコードの検査（Python は ruff、シェルは shellcheck、JavaScript は構文だけ）
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Python（ruff。設定は ruff.toml）
+        run: |
+          pip install ruff==0.15.8
+          ruff check tools/
+      - name: シェル（shellcheck）
+        run: |
+          command -v shellcheck || sudo apt-get install -y -q shellcheck
+          shellcheck tools/*.sh examples/*/*.sh
+      - name: JavaScript（構文）
+        run: for f in tools/*.mjs; do node --check "$f"; done
+
   # PDF を作らずに済む検査。数秒で終わる
   static:
     runs-on: ubuntu-24.04
@@ -62,3 +85,11 @@ jobs:
         with:
           name: decks-pdf
           path: laiken-marp-skill/examples/*/deck.pdf
+      # HTML はリポジトリに入れず、ここで作ったものを使う。画像は相対パスで参照するので一緒に残す
+      - name: 書き出した HTML を残す
+        uses: actions/upload-artifact@v7
+        with:
+          name: decks-html
+          path: |
+            laiken-marp-skill/examples/*/deck.html
+            laiken-marp-skill/examples/*/images/

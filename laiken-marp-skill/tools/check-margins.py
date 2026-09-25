@@ -28,7 +28,7 @@ for f in sorted(glob.glob(os.path.join(tmp, 'p-*.png'))):
     sx = 1280 / W
     px = im.load()
     bg = px[4, 4]
-    ink = lambda c: max(abs(c[0] - bg[0]), abs(c[1] - bg[1]), abs(c[2] - bg[2])) >= TOL
+    ink = lambda c, bg=bg: max(abs(c[0] - bg[0]), abs(c[1] - bg[1]), abs(c[2] - bg[2])) >= TOL
     # 表紙のグラデーションのように、地の色が一様でないページは対象外
     if ink(px[W - 5, H - 5]):
         continue

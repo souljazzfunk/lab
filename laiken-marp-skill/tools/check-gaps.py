@@ -24,7 +24,7 @@ for i, f in enumerate(pages, 1):
     W, H = im.size
     px = im.load()
     bg = px[4, 4]
-    ink = lambda c: max(abs(c[0] - bg[0]), abs(c[1] - bg[1]), abs(c[2] - bg[2])) >= TOL
+    ink = lambda c, bg=bg: max(abs(c[0] - bg[0]), abs(c[1] - bg[1]), abs(c[2] - bg[2])) >= TOL
     # ページ番号の角（右下 140x48）と左右の余白 60px は無視。全面画像のページは対象外
     rows = []
     for y in range(H):

@@ -53,13 +53,13 @@ def main():
         im = Image.open(io.BytesIO(png)).convert("RGB")
         W, H = im.size
         bg = im.getpixel((4, 4))
-        is_bg = lambda px: max(abs(px[0] - bg[0]), abs(px[1] - bg[1]), abs(px[2] - bg[2])) < 18
-        for x0, y0, x1, y1, s, txt in lines:
+        is_bg = lambda px, bg=bg: max(abs(px[0] - bg[0]), abs(px[1] - bg[1]), abs(px[2] - bg[2])) < 18
+        for x0, y0, x1, y1, _s, txt in lines:
             yc = min(H - 1, int((y0 + y1) / 2)); xr = int(x1) + 2; xl = int(x0) - 2
             if xr >= W or xl < 0 or is_bg(im.getpixel((xr, yc))) or is_bg(im.getpixel((xl, yc))):
                 continue
 
-            def run(x, step):
+            def run(x, step, im=im, W=W, yc=yc, is_bg=is_bg):
                 d = 0
                 while 0 <= x < W and not is_bg(im.getpixel((x, yc))):
                     x += step; d += 1

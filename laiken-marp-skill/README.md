@@ -56,10 +56,18 @@ python3 tools/check-static.py <デッキのディレクトリ> # 文字サイズ
 
 | ジョブ | 内容 |
 |---|---|
+| `lint` | `tools/` のコードの検査。Python は ruff（設定は `ruff.toml`）、シェルは shellcheck、JavaScript は `node --check` |
 | `static` | `check-contrast.py` と `check-static.py`。崩した版（`examples/broken`）を検出できることも確かめる |
 | `decks` | `tools/ci-decks.sh`。見本・デモ・カタログを書き出して検査4本が NG 0 件、崩した版では4本とも NG が出ること |
 
-手元で同じことをするなら、`laiken-marp-skill/` で `sh tools/ci-decks.sh` を実行します。
+`decks` が書き出した PDF と HTML は、Actions の実行結果のページから `decks-pdf` と `decks-html` としてダウンロードできます。`deck.pdf` と `deck.html` はリポジトリには入れません。
+
+手元で同じことをするなら、`laiken-marp-skill/` で次を実行します。
+
+```bash
+sh tools/ci-decks.sh
+ruff check tools/ && shellcheck tools/*.sh examples/*/*.sh
+```
 
 検査スクリプトが使うもの:
 
