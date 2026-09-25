@@ -2,6 +2,5 @@
 *.pptx
 __pycache__/
 .DS_Store
-examples/**/images/irasutoya-*.png
 # 書き出した HTML は CI が作ってダウンロードできるようにする（tools/ci-decks.sh と .github/workflows/laiken-marp-skill.yml）
 examples/*/deck.html

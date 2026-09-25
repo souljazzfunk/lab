@@ -94,7 +94,7 @@ python3 tools/add-toggles.py deck.html
 
 ```bash
 sh tools/ci-decks.sh
-ruff check tools/ && shellcheck tools/*.sh examples/*/*.sh
+ruff check tools/ && shellcheck tools/*.sh
 ```
 
 検査スクリプトが使うもの:
@@ -104,14 +104,6 @@ ruff check tools/ && shellcheck tools/*.sh examples/*/*.sh
 - Python 3 と Pillow
 
 `check-svg-box-fit.mjs` は Marp CLI に同梱の puppeteer-core を借ります。場所が違う環境では `MARP_NODE_MODULES` と `CHROME_PATH` で指定できます。Claude Code のクラウド環境では `/opt/pw-browsers/chromium` を自動で使います（Marp CLI には `CHROME_PATH=/opt/pw-browsers/chromium` を渡してください）。
-
-## 挿絵について
-
-見本デッキは「いらすとや」の挿絵を右下に置く想定です。画像は同梱していないので、書き出す前に取得してください。利用条件は各自で確かめてください。取得しなくても、挿絵の無い状態で書き出せます（プレビュー画像は挿絵なしで作っています）。
-
-```bash
-sh examples/sample/fetch-illustrations.sh
-```
 
 ## License
 

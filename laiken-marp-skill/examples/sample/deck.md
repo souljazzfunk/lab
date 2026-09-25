@@ -8,9 +8,6 @@ lang: mul
 <style>
 /* 図が主役のスライド。見出しとの間に36px以上、下にも余白 */
 img[alt~="center"] { display:block; margin:48px auto 0; }
-/* 挿絵。右端は本文の左右余白より内側へ。インラインの style 属性は Marp が落とすのでクラスで書く */
-.ill { position:absolute; right:96px; bottom:80px; width:240px; }
-.ill.sm { width:190px; }
 </style>
 
 <!-- _class: top -->
@@ -41,8 +38,6 @@ img[alt~="center"] { display:block; margin:48px auto 0; }
 
 <span class="ja">きれいなのに、頭に残りません</span><span class="en">Pretty, yet nothing sticks</span>
 
-<img src="./images/irasutoya-complex-slide.png" class="ill">
-
 ---
 
 <!-- _class: crosshead -->
@@ -63,8 +58,6 @@ img[alt~="center"] { display:block; margin:48px auto 0; }
 - <span class="ja">言葉の説明から始めない</span><span class="en">Don't open with definitions</span>
 - <span class="ja">中扉に心の声を書く</span><span class="en">Put their inner voice on dividers</span>
 - <span class="ja">答えは1枚ずつ見せる</span><span class="en">Reveal answers one slide at a time</span>
-
-<img src="./images/irasutoya-seminar.png" class="ill">
 
 ---
 
@@ -95,8 +88,6 @@ python3 tools/check-figure-text.py deck.pdf
 - <span class="ja">測れるのは、描けた物だけ</span><span class="en">Tools see only what got drawn</span>
 - <span class="ja">消えた矢印は見逃す</span><span class="en">A missing arrow slips by</span>
 - <span class="ja">最後は**自分の目で見る**</span><span class="en">Finally, **check with your eyes**</span>
-
-<img src="./images/irasutoya-magnifier.png" class="ill sm">
 
 ---
 
