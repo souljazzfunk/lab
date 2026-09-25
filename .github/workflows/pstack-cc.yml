@@ -1,0 +1,43 @@
+name: pstack-cc
+
+on:
+  pull_request:
+    paths:
+      - 'pstack-cc/**'
+      - 'vendor/pstack/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/pstack-cc.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'pstack-cc/**'
+      - 'vendor/pstack/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/pstack-cc.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: コードの検査（ruff と shellcheck）
+        run: |
+          pip install ruff==0.15.8
+          ruff check pstack-cc/
+          command -v shellcheck || sudo apt-get install -y -q shellcheck
+          shellcheck pstack-cc/sync-upstream.sh
+      # vendor/pstack や build.py を変えたのに plugin/ を作り直し忘れていないか
+      - name: 生成物が最新か
+        run: python3 pstack-cc/build.py --check
+      - name: プラグインと marketplace の検証
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.282
+          claude plugin validate --strict pstack-cc/plugin
+          claude plugin validate --strict .
