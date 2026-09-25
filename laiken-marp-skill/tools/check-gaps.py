@@ -2,7 +2,7 @@
 """大きい塊（画像・図・コードの箱・表）と隣の文の縦の間隔を実測する。
 pdftoppm -r 96 で 1280x720 に焼き、地の色（ページ左上隅から取る）でない行の連なりを「帯」として拾い、
 高さ 130px 以上の帯（画像・図・箱）と隣の帯の間隔が MIN_GAP 未満なら NG。
-見出しと本文の間、箇条書き同士の間は対象外（帯の高さで区別する。laiken-light の本文は1行65px）。
+見出しと本文の間、箇条書き同士の間は対象外（帯の高さと h1 の下線で区別する。laiken-light の本文は1行65px）。
 使い方: python3 tools/check-gaps.py <deck>.pdf [--min 36]"""
 import subprocess, sys, tempfile, os, glob
 from PIL import Image
@@ -43,18 +43,24 @@ for i, f in enumerate(pages, 1):
             bands.append((y0, y))
         else:
             y += 1
+    # h1 の下線（高さ 8px 以下で横幅いっぱいの帯）。英語の見出しは y や g の下がりが下線に近く、
+    # 下の結合で見出しと下線が1つの帯になるので、下線を含む帯は見出しとして隣の帯から外す
+    rules = {b for b in bands if b[1] - b[0] <= 8 and all(ink(px[x, b[0]]) for x in range(80, W - 80, 8))}
     # 行間で割れた文字の帯を、12px 以内なら結合（2行の箇条書きの行間と、画像の縁の細い帯を吸収する）
-    merged = []
+    merged, heading = [], []
     for b in bands:
         if merged and b[0] - merged[-1][1] <= 12:
             merged[-1] = (merged[-1][0], b[1])
+            heading[-1] = heading[-1] or b in rules
         else:
             merged.append(b)
+            heading.append(False)
     for k, (y0, y1) in enumerate(merged):
         if y1 - y0 < BLOCK:
             continue
         for nb in (merged[k - 1] if k > 0 else None, merged[k + 1] if k + 1 < len(merged) else None):
             if nb is None or nb[1] - nb[0] < 40: continue  # 図のラベル（32px の1行は 40px 未満）や画像の縁は本文ではない
+            if heading[merged.index(nb)]: continue
             gap = (y0 - nb[1]) if nb[1] <= y0 else (nb[0] - y1)
             if 0 <= gap < MIN_GAP:
                 ng += 1

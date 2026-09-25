@@ -47,7 +47,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.11'
-      - name: 配色のコントラスト比
+      - name: 配色のコントラスト比（ライトとダーク）
         run: python3 tools/check-contrast.py
       - name: スキルの決まり（文字サイズ・矢印・配色・見出しの語尾・スキルの設定）
         run: python3 tools/check-static.py examples/sample examples/demo examples/catalog --skills skills

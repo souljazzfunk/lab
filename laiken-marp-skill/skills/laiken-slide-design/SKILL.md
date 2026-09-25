@@ -1,6 +1,6 @@
 ---
 name: laiken-slide-design
-description: らいけんの Marp テーマ（laiken-light：ジャスミンライスの地＋唐辛子の深紅＋カルダモンの緑）でスライドを組むときのデザインバランスと検査。文字サイズの基準、1スライドに入る量、余白の測り方、縦のバランス、配色の決め方、表・コード・補足ボックスの型、Marp固有の罠、書き出し後の検査手順。「スライドのバランスを整えて」「色を変えて」「余白が変」「らいけんのテーマで作って」と言われたら読む。
+description: らいけんの Marp テーマ（laiken-light：ジャスミンライスの地＋唐辛子の深紅＋カルダモンの緑）でスライドを組むときのデザインバランスと検査。文字サイズの基準、1スライドに入る量、余白の測り方、縦のバランス、配色の決め方、表・コード・補足ボックスの型、Marp固有の罠、二か国語（EN / JA / Both）とダークモードの切り替え、書き出し後の検査手順。「スライドのバランスを整えて」「色を変えて」「余白が変」「らいけんのテーマで作って」「英語版も」「バイリンガルで」「ダークモード」と言われたら読む。
 ---
 
 # laiken-light のデザインバランス
@@ -91,7 +91,7 @@ PDFの座標は960×540、MarpのCSSは1280×720が基準なので、係数0.75�
 
 ## 配色
 
-パレットの外の色を足さない。
+パレットの外の色を足さない。デッキの `<style>` では色を16進で書かず、`var(--accent)` のようにテーマの変数で書く。16進で書くと、ダークモードで色が切り替わらない。
 
 | 用途 | 色 | 地 `#f8f6f1` とのコントラスト比 |
 |---|---|---|
@@ -197,12 +197,12 @@ grep -rn -i '#9e2f28\|#56704f' deck.md images/*.svg
 ```css
 .gbox { position: absolute; left: 0; right: 0; margin: 0 auto;
         width: fit-content; min-width: 900px; max-width: 1144px;
-        bottom: 64px; background: #efe9e2; border: 3px solid #dcd1c6;
+        bottom: 64px; background: var(--soft); border: 3px solid var(--line);
         border-radius: 18px; padding: 16px 56px; text-align: center; }
 .gbox, .gbox p { font-size: 32pt; line-height: 1.35; }
 .gbox p { margin: 0; }
-.gbox.key { background: #9e2f28; border-color: #9e2f28; }   /* 結論のパンチライン */
-.gbox.key, .gbox.key p { color: #ffffff; font-weight: 700; }
+.gbox.key { background: var(--accent); border-color: var(--accent); }   /* 結論のパンチライン */
+.gbox.key, .gbox.key p { color: var(--surface); font-weight: 700; }
 ```
 
 - `left:50%` と `translateX(-50%)` で中央に寄せない。使える幅が画面の右半分だけになり、収まるはずの文が折り返す
@@ -225,6 +225,54 @@ grep -rn -i '#9e2f28\|#56704f' deck.md images/*.svg
 
 - 文章のスライドが5つ続くと単調になる。中扉、図だけのスライド、スクリーンショットの中央置きを混ぜる
 - 同じ型の図のスライドが6つ続くのも同じ。図のスライドと、文章のスライドを交互にする
+
+## 二か国語（EN / JA / Both）
+
+1つの `deck.md` に日本語と英語を並べて書き、どちらを出すかを切り替える。
+
+```markdown
+---
+marp: true
+theme: laiken-light
+lang: mul
+---
+
+# <span class="ja">直すのは3か所だけ</span><span class="en">Just three things to fix</span>
+
+- <span class="ja">最後は**自分の目で見る**</span><span class="en">Finally, **check with your eyes**</span>
+
+![center ja w:1144](./images/flow.svg)
+![center en w:1144](./images/flow.en.svg)
+```
+
+- 文字は `<span class="ja">` と `<span class="en">` を隣に並べる。span の中でも `**強調**` は反映される。div で囲んだ段落ごとでもよい（`<div class="en">`）
+- 図は alt に `ja` か `en` を入れ、英語版は `名前.en.svg` にする。文字の無い図や挿絵には付けない（どの言語でも出る）
+- フロントマターの `lang` が、PDF と HTML の最初の表示を決める
+
+| `lang` | 表示 |
+|---|---|
+| `ja` | 日本語だけ |
+| `en` | 英語だけ |
+| `mul` | Both。日本語が主、英語は下に 24pt の補足色で添える（見出しの英語は 28〜30pt）。表のセルは「日本語 / English」と1行に並べる。図は日本語版 |
+
+`lang` を書かないと、書き出した環境の言語設定（`ja-JP` など）が入り、手元とCIで表示が変わる。二か国語のデッキでは必ず書く。
+
+- Both は1項目が2行になる。箇条書きは3行まで、締めの一文を足すなら箇条書きは2行まで。表と図は1言語の時と同じ量で収まる
+- 英語は日本語より横に長い。SVGの英語版は `check-svg-box-fit.mjs` で必ず測る。収まらなければ語を短くする（「Plan the story」→「Plan」）。箱を広げたり文字を小さくしたりしない
+- 英語の見出しも1行に収める。英語は主語と動詞のある短い文か、命令形にする
+- `ja` / `en` / `mul` の3通りで書き出して、それぞれ検査を通す（`tools/ci-decks.sh` は `lang: mul` のデッキを3通りで測る）
+
+### 書き出した HTML の切り替え
+
+```bash
+marp --no-stdin deck.md --html --theme theme/laiken-light.css -o deck.html
+python3 tools/add-toggles.py deck.html
+```
+
+- 右上に EN / JA / Both のトグルが出る。聞き手が見ながら言語を選べる
+- 左下の目立たない ◐ ボタンで、ダークとライトを切り替える。ダークの配色はテーマの `section[data-scheme="dark"]` にあり、`check-contrast.py` がライトと同じ規則で測る
+- ダークでは、SVG の図は色を反転して色相を戻して表示する（白い箱は暗い箱に、唐辛子の赤は明るい赤になる）。PNG の挿絵や写真はそのまま
+- 選んだ言語と配色はブラウザに覚えさせる。PDF は常にフロントマターの `lang` とライトの配色で書き出す
 
 ## Marp固有の罠
 
@@ -260,6 +308,7 @@ python3 tools/check-margins.py deck.pdf           # 中身の下端と右端の�
 python3 tools/check-gaps.py deck.pdf              # 画像、図、コードの箱と隣の本文の間隔。36px未満でNG
 python3 tools/check-figure-text.py deck.pdf       # 24pt未満の文字、箱の縁まで14px未満の文字
 node tools/check-svg-box-fit.mjs images/*.svg     # SVGを描画して文字と枠の余白を実測
+python3 tools/add-toggles.py deck.html            # HTML に言語とダークモードの切り替えを足す
 ```
 
 Claude Code のクラウド環境では、Marp の書き出しに `CHROME_PATH=/opt/pw-browsers/chromium` を付ける。

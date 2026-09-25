@@ -9,7 +9,8 @@
   - 配色: テーマの :root にない色（#ffffff は可）を NG。わざと多色にする図は
           ルートの <svg> に data-palette="free" を付けて除外する
   - 見出しの語尾: 「てる」「ばいい」「んです」で終わる h1 を NG。
-          ただし「…」で始まるどんでん返しの見出し（「…人生そんなに簡単じゃないんです」）は可
+          ただし「…」で始まるどんでん返しの見出し（「…人生そんなに簡単じゃないんです」）は可。
+          二か国語の見出し（<span class="ja">…</span><span class="en">…</span>）は日本語の部分を見る
 --skills を付けると、各スキルの冒頭に name と description があり、name がフォルダ名と一致するかも見る。
 """
 import glob, os, re, sys
@@ -50,7 +51,9 @@ def check_deck(d, pal):
         ng += [f'{md}: テーマにない色 {c}' for c in sorted({c.lower() for c in HEX.findall(body)} - pal)]
         for line in text.splitlines():
             if line.startswith('# '):
-                h = re.sub(r'<br>', '', line[2:]).strip()
+                # 二か国語の見出しは日本語の部分だけを見る
+                h = re.sub(r'<span class="en">.*?</span>', '', line[2:])
+                h = re.sub(r'<[^>]+>', '', h).strip()
                 if BAD_END.search(h) and not h.startswith('…'):
                     ng.append(f'{md}: 見出しの語尾「{h}」')
     for svg in sorted(glob.glob(os.path.join(d, 'images', '*.svg'))):

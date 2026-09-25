@@ -29,6 +29,27 @@
   --rule: #7c9a6e;     /* カルダモン（図形用）。見出しの下線・箇条書きの点・表紙の帯。文字には使わない */
 }
 
+/* ダークモード（夜のカレー屋）。書き出した HTML の左下のボタンで切り替える（tools/add-toggles.py）。
+   ボタンが各 section に data-scheme="dark" を付ける。PDF は明るい地のまま */
+section[data-scheme="dark"] {
+  --bg: #1d1917;
+  --ink: #f1ece6;
+  --accent: #f08c80;
+  --accent-ink: #f08c80;
+  --accent2: #a9c49b;
+  --soft: #2b2522;
+  --line: #4d423c;
+  --sub: #b5a99f;
+  --ink2: #dcd2ca;
+  --surface: #25201d;
+  --stripe: #2d2724;
+  --arrow: #7f7168;
+  --glow: #3b2622;
+  --on-accent-sub: #4a1813;
+  --code-str: #a9c49b;
+  --rule: #7c9a6e;
+}
+
 /* ===== ベーススタイル ===== */
 section {
   background: var(--bg);
@@ -319,4 +340,65 @@ section.image-full img {
 section.split p,
 section.split li {
   font-size: 32pt;
+}
+
+/* ======================================================
+   バイリンガル（EN / JA / Both）
+   文字は <span class="ja">…</span><span class="en">…</span> と並べて書き、
+   図は ![ja](a.svg) と ![en](a.en.svg) のように alt に ja / en を入れる。
+   どれを出すかは section の lang で決まる（フロントマターの lang: ja / en / mul）。
+   書き出した HTML では、右上のトグルが lang を書き換える（tools/add-toggles.py）
+   ====================================================== */
+section[lang|="ja"] .en,
+section[lang|="ja"] img[alt~="en"],
+section[lang|="en"] .ja,
+section[lang|="en"] img[alt~="ja"] {
+  display: none !important;
+}
+
+/* Both（lang: mul など ja / en 以外）: 日本語が主、英語は下に小さく添える。図は日本語版 */
+section:not([lang|="ja"]):not([lang|="en"]) img[alt~="en"] {
+  display: none !important;
+}
+
+section:not([lang|="ja"]):not([lang|="en"]) .en {
+  display: block;
+  font-size: 24pt;
+  line-height: 1.3;
+  font-weight: 400;
+  color: var(--sub);
+  margin-top: 4px;
+}
+
+section:not([lang|="ja"]):not([lang|="en"]) .en p,
+section:not([lang|="ja"]):not([lang|="en"]) .en li {
+  font-size: inherit;
+  color: inherit;
+}
+
+section:not([lang|="ja"]):not([lang|="en"]) h1 .en {
+  font-size: 28pt;
+  margin-top: 6px;
+}
+
+section.top:not([lang|="ja"]):not([lang|="en"]) h1 .en,
+section.crosshead:not([lang|="ja"]):not([lang|="en"]) h1 .en {
+  font-size: 30pt;
+  margin-top: 12px;
+}
+
+/* 表は行の高さを倍にしない。英語は同じ行に「 / 」で続ける */
+section:not([lang|="ja"]):not([lang|="en"]) table .en {
+  display: inline;
+  margin: 0;
+}
+
+section:not([lang|="ja"]):not([lang|="en"]) table .en::before {
+  content: " / ";
+}
+
+/* ダークモードの図。SVG は色を反転して色相を戻す（唐辛子の赤は明るい赤、白い箱は暗い箱になる）。
+   写真や挿絵（PNG・JPEG）はそのまま */
+section[data-scheme="dark"] img[src$=".svg"] {
+  filter: invert(.9) hue-rotate(180deg);
 }
