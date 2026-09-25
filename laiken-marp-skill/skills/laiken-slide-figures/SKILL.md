@@ -40,7 +40,7 @@ AIが作る図の失敗は、ほぼすべて「いらない情報を足しすぎ
 - アイコンを絵文字で済ませない。登場人物や道具はイラストか実物のアイコンで描く
 - 人物は「ユーザー」と書いた角丸の箱ではなく、イラストを1枚置く
 - 箱の中は大きめの1行ラベルが基本。「タイトル＋サブタイトルを枠で囲った箱」を並べない
-- 強調は太い枠ではなくベタ塗りで付ける。階層は「アクセント色のベタ塗り（主役1つ）、白地に3pxの枠（通常）、枠なしの淡い面 `#f0ece2`（脇役や道具）、ごく薄い背景（ゾーン）」の4段で作る
+- 強調は太い枠ではなくベタ塗りで付ける。階層は「アクセント色のベタ塗り（主役1つ）、白地に3pxの枠（通常）、枠なしの淡い面 `#efe9e2`（脇役や道具）、ごく薄い背景（ゾーン）」の4段で作る
 - 図の面の色は、スライドの背景色に合わせる。中間色のレーン背景を勝手に敷かない
 - 黒地用など他のテーマの図の色だけを機械的に置換した図は、元の構造がそのまま残る。下のパターン集の型で作り直す
 - 縦長の帯や大きい図形に置く文字は、縦中央に揃える。上端に寄せると浮いて見える
@@ -84,37 +84,38 @@ AIが作る図の失敗は、ほぼすべて「いらない情報を足しすぎ
 
 | 用途 | 色 |
 |---|---|
-| 地（図の背景は塗らない。スライドの地が透ける） | `#faf9f5` |
-| 文字 | `#29261f` |
-| アクセント（主役のノード、強調） | `#c9602a` |
-| サブアクセント（キャプション） | `#7a6a52` |
-| 補足の文字 | `#6d675a` |
-| 箱の枠、罫線 | `#d9d2c2` |
-| 矢印 | `#a89f8c` |
-| 淡い面（脇役、ゾーン） | `#f0ece2` |
-| アクセント塗りの箱の中の補足文字 | `#f6d9c8` |
+| 地（図の背景は塗らない。スライドの地が透ける） | `#f8f6f1` |
+| 文字 | `#241e1c` |
+| アクセント：唐辛子（主役のノード、強調） | `#9e2f28` |
+| サブアクセント：カルダモン（キャプション、ラベル） | `#56704f` |
+| 差し色：カルダモン（区切り線、ステップバーの現在地以外の印など。文字には使わない） | `#7c9a6e` |
+| 補足の文字 | `#655b55` |
+| 箱の枠、罫線 | `#dcd1c6` |
+| 矢印 | `#ad9f94` |
+| 淡い面（脇役、ゾーン） | `#efe9e2` |
+| アクセント塗りの箱の中の補足文字 | `#f3d2cc` |
 
 箱は高さ160px以上、`rx="18"`、枠は3px。
 
 ```svg
 <!-- 箱（白） -->
-<rect x="20" y="70" width="330" height="160" rx="18" fill="#ffffff" stroke="#d9d2c2" stroke-width="3"/>
-<text x="185" y="164" text-anchor="middle" font-size="40" font-weight="700" fill="#29261f">タイトル</text>
+<rect x="20" y="70" width="330" height="160" rx="18" fill="#ffffff" stroke="#dcd1c6" stroke-width="3"/>
+<text x="185" y="164" text-anchor="middle" font-size="40" font-weight="700" fill="#241e1c">タイトル</text>
 
 <!-- 箱（主役。アクセントのベタ塗りに白抜き） -->
-<rect x="430" y="60" width="310" height="180" rx="18" fill="#c9602a"/>
+<rect x="430" y="60" width="310" height="180" rx="18" fill="#9e2f28"/>
 <text x="585" y="164" text-anchor="middle" font-size="40" font-weight="700" fill="#ffffff">中心ノード</text>
 
 <!-- 横帯スタック（4層まで） -->
-<rect x="70" y="10" width="1000" height="105" rx="14" fill="#c9602a"/>
+<rect x="70" y="10" width="1000" height="105" rx="14" fill="#9e2f28"/>
 <text x="110" y="75" font-size="40" font-weight="700" fill="#ffffff">3. スキル</text>
-<text x="1030" y="75" text-anchor="end" font-size="32" fill="#f6d9c8">やり方の手順書</text>
+<text x="1030" y="75" text-anchor="end" font-size="32" fill="#f3d2cc">やり方の手順書</text>
 
 <!-- 番号付きラベル -->
-<text x="50" y="70" font-size="40" font-weight="700" fill="#29261f"><tspan fill="#c9602a">①</tspan> 項目名</text>
+<text x="50" y="70" font-size="40" font-weight="700" fill="#241e1c"><tspan fill="#9e2f28">①</tspan> 項目名</text>
 
 <!-- キャプション（図の下） -->
-<text x="570" y="300" text-anchor="middle" font-size="32" fill="#7a6a52">説明文</text>
+<text x="570" y="300" text-anchor="middle" font-size="32" fill="#56704f">説明文</text>
 ```
 
 SVGの `font-family` はテーマと同じサンセリフにそろえる。`'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif`
@@ -124,8 +125,8 @@ SVGの `font-family` はテーマと同じサンセリフにそろえる。`'Hir
 `<marker>` は使わず、`line` と `polygon` で描く。marker の id は、1つのデッキに複数のSVGを貼ると衝突して矢尻が消えたり別の色になったりする。また既定の `markerUnits="strokeWidth"` では矢尻の実寸が markerWidth × stroke-width になり、短い線だと軸が消えて矢尻だけが残る。
 
 ```svg
-<line x1="352" y1="150" x2="410" y2="150" stroke="#a89f8c" stroke-width="6"/>
-<polygon points="432,150 408,137 408,163" fill="#a89f8c"/>
+<line x1="352" y1="150" x2="410" y2="150" stroke="#ad9f94" stroke-width="6"/>
+<polygon points="432,150 408,137 408,163" fill="#ad9f94"/>
 <!-- 双方向なら、両端に polygon を置く -->
 ```
 

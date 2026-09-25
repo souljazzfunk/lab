@@ -9,19 +9,19 @@ author: らいけん
 <style>
 /* カタログ用：上端のヘッダに型の名前を出す。見出しと重ならないよう上の余白を広げる */
 section { padding-top: 104px; }
-header { font-size: 24pt; color: #a8501f; font-weight: 700; top: 34px; left: 68px; }
+header { font-size: 24pt; color: #9e2f28; font-weight: 700; top: 34px; left: 68px; }
 /* 図が主役のスライド */
 img[alt~="center"] { display: block; margin: 48px auto 0; }
 /* 挿絵。右端は本文の左右余白より内側へ */
 .ill { position: absolute; right: 96px; bottom: 80px; width: 240px; }
 /* スクリーンショット：中央、角丸、枠 */
-img[alt~="shot"] { display: block; margin: 40px auto 0; border-radius: 14px; border: 1px solid #d9d2c2; }
+img[alt~="shot"] { display: block; margin: 40px auto 0; border-radius: 14px; border: 1px solid #dcd1c6; }
 /* ステップバー：見出しの上に置く現在地 */
 img[alt~="stepbar"] { display: block; margin: 0 0 32px; }
 /* 補足ボックス */
 .gbox { position: absolute; left: 0; right: 0; margin: 0 auto;
         width: fit-content; min-width: 900px; max-width: 1144px;
-        bottom: 64px; background: #f0ece2; border: 3px solid #d9d2c2;
+        bottom: 64px; background: #efe9e2; border: 3px solid #dcd1c6;
         border-radius: 18px; padding: 16px 56px; text-align: center; }
 .gbox, .gbox p { font-size: 32pt; line-height: 1.35; }
 .gbox p { margin: 0; }
@@ -110,7 +110,7 @@ img[alt~="stepbar"] { display: block; margin: 0 0 32px; }
 <!-- _header: 型：表の注目行に網掛け -->
 
 <style scoped>
-table tr:nth-child(3) td { background: rgba(201, 96, 42, .12); }
+table tr:nth-child(3) td { background: rgba(158, 47, 40, .10); }
 </style>
 
 # 迷ったら、この表

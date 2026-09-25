@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 260" font-family="'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif">
-<text x="10" y="46" font-size="32" fill="#7a6a52">データ</text>
-<rect x="10" y="70" width="320" height="170" rx="18" fill="#ffffff" stroke="#d9d2c2" stroke-width="3"/>
-<text x="170" y="170" text-anchor="middle" font-size="40" font-weight="700" fill="#29261f">売上の表</text>
-<line x1="342" y1="155" x2="386" y2="155" stroke="#a89f8c" stroke-width="6"/>
-<polygon points="408,155 384,142 384,168" fill="#a89f8c"/>
-<text x="410" y="46" font-size="32" fill="#7a6a52">Tableau</text>
-<rect x="410" y="70" width="320" height="170" rx="18" fill="#c9602a"/>
+<text x="10" y="46" font-size="32" fill="#56704f">データ</text>
+<rect x="10" y="70" width="320" height="170" rx="18" fill="#ffffff" stroke="#dcd1c6" stroke-width="3"/>
+<text x="170" y="170" text-anchor="middle" font-size="40" font-weight="700" fill="#241e1c">売上の表</text>
+<line x1="342" y1="155" x2="386" y2="155" stroke="#ad9f94" stroke-width="6"/>
+<polygon points="408,155 384,142 384,168" fill="#ad9f94"/>
+<text x="410" y="46" font-size="32" fill="#56704f">Tableau</text>
+<rect x="410" y="70" width="320" height="170" rx="18" fill="#9e2f28"/>
 <text x="570" y="170" text-anchor="middle" font-size="40" font-weight="700" fill="#ffffff">ダッシュボード</text>
-<line x1="742" y1="155" x2="786" y2="155" stroke="#a89f8c" stroke-width="6"/>
-<polygon points="808,155 784,142 784,168" fill="#a89f8c"/>
-<text x="810" y="46" font-size="32" fill="#7a6a52">見る人</text>
-<rect x="810" y="70" width="320" height="170" rx="18" fill="#ffffff" stroke="#d9d2c2" stroke-width="3"/>
-<text x="970" y="170" text-anchor="middle" font-size="40" font-weight="700" fill="#29261f">会議の画面</text>
+<line x1="742" y1="155" x2="786" y2="155" stroke="#ad9f94" stroke-width="6"/>
+<polygon points="808,155 784,142 784,168" fill="#ad9f94"/>
+<text x="810" y="46" font-size="32" fill="#56704f">見る人</text>
+<rect x="810" y="70" width="320" height="170" rx="18" fill="#ffffff" stroke="#dcd1c6" stroke-width="3"/>
+<text x="970" y="170" text-anchor="middle" font-size="40" font-weight="700" fill="#241e1c">会議の画面</text>
 </svg>

@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460" font-family="'Hiragino Sans','Noto Sans JP','Noto Sans CJK JP',sans-serif">
-<path d="M230 230 L230.0 40.0 A190 190 0 0 1 325.0 65.5 Z" fill="#c9602a" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L325.0 65.5 A190 190 0 0 1 394.5 135.0 Z" fill="#7a6a52" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L394.5 135.0 A190 190 0 0 1 420.0 230.0 Z" fill="#d9d2c2" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L420.0 230.0 A190 190 0 0 1 394.5 325.0 Z" fill="#a89f8c" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L394.5 325.0 A190 190 0 0 1 325.0 394.5 Z" fill="#6d675a" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L325.0 394.5 A190 190 0 0 1 230.0 420.0 Z" fill="#e3a27c" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L230.0 420.0 A190 190 0 0 1 135.0 394.5 Z" fill="#4c4638" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L135.0 394.5 A190 190 0 0 1 65.5 325.0 Z" fill="#b8ad96" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L65.5 325.0 A190 190 0 0 1 40.0 230.0 Z" fill="#f0c7ad" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L40.0 230.0 A190 190 0 0 1 65.5 135.0 Z" fill="#8c7b62" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L65.5 135.0 A190 190 0 0 1 135.0 65.5 Z" fill="#cfc6b4" stroke="#faf9f5" stroke-width="3"/>
-<path d="M230 230 L135.0 65.5 A190 190 0 0 1 230.0 40.0 Z" fill="#a8501f" stroke="#faf9f5" stroke-width="3"/>
+<path d="M230 230 L230.0 40.0 A190 190 0 0 1 325.0 65.5 Z" fill="#9e2f28" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L325.0 65.5 A190 190 0 0 1 394.5 135.0 Z" fill="#56704f" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L394.5 135.0 A190 190 0 0 1 420.0 230.0 Z" fill="#dcd1c6" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L420.0 230.0 A190 190 0 0 1 394.5 325.0 Z" fill="#ad9f94" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L394.5 325.0 A190 190 0 0 1 325.0 394.5 Z" fill="#655b55" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L325.0 394.5 A190 190 0 0 1 230.0 420.0 Z" fill="#c9675c" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L230.0 420.0 A190 190 0 0 1 135.0 394.5 Z" fill="#473b36" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L135.0 394.5 A190 190 0 0 1 65.5 325.0 Z" fill="#9fb394" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L65.5 325.0 A190 190 0 0 1 40.0 230.0 Z" fill="#e9b8b1" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L40.0 230.0 A190 190 0 0 1 65.5 135.0 Z" fill="#7c9a6e" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L65.5 135.0 A190 190 0 0 1 135.0 65.5 Z" fill="#cfc4b9" stroke="#f8f6f1" stroke-width="3"/>
+<path d="M230 230 L135.0 65.5 A190 190 0 0 1 230.0 40.0 Z" fill="#9e2f28" stroke="#f8f6f1" stroke-width="3"/>
 </svg>

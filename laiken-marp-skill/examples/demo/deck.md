@@ -10,22 +10,22 @@ author: らいけん
 /* 図が主役のスライド。見出しとの間に36px以上 */
 img[alt~="center"] { display:block; margin:56px auto 0; }
 /* 図の下のキャプション */
-.cap { text-align:center; color:#7a6a52; font-size:24pt; margin-top:36px; }
+.cap { text-align:center; color:#56704f; font-size:24pt; margin-top:36px; }
 /* 比較のスライドは大きい数字を2つだけ */
 .vs { display:grid; grid-template-columns:1fr 3px 1fr; align-items:center; margin-top:56px; }
-.vs .bar { background:#d9d2c2; height:220px; }
+.vs .bar { background:#dcd1c6; height:220px; }
 .vs div { text-align:center; }
 .vs .num { font-size:88pt; font-weight:700; line-height:1.1; }
-.vs .num.key { color:#c9602a; }
-.vs .lbl { font-size:30pt; color:#6d675a; }
+.vs .num.key { color:#9e2f28; }
+.vs .lbl { font-size:30pt; color:#655b55; }
 /* 補足ボックス（laiken-slide-design の確定デザイン） */
 .gbox { position:absolute; left:0; right:0; margin:0 auto;
         width:fit-content; min-width:900px; max-width:1144px;
-        bottom:64px; background:#f0ece2; border:3px solid #d9d2c2;
+        bottom:64px; background:#efe9e2; border:3px solid #dcd1c6;
         border-radius:18px; padding:16px 56px; text-align:center; }
 .gbox, .gbox p { font-size:32pt; line-height:1.35; }
 .gbox p { margin:0; }
-.gbox.key { background:#c9602a; border-color:#c9602a; }
+.gbox.key { background:#9e2f28; border-color:#9e2f28; }
 .gbox.key, .gbox.key p { color:#ffffff; font-weight:700; }
 </style>
 

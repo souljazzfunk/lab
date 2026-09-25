@@ -10,7 +10,7 @@
 
 | 項目 | minorun-marp-skill | laiken-marp-skill |
 |---|---|---|
-| テーマ | 黒地＋シアン（minorun-dark） | 生成りの地＋テラコッタ（laiken-light） |
+| テーマ | 黒地＋シアン（minorun-dark） | ジャスミンライスの地＋唐辛子の深紅＋カルダモンの緑（laiken-light） |
 | 書体 | 丸ゴシック | サンセリフのみ（ヒラギノ角ゴ／游ゴシック／Noto Sans CJK） |
 | 本文 | 26pt | 36pt。下限24pt |
 | 大原則 | ― | 5歳児でもわかるスライド（2秒で理解、1項目20文字、箇条書き4行まで） |
@@ -24,7 +24,7 @@
 | `skills/laiken-slide-story` | 5歳児原則、らいけんのデッキの約束、つかみ、中扉、段階的な開示、見出しの文体、締め方、尺の見積り |
 | `skills/laiken-slide-figures` | 図の情報量の絞り方、laiken-light の配色でのSVGパターン、文字サイズの下限、挿絵の置き方 |
 | `skills/laiken-slide-design` | 文字サイズと1スライドの量、余白の測り方、縦のバランス、配色、表とコードの型、Marpの罠 |
-| `theme/laiken-light.css` | 生成りの地にテラコッタの Marp テーマ |
+| `theme/laiken-light.css` | 唐辛子の深紅とカルダモンの緑の Marp テーマ（タイ・スリランカのカレーから） |
 | `tools/` | 書き出したPDFとSVGを実測する検査スクリプト |
 | `examples/sample` | 見本デッキ。`examples/broken` は検査が反応することを確かめるための、わざと崩した版 |
 
