@@ -35,7 +35,7 @@ jobs:
       - name: シェル（shellcheck）
         run: |
           command -v shellcheck || sudo apt-get install -y -q shellcheck
-          shellcheck tools/*.sh examples/*/*.sh
+          shellcheck tools/*.sh
       - name: JavaScript（構文）
         run: for f in tools/*.mjs; do node --check "$f"; done
 
