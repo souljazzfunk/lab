@@ -15,6 +15,10 @@ Claude Code で:
 
 スキルは `/pstack:<名前>` で呼ぶ(例: `/pstack:poteto-mode`、`/pstack:how`、`/pstack:architect`)。最初に `/pstack:setup-pstack` を一度実行すると、役割ごとのモデルを選べる(しなくても既定値で動く)。
 
+## スキルの関係図
+
+スキル同士の参照関係と、各スキルがサブエージェントをどう動かすかは [`docs/skill-map.ja.md`](docs/skill-map.ja.md)(英語版 [`docs/skill-map.en.md`](docs/skill-map.en.md))。
+
 ## 仕組み
 
 ```
@@ -24,6 +28,7 @@ pstack-cc/
 ├── sync-upstream.sh      上流を vendor/pstack/ に取り込む
 ├── build.py              vendor/pstack/ → plugin/ に変換する(置き換えルールもここ)
 ├── claude-code.md        Cursor と Claude Code の対応表(plugin/ に同梱される)
+├── docs/                 スキルの関係図(日本語・英語)
 ├── overrides/            丸ごと差し替えるファイル(今は setup-pstack だけ)
 └── plugin/               生成物(手で編集しない)。marketplace はここを配る
 .claude-plugin/marketplace.json
