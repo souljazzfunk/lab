@@ -15,6 +15,8 @@ Claude Code で:
 
 スキルは `/pstack:<名前>` で呼ぶ(例: `/pstack:poteto-mode`、`/pstack:how`、`/pstack:architect`)。最初に `/pstack:setup-pstack` を一度実行すると、役割ごとのモデルを選べる(しなくても既定値で動く)。
 
+初めて使うなら、[`docs/tutorial.ja.md`](docs/tutorial.ja.md)(英語版 [`docs/tutorial.en.md`](docs/tutorial.en.md))のチュートリアルで、インストールから小さな機能の追加までを 40 分ほどで一通り試せる。
+
 ## スキルの関係図
 
 スキル同士の参照関係と、各スキルがサブエージェントをどう動かすかは [`docs/skill-map.ja.md`](docs/skill-map.ja.md)(英語版 [`docs/skill-map.en.md`](docs/skill-map.en.md))。
