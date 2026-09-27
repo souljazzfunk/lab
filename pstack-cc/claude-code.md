@@ -46,6 +46,12 @@ Claude Code stores chat history as JSONL:
 
 To find the current session's transcript, take the most recently modified `*.jsonl` in that directory and check that one of its first `"type":"user"` lines holds the conversation's opening prompt.
 
+## Paths to pstack's own files
+
+Upstream runs from inside the pstack repository, so it names pstack files by repository path (`pstack/skills/swarm/SKILL.md`) and re-reads them from trunk with `git show origin/main:pstack/...`. Here pstack is an installed plugin, and the build rewrote those paths to `<pstack plugin root>/skills/...`.
+
+`<pstack plugin root>` is the directory two levels above any pstack skill's base directory, where this file lives. Read files there with the Read tool or `cat`. The installed copy is the current version, so there is no trunk to re-read. A `git show origin/main:` path that does not start with `pstack/` points into the user's own repository and works as written.
+
 ## Other Cursor mentions left in the text
 
 | The skill says | In Claude Code |
