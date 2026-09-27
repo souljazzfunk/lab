@@ -88,6 +88,13 @@ RULES = [
         "check it out in its worktree first.",
         only="skills/swarm/SKILL.md",
     ),
+    # 上流は pstack リポジトリの中から実行する前提のパス。プラグインとして入れた場合はスキルの場所から辿る
+    Rule(
+        "`node pstack/skills/poteto-mode/scripts/check-plan.mjs <plan.md>`",
+        "`node <poteto-mode base directory>/scripts/check-plan.mjs <plan.md>` "
+        "(the base directory Claude Code reported when it loaded the `poteto-mode` skill)",
+        only="skills/poteto-mode/playbooks/multi-phase-plan.md",
+    ),
     # --- 全体の置き換え ---
     # モデル設定ファイル
     Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md", min_hits=4),
