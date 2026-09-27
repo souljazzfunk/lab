@@ -1,170 +1,332 @@
-# Tutorial: add a small feature with pstack
+# Tutorial: learn pstack by running it
 
 [日本語](tutorial.ja.md)
 
-In this tutorial, we install pstack in Claude Code and add a `--stats` option to this repository's `pstack-cc/build.py`. `--stats` prints a table that shows how many times each replacement rule matched.
+Lauren Tan (poteto), the author of pstack, explains how to use it in three sources:
 
-Along the way we use the main pstack skills in order. We ask `/pstack:how` how the code works and `/pstack:why` why it was built that way. Then we hand the change to `/pstack:poteto-mode`, and finish by having `/pstack:teach` explain its choices. The whole tutorial takes about 40 minutes.
+- The post [The Complete Guide to pstack Pt. 1](https://x.com/poteto/status/2094457600259842065), about verification skills.
+- The post [The Complete Guide to pstack Pt. 2](https://x.com/poteto/status/2097732320606507506), about research, planning, prototyping, and architecture.
+- A talk about building an environment where you can trust your agents.
 
-## Before you start
+In this tutorial, we run the workflows from those sources one by one in your own repository. At the end you have a verification skill for your app and one change built with it.
 
-You need these:
+The tutorial has three parts. Part 1 follows Pt. 1, part 2 follows Pt. 2, and part 3 follows the talk. Each part takes about an hour, and you can do the parts on different days.
 
-- Claude Code (`claude --version` prints 2.1 or later)
-- `git` and Python 3.11 or later
-- A GitHub account that can clone `souljazzfunk/lab`
+## Notation
 
-Agent output changes a little on every run. So each "you should see" in this tutorial lists what the output contains, not its exact words.
+This tutorial writes skills in short form, such as `/how`. The full name is `/pstack:how`. Type `/how` and the completion list shows `/pstack:how`.
 
-## 1. Set up a practice repository
+`/verify-<app>` is the verification skill we create in part 1, where `<app>` is the name of your app. It is the same thing as `/control-app` in the posts.
 
-First, clone the repository and create a practice branch.
+Replace `<feature>`, `<subsystem>`, and other placeholders in the prompts with names from your repository.
+
+## Get ready
+
+1. Pick the repository of an app you work on. A browser app, an Electron app, a CLI, or an API all work. You must be able to start it locally.
+2. Create a practice branch.
+
+    ```bash
+    cd <your repository>
+    git switch -c pstack-tutorial
+    ```
+
+3. Pick one small task. A feature that takes about 30 minutes, or a bug with known repro steps, works well.
+4. Start Claude Code and install pstack.
+
+    ```
+    /plugin marketplace add souljazzfunk/lab
+    /plugin install pstack@lab
+    ```
+
+5. Restart Claude Code. Type `/poteto`. If the completion list shows `/pstack:poteto-mode`, you are ready.
+
+pstack runs on its default models. Run `/setup-pstack` only when you want to change them.
+
+## Part 1: let agents check their own work
+
+Pt. 1 makes one point. If an agent cannot check its own work, you become the checker and spend your day watching it. In part 1 we build the tool that does the checking.
+
+### 1. Create a verification skill
+
+```
+/create-verification-skill
+```
+
+The agent first reads the repository. It works out how to start the app, how to drive it, and how to capture evidence from the code and the README. It asks you only what the code does not show.
+
+When it finishes, you have these files:
+
+- `.claude/skills/verify-<app>/SKILL.md`, with the sections Launch, Doctor, Drive, Evidence, and Cleanup.
+- `.claude/skills/verify-<app>/features/README.md` and three to five files, one per feature. This is the Feature Map.
+
+The agent has already run the new skill once from start to end. It launched the app, ran `doctor`, drove one feature, saved evidence, and cleaned up. Check that the reply names where the screenshots or logs were saved.
+
+Restart Claude Code, and `/verify-<app>` shows up in the completion list.
+
+### 2. Read the Feature Map
+
+Open `features/README.md`. It lists the main features of the app and links to one file per feature.
+
+Open one feature file. It has these four headings:
+
+- `Sub-features`
+- `How to get to it (user POV)`
+- `Driving it with <harness>`
+- `Gotchas`
+
+The author calls this "materialized memory". It records how a user reaches each feature, so agents do not have to feel their way around the app. Fix anything wrong now. The Feature Map lives in the repository, and the whole team shares it.
+
+### 3. Try the verification CLI
+
+The pstack principle "Build the Lever" says to give agents tools rather than markdown. For a verification skill, the tool is a small CLI that drives the app.
+
+```
+use /verify-<app> to start the app, run doctor, and take a screenshot of the first screen
+```
+
+The agent runs the CLI that ships with the skill instead of writing a new script each time. The reply names the commands it ran and where it saved the screenshot.
+
+If the CLI is missing a command, have the agent add it. Pt. 1 asks for these properties in an agent-friendly CLI:
+
+```
+/poteto-mode add a command for <missing action> to the verify-<app> CLI. give it rich --help text and JSON output. add --dry-run if it has destructive side effects. make error messages say what to do instead
+```
+
+### 4. Build a feature with verification
+
+Now we build the task you picked. We use the prompt from Pt. 1 as is.
+
+```
+/poteto-mode build <description of feature, any useful context>. use /verify-<app> to verify your changes and show me a video and screenshots as proof
+```
+
+The agent picks a playbook from the kind of work, **Feature** for a new feature and **Bug fix** for a bug. It opens a todo list, and the first items are the playbook steps. A step it skips stays in the list as `skip: <reason>`.
+
+When it finishes, the reply contains these:
+
+- What it built and which data shape it chose.
+- The principles behind its decisions, by name (for example, Prove It Works).
+- Where the evidence from `/verify-<app>` is saved.
+
+Look at the evidence yourself. If a screenshot does not show the change, say so and have the agent try again.
+
+If you picked a bug, use the prompt from example 4 in Pt. 2:
+
+```
+/poteto-mode repro this with /verify-<app>. if it repros on main, fix it and show me a video as proof
+```
+
+### 5. Check in parallel with `/swarm`
+
+`/swarm` splits one check across many agents. Here we use the Feature Map to check that the change did not break other features.
+
+```
+/swarm 4 workers. use /verify-<app> to check the features in features/, split between you. report PASS, ISSUES, or BLOCKED for anything this branch broke
+```
+
+The agent runs the workers in parallel, each in its own worktree. At the end you get one table with a result per feature.
+
+The perf example from Pt. 1 has the same shape:
+
+```
+/poteto-mode improve the initial loading time of our app. first use /verify-<app> to take a trace of the status quo, and identify opportunities for improvement. then do a targeted fix and use /verify-<app> + a /swarm to confirm the win
+```
+
+In the posts, `/swarm` runs on Cursor's cloud. The Claude Code version runs on your machine, so keep it to five workers at once.
+
+### 6. Maintain the verification skill
+
+The Feature Map goes stale as soon as the app changes.
+
+```
+/maintain-verification-skill
+```
+
+The agent reads the source for each feature, drives the real app, and looks for places where the Feature Map is wrong. The result is `clean`, `changed`, or `blocked`. For `changed`, the fixes come as one PR.
+
+The author recommends running this at least once a day. Pt. 1 treats the verification skill as critical infrastructure, important enough to give it an on-call rotation.
+
+## Part 2: understand first, and plan with code
+
+Pt. 2 makes two points. The better the context you give an agent, the better its work. And you plan with code, not with abstract documents.
+
+### 7. Have the agent restate the problem
+
+If you state your own guess first, the agent follows it. So we have the agent restate the problem first. Use a bug report, an issue, or a Slack thread your team received.
+
+```
+/poteto-mode read this issue. restate in your own words and in plain english what you think the underlying issue is
+```
+
+Read the restatement. If the agent fixed on a red herring, correct it now, before it writes any code.
+
+### 8. Ask `/how` and `/why`
+
+```
+/how is <subsystem> implemented?
+```
+
+The agent judges how complex the question is. For a complex one, it runs two to four explorers in parallel and merges their findings into one explanation. The headings are Overview, Key Concepts, How It Works, Where Things Live, and Gotchas.
+
+```
+/why are we still stuck on <an old dependency or an odd implementation>?
+```
+
+`/why` reads git history and PRs, plus the MCP servers connected to Claude Code, such as Slack, Linear, Notion, and Sentry. It skips sources that are not connected and says so in the answer. The answer cites the commits and PRs it used.
+
+### 9. Have `/teach` explain
+
+Ask the agent to explain the choices behind the change from part 1.
+
+```
+/teach me why you implemented step 4 this way and not another way. what were the tradeoffs you made and why?
+```
+
+`/teach` runs `/how` and `/why`. The answer starts short and goes deeper as you ask. If a point does not convince you, keep asking. The author notes that explaining also corrects the agent's own understanding.
+
+### 10. Bring back context with `/recall`
+
+Quit Claude Code and start a new conversation. The new conversation does not know what the old one did.
+
+```
+/recall the work i did yesterday on <feature>
+```
+
+The agent reads your past chats in `~/.claude/projects/` and checks the related PRs and issues. The reply has this shape:
+
+- **Capsule.** Where things stand, in five bullets or fewer.
+- **Threads.** One line per thread of work, each with a status tag such as `[open PR #N]` or `[in flight <branch>]`.
+- **Problems.** The problems that keep coming back.
+- **Next move.** The one most useful next action.
+
+### 11. Compare options with prototypes
+
+Pt. 2 warns against taking the agent's first design.
+
+```
+/poteto-mode prototype a few options for <feature>. use /verify-<app> and take videos/screenshots for me to review and choose from
+```
+
+The agent follows the **Prototype** playbook. It builds throwaway sketches in a scratch directory, apart from production code. For UI, it puts the options behind one switcher so you can compare them.
+
+The reply lists the options it tried, the evidence for each, the tradeoffs, and a recommendation. It also says plainly that the prototype is throwaway. For the real build, ask for it as a Feature, as in step 4.
+
+### 12. Design with `/architect`
+
+For a change that crosses function boundaries, design before you build. This is example 2 from Pt. 2:
+
+```
+/poteto-mode we need to add <feature>. /architect this first, and answer any open questions with prototypes. let me review before proceeding.
+```
+
+`/architect` runs in five phases:
+
+1. **Ground.** It runs `/how` and `/why` over the systems involved.
+2. **Sketch.** Several models (opus, fable, and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
+3. **Agree.** The prompt ends with "let me review before proceeding", so it stops here and shows you the design.
+4. **Implement.** When you approve, it fills in the sketch.
+5. **Scrap.** If the same kind of workaround keeps appearing, or the types need `any` or casts, it throws the sketch away and designs again.
+
+In the Claude Code version, every designer is a Claude model. The Cursor version mixes models from different vendors, so expect less variety here.
+
+### 13. Write the README first
+
+For code that other people will use, writing the usage doc before the code shows its shape. The author started the in-house framework Dune by writing its tutorial, and built `/technical-writing` for that job.
+
+```
+/technical-writing write a tutorial for people who will use <feature>. do not implement anything yet
+```
+
+The doc you get is written in one Diátaxis mode, tutorial. Each step says what the reader should see. The doc becomes a target the agent can check its implementation against. This tutorial was written with the same skill.
+
+### 14. Turn the design into a plan
+
+Once the design is settled, turn it into a plan to execute.
+
+```
+/poteto-mode turn this design into a plan
+```
+
+The agent follows the **Multi-phase plan** playbook. The plan file has one section per PR, and every checkbox names the evidence that checks it. Every PR includes steps that drive the real app. The playbook's rule is that passing tests alone do not count as verified.
+
+When the plan is written, the agent stops. It starts executing only when you tell it to go.
+
+## Part 3: build an environment you can trust
+
+The talk argues that the number of agents you can run at once depends on how much you trust their work. More agents without trust means more low-quality PRs and more bugs.
+
+### 15. Encode each correction in structure
+
+By now you have corrected the agent at least once. Make sure the same mistake cannot happen again.
+
+```
+/poteto-mode make sure the <mistake> i just corrected cannot happen again. first check whether the code's structure can make it impossible. if not, catch it with lint or CI. write it into rules or skills only as a last resort
+```
+
+The talk lists four places to stop a repeat mistake, strongest first:
+
+1. The code's structure and data structures, so the mistake cannot be written.
+2. Static analysis, such as lint, the compiler, and CI.
+3. Rules and skills, which agents sometimes skip.
+4. The style guide, which only human review enforces.
+
+Agents copy the patterns they see in the code. One workaround left in place spreads across the repository in a few weeks. So stop a mistake with structure as soon as you see it.
+
+### 16. Question the comments
+
+The talk describes agents using code comments as an excuse to keep a workaround. The author's framework Dune bans comments for that reason.
+
+```
+/no-comments
+```
+
+The `comment-sicko` agent checks each comment in this branch's diff. It deletes the comments that should go and fixes the root cause of any workaround a comment was covering. Each comment it keeps comes with a reason.
+
+## Prompts to take with you
+
+These are the examples from the end of Pt. 2, ready to use.
+
+Research an ambiguous bug:
+
+```
+/poteto-mode investigate why background workers periodically fail with timeout errors. give me a breakdown of what we know, what data you used, and your best hypotheses.
+```
+
+Design a new service boundary:
+
+```
+/poteto-mode we need to add rate limiting for external webhooks. /architect this first, and answer any open questions with prototypes. let me review before proceeding.
+```
+
+Split a large migration into small PRs:
+
+```
+/poteto-mode create a plan to migrate our entire UI library to StyleX. break the migration into small, verifiable PRs. each PR must have its visual regression tests and live verification steps. i want the final result to be 100% identical compared to the original - bugs included
+```
+
+Fix a problem reported on Slack:
+
+```
+/poteto-mode repro this with /verify-<app>. if it repros on main, fix it and show me a video as proof
+```
+
+Most of the time `/poteto-mode` alone is enough. It calls `/how`, `/architect`, and the other skills on its own when the work needs them.
+
+## Clean up
+
+Delete the practice branch. To keep the verification skill, move `.claude/skills/verify-<app>/` alone to a new branch and open a PR for it.
 
 ```bash
-git clone https://github.com/souljazzfunk/lab.git pstack-tutorial
-cd pstack-tutorial
-git switch -c tutorial/build-stats
-python3 pstack-cc/build.py --check
+git switch main
+git branch -D pstack-tutorial
 ```
 
-The last command prints one line:
+## How this differs from Cursor
 
-```
-pstack-cc/plugin/ は最新です。
-```
+The posts describe pstack in Cursor and Grok Bot. The Claude Code version differs in these ways:
 
-The line means "pstack-cc/plugin/ is up to date". The generated plugin matches its sources. We run the same command later to check that our change did not break it.
+- `/poteto-mode` cannot be pinned the way a Cursor Custom Mode can. Add it each time you start a new task.
+- There are no cloud agents. `/swarm` and other parallel work run in local worktrees.
+- There are no Grok Bot routines or Cursor Automations. Set up scheduled runs another way.
 
-## 2. Install pstack
-
-Start Claude Code in the same directory.
-
-```bash
-claude
-```
-
-Inside Claude Code, run these two commands in order:
-
-```
-/plugin marketplace add souljazzfunk/lab
-/plugin install pstack@lab
-```
-
-When the install finishes, restart Claude Code. Type `/pstack:` and the completion list shows `/pstack:poteto-mode`, `/pstack:how`, `/pstack:why`, and more.
-
-## 3. Choose the models
-
-Next, we choose which models pstack gives its subagents.
-
-```
-/pstack:setup-pstack
-```
-
-Claude Code lists each role with its model and asks whether to keep them. Pick the option that keeps them as they are.
-
-The skill writes `~/.claude/pstack-models.md`. Open it from another terminal and you see lines like `how explorer: sonnet`.
-
-```bash
-cat ~/.claude/pstack-models.md
-```
-
-If your plan does not include `fable`, the skills skip that model and run the role on the parent model. You don't need to change anything here.
-
-## 4. Ask `/pstack:how` how the code works
-
-Before we ask for a change, we have the agent explain the code we are about to change.
-
-```
-/pstack:how how does pstack-cc/build.py turn vendor/pstack into pstack-cc/plugin?
-```
-
-The agent first judges how complex the question is. If it needs more than one angle, it starts two to four explorer subagents in parallel.
-
-After a few minutes, you get an explanation with these headings (it drops any that do not apply):
-
-- Overview
-- Key Concepts
-- How It Works
-- Where Things Live
-- Gotchas
-
-Check that the explanation mentions `RULES`, `min_hits`, and `apply_rules`. These three are what `--stats` builds on.
-
-## 5. Ask `/pstack:why` for the reason
-
-Code shows what happens, but rarely why. That is the job of `/pstack:why`.
-
-```
-/pstack:why why does build.py give each replacement rule a min_hits value?
-```
-
-The agent searches the git history, the README, and the code in parallel. Its answer cites the commits and files it used.
-
-Check that the answer says, in some form, that the build fails when upstream text changes and a rule stops matching. `--stats` makes those match counts visible to people too.
-
-## 6. Have `/pstack:poteto-mode` build it
-
-Now we ask for the change.
-
-```
-/pstack:poteto-mode add a --stats option to pstack-cc/build.py. it prints a table with each replacement rule, how many times it matched, and its min_hits. it must not rewrite pstack-cc/plugin/. show me the real output of python3 pstack-cc/build.py --stats and a passing --check as proof
-```
-
-The agent picks a playbook from the kind of work. This time it is **Feature**. It opens a todo list, and the first items are the Feature playbook steps:
-
-- `how` over the affected subsystem.
-- `architect` for parallel design exploration.
-- The throughput checkpoint, the delegated implementation, verification, commits, and the PR.
-
-A step the agent skips stays in the list as `skip: <reason>`. This change is small, so expect a few steps skipped with a reason.
-
-When the work is done, the reply contains these:
-
-- What it built, which data shape it chose, and why.
-- The principles behind its decisions, by name (for example, Laziness Protocol and Prove It Works).
-- The real output of `python3 pstack-cc/build.py --stats`.
-- The output of a passing `python3 pstack-cc/build.py --check`.
-
-Finally, run the same commands yourself. In Claude Code, a line that starts with `!` runs as a shell command.
-
-```
-!python3 pstack-cc/build.py --stats
-!python3 pstack-cc/build.py --check
-```
-
-The first prints a table with one row per rule. The second prints the same "up to date" line as in step 1. Also run `git status` and check that nothing under `pstack-cc/plugin/` changed.
-
-If the agent starts to open a PR, stop it. This is a practice branch, so there is nothing to push.
-
-## 7. Have `/pstack:teach` explain it
-
-Last, we ask the agent to explain the choices it made.
-
-```
-/pstack:teach me why you implemented --stats this way. what other shapes did you consider, and what did you compare to decide?
-```
-
-`/pstack:teach` runs `how` and `why` and merges what they find into one explanation. The explanation compares the shape the agent chose with the ones it rejected. If a point does not convince you, keep asking.
-
-## 8. Clean up
-
-Delete the practice directory.
-
-```bash
-cd ..
-rm -rf pstack-tutorial
-```
-
-`~/.claude/pstack-models.md` and the installed plugin stay. You can use them in your own repositories.
-
-## What we did
-
-We installed pstack and chose its models. We used `how` and `why` to understand the code before changing it. Then `poteto-mode` built the feature and proved it worked with real command output. Last, `teach` turned the agent's decisions into an explanation we can check.
-
-## Next steps
-
-- Run `/pstack:create-verification-skill` in your own repository. It gives agents a way to drive your app and prove their changes work. pstack's author calls this the most important skill to have.
-- When you correct an agent, find the place that stops the same mistake next time. In a talk on this topic, the author suggests checking these in order. Make the mistake impossible through the code's structure, catch it with lint or CI, and write it into rules or skills. A reviewer who only leaves comments cannot keep up with the number of PRs.
-- The [skill map](skill-map.en.md) shows how the skills call each other.
-- [`claude-code.md`](../claude-code.md) lists the differences between Cursor and Claude Code.
-- The author, Lauren Tan (poteto), explains pstack in [The Complete Guide to pstack Pt. 1](https://x.com/poteto/status/2094457600259842065) and [Pt. 2](https://x.com/poteto/status/2097732320606507506).
+[`claude-code.md`](../claude-code.md) has the details. The [skill map](skill-map.en.md) shows how the skills call each other.

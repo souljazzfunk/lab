@@ -15,7 +15,7 @@ Claude Code で:
 
 スキルは `/pstack:<名前>` で呼ぶ(例: `/pstack:poteto-mode`、`/pstack:how`、`/pstack:architect`)。最初に `/pstack:setup-pstack` を一度実行すると、役割ごとのモデルを選べる(しなくても既定値で動く)。
 
-初めて使うなら、[`docs/tutorial.ja.md`](docs/tutorial.ja.md)(英語版 [`docs/tutorial.en.md`](docs/tutorial.en.md))のチュートリアルで、インストールから小さな機能の追加までを 40 分ほどで一通り試せる。
+pstack の作者による記事 2 本と講演の内容を、自分のリポジトリで手を動かしながらたどるチュートリアルが [`docs/tutorial.ja.md`](docs/tutorial.ja.md)(英語版 [`docs/tutorial.en.md`](docs/tutorial.en.md))にある。
 
 ## スキルの関係図
 
