@@ -95,7 +95,18 @@ RULES = [
         "(the base directory Claude Code reported when it loaded the `poteto-mode` skill)",
         only="skills/poteto-mode/playbooks/multi-phase-plan.md",
     ),
+    Rule("Read these from trunk at program start.", "Read these at program start.",
+         only="skills/poteto-mode/playbooks/multi-phase-plan.md"),
+    Rule("re-read this playbook from trunk with `git show origin/main:pstack/skills/",
+         "re-read this playbook with `cat <pstack plugin root>/skills/", min_hits=2),
+    # 計画に「trunk から読み直す」手順があるかの検査。pstack のファイルは trunk から読まなくなったので、
+    # 同じ手順の文言「Re-read them at every tick」を目印にする
+    Rule('"git show origin/main:",', '"Re-read them at every tick",',
+         only="skills/poteto-mode/scripts/check-plan.mjs"),
     # --- 全体の置き換え ---
+    # pstack リポジトリ内のパス(claude-code.md の "Paths to pstack's own files" を参照)
+    Rule("`git show origin/main:pstack/skills/", "`cat <pstack plugin root>/skills/", min_hits=4),
+    Rule("`pstack/skills/", "`<pstack plugin root>/skills/", min_hits=5),
     # モデル設定ファイル
     Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md", min_hits=4),
     Rule("the `pstack-models.mdc` rule", "`~/.claude/pstack-models.md`", min_hits=3),
@@ -123,7 +134,7 @@ RULES = [
 ]
 
 # 変換後に残っていたら build を失敗させる文字列
-FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4.7", "claude-opus-5-5"]
+FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4.7", "claude-opus-5-5", "origin/main:pstack/", "`pstack/skills/"]
 
 SKILL_NOTICE = (
     "> **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read "
