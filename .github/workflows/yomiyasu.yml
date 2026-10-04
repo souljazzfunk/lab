@@ -1,0 +1,40 @@
+name: yomiyasu
+
+on:
+  pull_request:
+    paths:
+      - 'yomiyasu/**'
+      - 'vendor/yomiyasu/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/yomiyasu.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'yomiyasu/**'
+      - 'vendor/yomiyasu/**'
+      - '.claude-plugin/**'
+      - '.github/workflows/yomiyasu.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: shellcheck
+        run: |
+          command -v shellcheck || sudo apt-get install -y -q shellcheck
+          shellcheck yomiyasu/sync-upstream.sh
+      - name: プラグインと marketplace の検証
+        run: |
+          npm install -g @anthropic-ai/claude-code@2.1.282
+          claude plugin validate --strict vendor/yomiyasu/.claude-plugin/plugin.json
+          claude plugin validate --strict .
+      - name: marketplace からインストールできるか
+        run: |
+          export HOME="$RUNNER_TEMP/home" && mkdir -p "$HOME"
+          claude plugin marketplace add "$GITHUB_WORKSPACE"
+          claude plugin install yomiyasu@lab
