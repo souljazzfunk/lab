@@ -2,7 +2,7 @@
 
 [English](skill-map.en.md)
 
-Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 47 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
+Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 50 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
 
 ## 1. 全体像
 
@@ -54,6 +54,7 @@ flowchart TB
   PM --> UN[unslop]:::q
   PM --> TW[technical-writing]:::q
   PM --> SMW[show-me-your-work]:::q
+  PM --> BC[benchmark-checklist]:::q
 
   FIO --> ARC
   FIO --> ARN
@@ -85,9 +86,10 @@ flowchart TB
   SP[setup-pstack]:::etc --> CVS[create-verification-skill]:::etc
   CVS <--> MVS[maintain-verification-skill]:::etc
   PTS[principle-type-system-discipline]:::etc --> TS[typescript-best-practices]:::etc
+  PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-参照のない単独スキルは bro、make-bot-ui。
+参照のない単独スキルは bro、make-bot-ui、correct。
 
 ## 3. 各ワークフローのエージェントの流れ
 
