@@ -2,7 +2,7 @@
 
 [日本語](skill-map.ja.md)
 
-Diagrams of how the 47 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
+Diagrams of how the 50 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
 
 ## 1. Overview
 
@@ -54,6 +54,7 @@ flowchart TB
   PM --> UN[unslop]:::q
   PM --> TW[technical-writing]:::q
   PM --> SMW[show-me-your-work]:::q
+  PM --> BC[benchmark-checklist]:::q
 
   FIO --> ARC
   FIO --> ARN
@@ -85,9 +86,10 @@ flowchart TB
   SP[setup-pstack]:::etc --> CVS[create-verification-skill]:::etc
   CVS <--> MVS[maintain-verification-skill]:::etc
   PTS[principle-type-system-discipline]:::etc --> TS[typescript-best-practices]:::etc
+  PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-bro and make-bot-ui stand alone with no references.
+bro, make-bot-ui, and correct stand alone with no references.
 
 ## 3. Agent flow in each workflow
 
