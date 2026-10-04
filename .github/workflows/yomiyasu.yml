@@ -27,11 +27,16 @@ jobs:
       - name: shellcheck
         run: |
           command -v shellcheck || sudo apt-get install -y -q shellcheck
-          shellcheck yomiyasu/sync-upstream.sh
+          shellcheck yomiyasu/sync-upstream.sh yomiyasu/build.sh
+      - name: yomiyasu/plugin が vendor から組み立て直した結果と一致するか
+        run: |
+          yomiyasu/build.sh
+          git status --porcelain yomiyasu/plugin
+          test -z "$(git status --porcelain yomiyasu/plugin)"
       - name: プラグインと marketplace の検証
         run: |
           npm install -g @anthropic-ai/claude-code@2.1.282
-          claude plugin validate --strict vendor/yomiyasu/.claude-plugin/plugin.json
+          claude plugin validate --strict yomiyasu/plugin/.claude-plugin/plugin.json
           claude plugin validate --strict .
       - name: marketplace からインストールできるか
         run: |

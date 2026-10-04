@@ -25,7 +25,9 @@ rm -rf "$dest/.git"
 	echo "date: $(git -C "$tmp/src" log -1 --format=%cI)"
 } > "$root/yomiyasu/UPSTREAM"
 
-echo "vendor/yomiyasu を更新しました:"
+"$root/yomiyasu/build.sh"
+
+echo "vendor/yomiyasu と yomiyasu/plugin を更新しました:"
 cat "$root/yomiyasu/UPSTREAM"
 echo
-echo "次に: git diff --stat vendor/yomiyasu で変更を確認 → claude plugin validate --strict vendor/yomiyasu"
+echo "次に: git diff --stat vendor/yomiyasu yomiyasu/plugin で変更を確認 → claude plugin validate --strict yomiyasu/plugin"
