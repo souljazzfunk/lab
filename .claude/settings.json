@@ -11,7 +11,17 @@
       }
     ]
   },
+  "extraKnownMarketplaces": {
+    "lab": {
+      "source": {
+        "source": "github",
+        "repo": "souljazzfunk/lab"
+      }
+    }
+  },
   "enabledPlugins": {
-    "cc-plugin-you-should-know@builtin": true
+    "cc-plugin-you-should-know@builtin": true,
+    "pstack@lab": true,
+    "yomiyasu@lab": true
   }
 }
