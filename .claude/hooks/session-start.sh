@@ -6,6 +6,15 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
+# Install this repo's plugins. The container starts fresh each session, and
+# enabledPlugins in settings.json only enables plugins that are installed.
+if command -v claude >/dev/null 2>&1; then
+  claude plugin marketplace add "$CLAUDE_PROJECT_DIR" >/dev/null 2>&1 || true
+  for plugin in pstack@lab yomiyasu@lab; do
+    claude plugin install "$plugin" >/dev/null 2>&1 || true
+  done
+fi
+
 CHROMIUM=/opt/pw-browsers/chromium
 CA=/root/.ccr/agent-proxy-ca.crt
 NSSDB="$HOME/.pki/nssdb"
