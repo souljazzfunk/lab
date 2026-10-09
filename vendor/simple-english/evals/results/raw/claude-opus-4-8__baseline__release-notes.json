@@ -1,0 +1,35 @@
+{
+  "text": "# SQLPipe v2.0\n\n**Breaking changes**\n\n- The `/v2/users` endpoint now returns and expects `first_name` and `last_name` instead of a single `name` field. Update any client code that reads or writes `name` before upgrading \u2014 requests using the old field will be rejected.\n\n**New features**\n\n- Added an `--incremental` flag to sync only rows changed since the last run, avoiding full-table reprocessing on large datasets.\n\n**Performance**\n\n- Parquet writes are now roughly 40% faster, cutting export times and lowering memory pressure on wide tables.\n\n**Upgrading**\n\nMigrate `name` handling to the new split fields, then adopt `--incremental` where full reloads aren't required. See the migration guide for details. This is a major release; review the breaking change carefully before deploying to production.",
+  "input_tokens": 2,
+  "output_tokens": 275,
+  "thinking_tokens": 10,
+  "effort": "low",
+  "duration_ms": 5892,
+  "cost_usd": 0.049485,
+  "model": "claude-opus-4-8",
+  "condition": "baseline",
+  "scenario": "release-notes",
+  "type": "descriptive",
+  "lint": {
+    "type": "descriptive",
+    "words": 117,
+    "sentences": 7,
+    "mean_sentence_words": 16.3,
+    "longest_sentence_words": 21,
+    "violations": {
+      "sentence_over_limit": 0,
+      "contraction": 1,
+      "banned_modal": 0,
+      "perfect_tense": 0,
+      "ing_clause": 0,
+      "semicolon": 1,
+      "em_dash": 1,
+      "latin_abbrev": 0,
+      "slop_word": 0,
+      "trailing_condition": 0,
+      "synonym_rotation": 0
+    },
+    "violations_total": 3,
+    "violations_per_100w": 2.56
+  }
+}

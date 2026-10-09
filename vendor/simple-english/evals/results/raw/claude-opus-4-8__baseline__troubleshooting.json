@@ -1,0 +1,35 @@
+{
+  "text": "## Troubleshooting\n\n**Connection timeouts to Postgres**\n\nIf sqlpipe hangs or reports `dial tcp: i/o timeout`, first confirm the host and port are reachable (`nc -vz <host> 5432`). Timeouts usually stem from a firewall or security group blocking the port, an unreachable host, or `sslmode` mismatch. Increase the deadline with `--connect-timeout=30`, and verify Postgres `listen_addresses` and `pg_hba.conf` permit your client IP. For cloud databases, ensure your instance allows inbound traffic from the machine running sqlpipe.\n\n**S3 permission errors**\n\n`AccessDenied` or `403 Forbidden` responses mean the supplied credentials lack the required actions. Confirm the IAM policy grants `s3:GetObject`, `s3:PutObject`, and `s3:ListBucket` on both the bucket and its objects (`arn:aws:s3:::bucket` and `arn:aws:s3:::bucket/*`). Check that `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and the target region are set correctly, and verify no bucket policy or SCP overrides your access.",
+  "input_tokens": 2,
+  "output_tokens": 416,
+  "thinking_tokens": 0,
+  "effort": "low",
+  "duration_ms": 6994,
+  "cost_usd": 0.052725,
+  "model": "claude-opus-4-8",
+  "condition": "baseline",
+  "scenario": "troubleshooting",
+  "type": "procedural",
+  "lint": {
+    "type": "procedural",
+    "words": 131,
+    "sentences": 7,
+    "mean_sentence_words": 18.7,
+    "longest_sentence_words": 23,
+    "violations": {
+      "sentence_over_limit": 3,
+      "contraction": 0,
+      "banned_modal": 0,
+      "perfect_tense": 0,
+      "ing_clause": 0,
+      "semicolon": 0,
+      "em_dash": 0,
+      "latin_abbrev": 0,
+      "slop_word": 0,
+      "trailing_condition": 0,
+      "synonym_rotation": 3
+    },
+    "violations_total": 6,
+    "violations_per_100w": 4.58
+  }
+}
