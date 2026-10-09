@@ -40,7 +40,7 @@ pstack-cc/
 
 1. `vendor/pstack/` から `skills/`・`agents/`・`LICENSE` を写す(`automations/` と `docs/` は Cursor 専用か記事なので入れない)
 2. `overrides/` のファイルで差し替える
-3. 置き換えルールを当てる: `~/.cursor/...` のパス、`Task` → `Agent`、`generalPurpose` → `general-purpose`、モデル名(`claude-opus-5-5-max` → `opus`、`gpt-5.6-sol-max` → `fable`、`grok-4.7-xhigh-fast` → `sonnet`)、会話ログの場所、`/swarm` のクラウド実行 → ローカルの worktree、など
+3. 置き換えルールを当てる: `~/.cursor/...` のパス、`Task` → `Agent`、`generalPurpose` → `general-purpose`、モデル名(`claude-opus-5-5-xhigh` などの Opus → `opus`、`grok-4.7-xhigh-fast` → `sonnet`)、会話ログの場所、`/swarm` のクラウド実行 → ローカルの worktree、など
 4. frontmatter を Claude Code の形に揃える(スキル名をディレクトリ名に。Cursor 専用のキーを外す)
 5. 各スキルの先頭に「`claude-code.md` を読んで」という一文を入れる
 6. `plugin.json` と README を生成する
@@ -74,7 +74,7 @@ PR を作れるように、リポジトリの Settings → Actions → General �
 Cursor にしかない機能(クラウドエージェント、automations、Custom Modes、`cursor-team-kit` のスキル)に頼る部分は、文章を残したまま `claude-code.md` で代わりのやり方を説明している。特に:
 
 - `/swarm` などの並列実行は、Cursor のクラウドではなく手元の worktree で動く。同時に動かす数は少なめ(5 前後)にする。
-- `/architect`・`/arena`・`/interrogate` の「別々のモデルで案を出させる」は、別会社のモデルではなく Claude 同士(opus / fable / sonnet)になる。
+- `/architect`・`/arena`・`/interrogate` の「別々のモデルで案を出させる」は、別会社のモデルではなく Claude 同士(opus / sonnet)になる。
 - `/poteto-mode` は Cursor のように固定できない。新しいタスクのたびに呼び直す。
 
 ## ライセンス

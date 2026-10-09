@@ -127,14 +127,21 @@ RULES = [
     Rule(r"\bAskQuestion\b", "AskUserQuestion", min_hits=3, regex=True),
     Rule("(Shell, Grep, MCP", "(Bash, Grep, MCP", min_hits=3),
     Rule("Comment Sicko", "comment-sicko", min_hits=2),
+    # poteto-help が指す上流の記事と README は plugin/ に入れないので、上流の公開版にリンクする
+    Rule(
+        r"\]\(\.\./\.\./(docs/guide/[^)]+|README\.md)\)",
+        r"](https://github.com/cursor/plugins/blob/main/pstack/\1)",
+        min_hits=5,
+        only="skills/poteto-help/SKILL.md",
+        regex=True,
+    ),
     # モデル名(対応表は claude-code.md)
-    Rule(r"claude-opus-5-5-(?:max|medium)", "opus", min_hits=10, regex=True),
-    Rule("gpt-5.6-sol-max", "fable", min_hits=5),
+    Rule(r"claude-opus-5-5-(?:max|xhigh|medium)", "opus", min_hits=10, regex=True),
     Rule("grok-4.7-xhigh-fast", "sonnet", min_hits=10),
 ]
 
 # 変換後に残っていたら build を失敗させる文字列
-FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4.7", "claude-opus-5-5", "origin/main:pstack/", "`pstack/skills/"]
+FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4.7", "claude-opus-5-5", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
 
 SKILL_NOTICE = (
     "> **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read "

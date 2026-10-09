@@ -40,13 +40,13 @@ how explorer: sonnet
 how explainer: opus
 why investigators: sonnet
 why synthesizer: opus
-reflect tooling: fable
+reflect tooling: sonnet
 reflect judgment, divergent, synthesizer: opus
-arena runners: opus, fable, sonnet
-arena cross-judge pool: opus, fable, sonnet
+arena runners: opus, sonnet
+arena cross-judge pool: opus, sonnet
 swarm workers: sonnet
-architect runners: opus, fable, sonnet
-interrogate reviewers: opus, fable, sonnet
+architect runners: opus, sonnet
+interrogate reviewers: opus, sonnet
 ```
 
 ### 5. Confirm
