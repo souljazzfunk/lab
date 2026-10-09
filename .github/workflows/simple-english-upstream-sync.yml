@@ -1,0 +1,138 @@
+name: simple-english 上流の同期
+
+# 毎日 AminBlg/SimpleEnglish を確認し、更新があれば取り込んで simple-english/plugin/ を組み立て直した PR を出す。
+# 取り込みか組み立てが失敗したら(上流のファイル構成が変わったなど)、PR ではなく issue を立てる。
+on:
+  schedule:
+    - cron: '57 23 * * *' # 毎日 8:57 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: simple-english-upstream-sync
+
+env:
+  BRANCH: automation/simple-english-upstream-sync
+  ISSUE_TITLE: 'simple-english 上流の同期: 取り込みが失敗しました'
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 上流に更新があるか
+        id: check
+        run: |
+          repo="$(sed -n 's/^repo: //p' simple-english/UPSTREAM)"
+          old="$(sed -n 's/^commit: //p' simple-english/UPSTREAM)"
+          new="$(git ls-remote "$repo" refs/heads/main | cut -f1)"
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+          if [ "$old" = "$new" ]; then
+            echo "上流に更新はありません($new)"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif git fetch -q origin "$BRANCH" 2>/dev/null \
+            && git show "FETCH_HEAD:simple-english/UPSTREAM" | grep -qx "commit: $new"; then
+            echo "$new は取り込み済みの PR がすでにあります"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif gh issue list --state open --search "in:title \"$ISSUE_TITLE\"" --json body,comments \
+            --jq '.[] | .body, .comments[].body' | grep -q "$new"; then
+            echo "$new の失敗は issue に記録済みです"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # sync-upstream.sh は最後に build.sh まで走らせる
+      - name: 取り込んで組み立て直す
+        id: sync
+        if: steps.check.outputs.changed == 'true'
+        env:
+          NEW: ${{ steps.check.outputs.new }}
+        run: |
+          set +e
+          simple-english/sync-upstream.sh "$NEW" > "$RUNNER_TEMP/sync.log" 2>&1
+          status=$?
+          cat "$RUNNER_TEMP/sync.log"
+          echo "ok=$([ "$status" -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: 失敗を issue に記録する
+        if: steps.check.outputs.changed == 'true' && steps.sync.outputs.ok == 'false'
+        env:
+          NEW: ${{ steps.check.outputs.new }}
+        run: |
+          body="$RUNNER_TEMP/issue.md"
+          {
+            echo "上流 AminBlg/SimpleEnglish の \`$NEW\` の取り込み(\`simple-english/sync-upstream.sh\`)が失敗しました。"
+            echo
+            echo "上流のファイル構成が変わり、\`simple-english/build.sh\` が写すファイルが見つからなくなった可能性があります。手元で \`simple-english/sync-upstream.sh\` を実行して原因を確かめ、\`build.sh\` を直してください。"
+            echo
+            echo "実行ログ: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/sync.log"
+            echo '```'
+          } > "$body"
+          num="$(gh issue list --state open --search "in:title \"$ISSUE_TITLE\"" --json number,title \
+            --jq "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")"
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body-file "$body"
+          else
+            gh issue create --title "$ISSUE_TITLE" --body-file "$body"
+          fi
+          exit 1
+
+      - name: PR を出す(既にあれば更新する)
+        if: steps.check.outputs.changed == 'true' && steps.sync.outputs.ok == 'true'
+        env:
+          OLD: ${{ steps.check.outputs.old }}
+          NEW: ${{ steps.check.outputs.new }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898283+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$BRANCH"
+          git add -A vendor/simple-english simple-english
+          version="$(jq -r .version simple-english/plugin/.claude-plugin/plugin.json)"
+          title="simple-english: 上流 ${NEW:0:7}(v$version)に追従"
+          git commit -q -m "$title" -m "AminBlg/SimpleEnglish ${OLD:0:7} → ${NEW:0:7} を取り込み、simple-english/plugin/ を組み立て直した"
+          git push --force origin "$BRANCH"
+
+          body="$RUNNER_TEMP/pr.md"
+          {
+            echo "上流 simple-english を AminBlg/SimpleEnglish [\`${OLD:0:7}\`](https://github.com/AminBlg/SimpleEnglish/commit/$OLD) → [\`${NEW:0:7}\`](https://github.com/AminBlg/SimpleEnglish/commit/$NEW) に更新し、\`simple-english/plugin/\` を組み立て直した(毎日の自動同期)。上流の変更内容: https://github.com/AminBlg/SimpleEnglish/compare/$OLD...$NEW"
+            echo
+            echo '## 配布するプラグインの変更'
+            echo '```'
+            git diff --stat HEAD~1 -- simple-english/plugin | tail -n 40
+            echo '```'
+            # build.sh は skills/simple-english だけを写す。上流にスキルが増えたら気づけるようにする
+            others="$(find vendor/simple-english/skills -mindepth 1 -maxdepth 1 -type d ! -name simple-english -printf '%f\n')"
+            if [ -n "$others" ]; then
+              echo
+              echo '## 上流に simple-english 以外のスキルがある'
+              echo "\`simple-english/build.sh\` は \`skills/simple-english\` だけを写すので、次のスキルは配布されていない。入れるなら \`build.sh\` を直すこと。"
+              for s in $others; do echo "- \`$s\`"; done
+            fi
+            if ! git diff --quiet HEAD~1 -- vendor/simple-english/.claude-plugin; then
+              echo
+              echo '## 上流のマニフェストが変わった'
+              echo "\`vendor/simple-english/.claude-plugin/\` が変わった。\`.claude-plugin/marketplace.json\` の simple-english の説明と食い違っていないか見ること。"
+            fi
+          } > "$body"
+
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
+            gh pr edit "$BRANCH" --title "$title" --body-file "$body"
+          else
+            gh pr create --base "${{ github.event.repository.default_branch }}" --head "$BRANCH" \
+              --title "$title" --body-file "$body"
+          fi
+
+          # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
+          gh workflow run simple-english.yml --ref "$BRANCH"

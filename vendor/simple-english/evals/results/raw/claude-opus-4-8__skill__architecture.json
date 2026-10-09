@@ -1,0 +1,35 @@
+{
+  "text": "sqlpipe moves data from Postgres to S3 in three stages.\n\nThe reader process connects to Postgres and streams rows in batches. It reads a fixed number of rows at a time, so memory use stays flat for a large table.\n\nThe converter takes each batch and builds a Parquet row group. Parquet is a column format that stores values by column, not by row. Each row group holds the converted rows and its own column statistics.\n\nThe uploader writes the Parquet output to S3 as a multipart object. A multipart object is one file that S3 receives in separate parts. If a part fails, the uploader retries that part with backoff. Backoff means the wait time grows after each failed try.\n\nThe three stages run as a pipeline. The reader fills batches while the converter and the uploader work, so no stage waits for the whole table.",
+  "input_tokens": 2,
+  "output_tokens": 255,
+  "thinking_tokens": 0,
+  "effort": "low",
+  "duration_ms": 6062,
+  "cost_usd": 0.09282399999999999,
+  "model": "claude-opus-4-8",
+  "condition": "skill",
+  "scenario": "architecture",
+  "type": "descriptive",
+  "lint": {
+    "type": "descriptive",
+    "words": 147,
+    "sentences": 12,
+    "mean_sentence_words": 12.2,
+    "longest_sentence_words": 19,
+    "violations": {
+      "sentence_over_limit": 0,
+      "contraction": 0,
+      "banned_modal": 0,
+      "perfect_tense": 0,
+      "ing_clause": 0,
+      "semicolon": 0,
+      "em_dash": 0,
+      "latin_abbrev": 0,
+      "slop_word": 0,
+      "trailing_condition": 0,
+      "synonym_rotation": 0
+    },
+    "violations_total": 0,
+    "violations_per_100w": 0.0
+  }
+}
