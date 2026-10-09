@@ -10,7 +10,7 @@ fi
 # enabledPlugins in settings.json only enables plugins that are installed.
 if command -v claude >/dev/null 2>&1; then
   claude plugin marketplace add "$CLAUDE_PROJECT_DIR" >/dev/null 2>&1 || true
-  for plugin in pstack@lab yomiyasu@lab; do
+  for plugin in pstack@lab yomiyasu@lab simple-english@lab; do
     claude plugin install "$plugin" >/dev/null 2>&1 || true
   done
 fi
