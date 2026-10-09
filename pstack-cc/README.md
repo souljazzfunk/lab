@@ -59,6 +59,16 @@ git add vendor/pstack pstack-cc && git commit
 
 build が失敗したら、表示されたルール(`build.py` の `RULES`)を新しい文章に合わせて直す。`overrides/` にあるファイルの上流版が変わったときは、変更点を手で反映する。
 
+### 毎日の自動チェック
+
+`.github/workflows/pstack-upstream-sync.yml` が毎日 8:47 JST に上の手順を実行する(Actions タブから手動でも実行できる)。
+
+- 上流に更新があり build が通れば、`automation/pstack-upstream-sync` ブランチで PR を出し(開いていれば更新し)、`pstack-cc.yml` の検査を起動する。PR 本文には、スキルの増減と、`overrides/` の上流版が変わったかどうかが書かれる。
+- build が通らなければ、PR ではなく「pstack 上流の同期: build が失敗しました」という issue にログを残し、実行を失敗させる。
+- 同じ上流コミットについては、PR も issue も一度しか作らない。
+
+PR を作れるように、リポジトリの Settings → Actions → General → Workflow permissions で「Allow GitHub Actions to create and approve pull requests」をオンにしておく。
+
 ## 変換しきれないもの
 
 Cursor にしかない機能(クラウドエージェント、automations、Custom Modes、`cursor-team-kit` のスキル)に頼る部分は、文章を残したまま `claude-code.md` で代わりのやり方を説明している。特に:

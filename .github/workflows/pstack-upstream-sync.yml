@@ -1,0 +1,148 @@
+name: pstack 上流の同期
+
+# 毎日 cursor/plugins の pstack を確認し、更新があれば取り込んで build し直した PR を出す。
+# build が通らない(置き換えルールが上流の新しい文章に当たらない)ときは PR ではなく issue を立てる。
+on:
+  schedule:
+    - cron: '47 23 * * *' # 毎日 8:47 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: pstack-upstream-sync
+
+env:
+  BRANCH: automation/pstack-upstream-sync
+  ISSUE_TITLE: 'pstack 上流の同期: build が失敗しました'
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: 上流を取り込む
+        id: sync
+        run: |
+          old="$(sed -n 's/^commit: //p' pstack-cc/UPSTREAM)"
+          pstack-cc/sync-upstream.sh
+          new="$(sed -n 's/^commit: //p' pstack-cc/UPSTREAM)"
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+          if [ "$old" = "$new" ]; then
+            echo "上流に更新はありません($new)"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif git fetch -q origin "$BRANCH" 2>/dev/null \
+            && git show "FETCH_HEAD:pstack-cc/UPSTREAM" | grep -qx "commit: $new"; then
+            echo "$new は取り込み済みの PR がすでにあります"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif gh issue list --state open --search "in:title \"$ISSUE_TITLE\"" --json body,comments \
+            --jq '.[] | .body, .comments[].body' | grep -q "$new"; then
+            echo "$new の build 失敗は issue に記録済みです"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: build し直す
+        id: build
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          set +e
+          python3 pstack-cc/build.py > "$RUNNER_TEMP/build.log" 2>&1
+          status=$?
+          cat "$RUNNER_TEMP/build.log"
+          echo "ok=$([ "$status" -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: build 失敗を issue に記録する
+        if: steps.sync.outputs.changed == 'true' && steps.build.outputs.ok == 'false'
+        env:
+          NEW: ${{ steps.sync.outputs.new }}
+        run: |
+          body="$RUNNER_TEMP/issue.md"
+          {
+            echo "上流 cursor/plugins の \`$NEW\` を取り込んだところ、\`pstack-cc/build.py\` が失敗しました。"
+            echo
+            echo "上流の文章が変わって \`RULES\` の置き換えが当たらなくなった可能性があります。手元で \`pstack-cc/sync-upstream.sh\` → \`python3 pstack-cc/build.py\` を実行し、表示されたルールを直してください。"
+            echo
+            echo "実行ログ: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/build.log"
+            echo '```'
+          } > "$body"
+          num="$(gh issue list --state open --search "in:title \"$ISSUE_TITLE\"" --json number,title \
+            --jq "map(select(.title == \"$ISSUE_TITLE\")) | .[0].number // empty")"
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body-file "$body"
+          else
+            gh issue create --title "$ISSUE_TITLE" --body-file "$body"
+          fi
+          exit 1
+
+      - name: PR を出す(既にあれば更新する)
+        if: steps.sync.outputs.changed == 'true' && steps.build.outputs.ok == 'true'
+        env:
+          OLD: ${{ steps.sync.outputs.old }}
+          NEW: ${{ steps.sync.outputs.new }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898283+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$BRANCH"
+          git add -A vendor/pstack pstack-cc
+          version="$(python3 -c 'import json; print(json.load(open("pstack-cc/plugin/.claude-plugin/plugin.json"))["version"])')"
+          title="pstack-cc: pstack $version に追従"
+          git commit -q -m "$title" -m "cursor/plugins ${OLD:0:7} → ${NEW:0:7} を取り込み、pstack-cc/plugin/ を再生成"
+          git push --force origin "$BRANCH"
+
+          added="$(git diff --name-only --diff-filter=A HEAD~1 -- 'vendor/pstack/skills/*/SKILL.md' | cut -d/ -f4)"
+          removed="$(git diff --name-only --diff-filter=D HEAD~1 -- 'vendor/pstack/skills/*/SKILL.md' | cut -d/ -f4)"
+          body="$RUNNER_TEMP/pr.md"
+          {
+            echo "上流 pstack を cursor/plugins [\`${OLD:0:7}\`](https://github.com/cursor/plugins/commit/$OLD) → [\`${NEW:0:7}\`](https://github.com/cursor/plugins/commit/$NEW) に更新し、\`pstack-cc/plugin/\` を再生成した(毎日の自動同期)。"
+            echo
+            echo '## 変更されたファイル'
+            echo '```'
+            git diff --stat HEAD~1 -- vendor/pstack | tail -n 40
+            echo '```'
+            if [ -n "$added$removed" ]; then
+              echo
+              echo '## スキルの増減'
+              for s in $added; do echo "- 追加: \`$s\`"; done
+              for s in $removed; do echo "- 削除: \`$s\`"; done
+              echo
+              echo "\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数を手で直すこと。"
+            fi
+            touched=""
+            for f in $(cd pstack-cc/overrides && find . -type f | sed 's|^\./||'); do
+              git diff --quiet HEAD~1 -- "vendor/pstack/$f" || touched="$touched $f"
+            done
+            if [ -n "$touched" ]; then
+              echo
+              echo '## overrides の上流版が変わった'
+              echo "\`pstack-cc/overrides/\` で丸ごと差し替えているファイルの上流版が変わった。変更点を手で反映すること。"
+              for f in $touched; do echo "- \`vendor/pstack/$f\`"; done
+            fi
+            echo
+            echo '## merge する前に'
+            echo "- poteto-mode などの方針の変更が \`pstack-cc/claude-code.md\` の対応表と食い違っていないか見る"
+          } > "$body"
+
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
+            gh pr edit "$BRANCH" --title "$title" --body-file "$body"
+          else
+            gh pr create --base "${{ github.event.repository.default_branch }}" --head "$BRANCH" \
+              --title "$title" --body-file "$body"
+          fi
+
+          # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
+          gh workflow run pstack-cc.yml --ref "$BRANCH"
