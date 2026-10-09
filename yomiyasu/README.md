@@ -23,3 +23,11 @@ git add vendor/yomiyasu yomiyasu && git commit
 ```
 
 `UPSTREAM` に取り込んだコミットが記録される。`vendor/yomiyasu/` と `yomiyasu/plugin/` は手で編集しない。
+
+### 毎日の自動チェック
+
+`.github/workflows/yomiyasu-upstream-sync.yml` が毎日 8:52 JST に上流の main を確認する(Actions タブから手動でも実行できる)。
+
+- 更新があれば上の手順で取り込み、`automation/yomiyasu-upstream-sync` ブランチで PR を出し(開いていれば更新し)、`yomiyasu.yml` の検査を起動する。上流に yomiyasu 以外のスキルが増えたときや、上流のマニフェストが変わったときは、PR 本文にそう書かれる。
+- 取り込みか組み立てが失敗したら、PR ではなく「yomiyasu 上流の同期: 取り込みが失敗しました」という issue にログを残し、実行を失敗させる。
+- 同じ上流コミットについては、PR も issue も一度しか作らない。
