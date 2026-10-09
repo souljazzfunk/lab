@@ -2,7 +2,7 @@
 
 [English](skill-map.en.md)
 
-Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 50 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
+Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 51 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
 
 ## 1. 全体像
 
@@ -40,6 +40,8 @@ flowchart TB
   FIO[figure-it-out]:::entry
   AG{{poteto-agent}}:::ag
   AG --> PM
+  PH[poteto-help]:::entry --> PM
+  PH --> SP
 
   PM --> HOW[how]:::wf
   PM --> WHY[why]:::wf
@@ -89,7 +91,7 @@ flowchart TB
   PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-参照のない単独スキルは bro、make-bot-ui、correct。
+poteto-help は質問に応じてほぼ全スキルを案内するので、図では poteto-mode と setup-pstack への矢印だけ描いた。bro、make-bot-ui、correct を参照しているのは poteto-help だけ。
 
 ## 3. 各ワークフローのエージェントの流れ
 
@@ -126,7 +128,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[課題と採点基準を決める] --> B["候補 ×N<br/>(opus / fable / sonnet)<br/>各自の worktree"]
+  A[課題と採点基準を決める] --> B["候補 ×N<br/>(opus / sonnet)<br/>各自の worktree"]
   B --> C["cross-judge<br/>(別モデル)"]
   C --> D[土台を選ぶ]
   D --> E[負けた案から移植]
@@ -152,7 +154,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[範囲と意図を明示] --> B["reviewer ×3<br/>(opus / fable / sonnet)"]
+  A[範囲と意図を明示] --> B["reviewer ×2<br/>(opus / sonnet)"]
   B --> C[統合]
   C --> D["親の判断<br/>Act On / Consider / Dismissed"]
 ```
@@ -174,7 +176,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[会話ログ JSONL を特定] --> B["Judgment (opus)<br/>Tooling (fable)<br/>Divergent (opus)"]
+  A[会話ログ JSONL を特定] --> B["Judgment (opus)<br/>Tooling (sonnet)<br/>Divergent (opus)"]
   B --> C["synthesizer (opus)"]
   C --> D[構造で縛れるか確認]
   D --> E[スキルを修正]

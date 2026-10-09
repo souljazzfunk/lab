@@ -2,7 +2,7 @@
 
 [日本語](skill-map.ja.md)
 
-Diagrams of how the 50 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
+Diagrams of how the 51 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
 
 ## 1. Overview
 
@@ -40,6 +40,8 @@ flowchart TB
   FIO[figure-it-out]:::entry
   AG{{poteto-agent}}:::ag
   AG --> PM
+  PH[poteto-help]:::entry --> PM
+  PH --> SP
 
   PM --> HOW[how]:::wf
   PM --> WHY[why]:::wf
@@ -89,7 +91,7 @@ flowchart TB
   PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-bro, make-bot-ui, and correct stand alone with no references.
+poteto-help routes questions to almost every skill, so the diagram draws only its arrows to poteto-mode and setup-pstack. Only poteto-help refers to bro, make-bot-ui, and correct.
 
 ## 3. Agent flow in each workflow
 
@@ -126,7 +128,7 @@ Several models solve the same task. Pick a base, then graft the best parts of th
 
 ```mermaid
 flowchart LR
-  A[Set task and rubric] --> B["candidate xN<br/>(opus / fable / sonnet)<br/>own worktree each"]
+  A[Set task and rubric] --> B["candidate xN<br/>(opus / sonnet)<br/>own worktree each"]
   B --> C["cross-judge<br/>(different model)"]
   C --> D[Pick a base]
   D --> E[Graft from the losers]
@@ -152,7 +154,7 @@ Reviewers attack from separate angles at once, and the parent makes the final ca
 
 ```mermaid
 flowchart LR
-  A[State scope and intent] --> B["reviewer x3<br/>(opus / fable / sonnet)"]
+  A[State scope and intent] --> B["reviewer x2<br/>(opus / sonnet)"]
   B --> C[Synthesize]
   C --> D["Lead judgment<br/>Act On / Consider / Dismissed"]
 ```
@@ -174,7 +176,7 @@ Reads the transcript through three lenses and turns each learning into an edit t
 
 ```mermaid
 flowchart LR
-  A[Locate transcript JSONL] --> B["Judgment (opus)<br/>Tooling (fable)<br/>Divergent (opus)"]
+  A[Locate transcript JSONL] --> B["Judgment (opus)<br/>Tooling (sonnet)<br/>Divergent (opus)"]
   B --> C["synthesizer (opus)"]
   C --> D[Can structure enforce it?]
   D --> E[Edit the skill]

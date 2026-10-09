@@ -222,7 +222,7 @@ For a change that crosses function boundaries, design before you build. This is 
 `/architect` runs in five phases:
 
 1. **Ground.** It runs `/how` and `/why` over the systems involved.
-2. **Sketch.** Several models (opus, fable, and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
+2. **Sketch.** Several models (opus and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
 3. **Agree.** The prompt ends with "let me review before proceeding", so it stops here and shows you the design.
 4. **Implement.** When you approve, it fills in the sketch.
 5. **Scrap.** If the same kind of workaround keeps appearing, or the types need `any` or casts, it throws the sketch away and designs again.
