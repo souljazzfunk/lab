@@ -22,6 +22,7 @@
   "enabledPlugins": {
     "cc-plugin-you-should-know@builtin": true,
     "pstack@lab": true,
-    "yomiyasu@lab": true
+    "yomiyasu@lab": true,
+    "simple-english@lab": true
   }
 }
