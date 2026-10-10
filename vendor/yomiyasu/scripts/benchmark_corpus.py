@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-160本のコーパスに対してNaive正規表現とLookaround正規表現（yomiyasu_lint.py）を
-実行し、精度・誤検出率・リライト前後のスコア変化を計測するベンチマークスクリプト
+保存済みコーパスに対し、単純な正規表現とyomiyasu_lint.pyの検出件数・スコアを集計する。
+検出件数の比は精度や誤検出率ではない。実行するとbenchmark_results.jsonを上書きする。
 """
 import os
 import sys
@@ -92,9 +92,10 @@ def benchmark_corpus():
                 rule = finding.get("rule", "")
                 if "metaphor_verb" in rule:
                     g_metaphor_verbs += 1
-                elif rule in ["symbol_colon", "symbol_bracket", "symbol_space_around_ascii", "symbol_emoji"]:
+                elif rule in {"trailing_colon", "redundant_bracket", "emoji_prohibited", "dash_decoration", "dash_list_ending", "dash_insertion", "heading_colon"}:
                     g_symbols += 1
-                elif rule in ["excessive_bold", "excessive_bullet", "contrast_negation"]:
+                elif rule in {"excess_bold", "excess_list", "negative_parallelism", "negative_parallelism_density",
+                              "bold_label_list", "short_summary_heading"}:
                     g_formatting += 1
 
             results[gname].append({
@@ -126,9 +127,9 @@ def benchmark_corpus():
         json.dump(out_data, fp, ensure_ascii=False, indent=2)
 
     print("\n" + "="*70)
-    print(f"コーパス較正ベンチマーク結果 (対象ファイル数: {total_files}本)")
+    print(f"コーパスの検出件数とスコア (対象ファイル数: {total_files}本)")
     print("="*70)
-    print(f"{'グループ':<20} | {'本数':<5} | {'平均点':<6} | {'Naive検出':<10} | {'Lookaround検出':<14} | {'誤検出抑制率':<10}")
+    print(f"{'グループ':<20} | {'本数':<5} | {'平均点':<6} | {'単純一致件数':<10} | {'リンター指摘件数':<14} | {'件数減少率':<10}")
     print("-" * 75)
 
     for gname, s in summary.items():
