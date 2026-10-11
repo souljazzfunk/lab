@@ -58,9 +58,9 @@ RULES = [
         only="skills/recall/SKILL.md",
     ),
     Rule(
-        "The system prompt names the active workspace's `agent-transcripts/` directory. Use that path.",
-        "Use the active project's transcript directory, `~/.claude/projects/<slug>/` "
-        "(`claude-code.md` at the plugin root explains the slug).",
+        "find this conversation's transcript in the `agent-transcripts/` directory the system prompt names.",
+        "find this conversation's transcript in the active project's transcript directory, "
+        "`~/.claude/projects/<slug>/` (`claude-code.md` at the plugin root explains the slug).",
         only="skills/reflect/SKILL.md",
     ),
     Rule(
@@ -121,7 +121,7 @@ RULES = [
     Rule(".cursor/worktrees", ".claude/worktrees", min_hits=1),
     # ツール名
     Rule("Task tool", "Agent tool", min_hits=5),
-    Rule(r"\bTask subagent", "Agent-tool subagent", min_hits=2, regex=True),
+    Rule(r"\bTask subagent", "Agent-tool subagent", min_hits=1, regex=True),
     Rule("`Task`", "`Agent`", min_hits=5),
     Rule("generalPurpose", "general-purpose", min_hits=5),
     Rule(r"\bAskQuestion\b", "AskUserQuestion", min_hits=3, regex=True),
