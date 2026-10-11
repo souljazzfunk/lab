@@ -25,6 +25,11 @@
       "description": "Simple English (by AminBlg, MIT): ASD-STE100 Simplified Technical English の考え方で、平易で誤解のない英語を書くスキル。上流を vendor/simple-english/ に無改造で取り込み、simple-english/plugin/ にスキルだけの配布用最小構成を組み立てたもの。",
       "homepage": "https://github.com/AminBlg/SimpleEnglish",
       "license": "MIT"
+    },
+    {
+      "name": "life-automation-guards",
+      "source": "./life-automation-guards/plugin",
+      "description": "life-automation の hooks を Project のクラウドのスレッドでも動かす (リポジトリが複数ある Project では各リポジトリの .claude/settings.json の hooks が読まれないため)。"
     }
   ]
 }
