@@ -1,0 +1,5 @@
+{
+  "name": "life-automation-guards",
+  "version": "0.1.0",
+  "description": "life-automation の hooks (no_user_chores、memory_lint_after_write) を、hooks が読まれない Project のクラウドのスレッドでも動かす。スクリプト本体は life-automation の .claude/hooks/ にあり、このプラグインはそれを呼ぶだけ。"
+}
