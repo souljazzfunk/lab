@@ -2,17 +2,17 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__hearthbot__reply|mcp__hearthbot__post_message|mcp__hearthbot__update_message",
+        "matcher": ".*",
         "hooks": [
-          { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/no_user_chores.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
+          { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/dispatch.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit|Bash",
+        "matcher": ".*",
         "hooks": [
-          { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/memory_lint_after_write.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
+          { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/dispatch.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
         ]
       }
     ]
