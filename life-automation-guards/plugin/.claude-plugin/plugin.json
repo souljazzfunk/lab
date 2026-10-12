@@ -1,7 +1,7 @@
 {
   "name": "life-automation-guards",
-  "version": "0.2.0",
-  "description": "life-automation の .claude/settings.json の hooks を、hooks が読まれない Project のクラウドのスレッドでも動かす。全ツールで life-automation の .claude/hooks/dispatch.py を呼び、それが settings.json の hook を走らせるので、hook を足すときにこのプラグインは変えなくてよい。",
+  "version": "0.3.0",
+  "description": "life-automation の .claude/settings.json の hooks を、hooks が読まれない Project のクラウドのスレッドでも動かす。全ツールと turn の終わり (Stop) で life-automation の .claude/hooks/dispatch.py を呼び、それが settings.json の hook を走らせるので、hook を足すときにこのプラグインは変えなくてよい。",
   "author": {
     "name": "souljazzfunk"
   }
