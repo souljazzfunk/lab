@@ -41,9 +41,9 @@ pstack-cc/
 1. `vendor/pstack/` から `skills/`・`agents/`・`LICENSE` を写す(`automations/` と `docs/` は Cursor 専用か記事なので入れない)
 2. `overrides/` のファイルで差し替える
 3. 置き換えルールを当てる: `~/.cursor/...` のパス、`Task` → `Agent`、`generalPurpose` → `general-purpose`、モデル名(`claude-opus-5-5-xhigh` などの Opus → `opus`、`grok-4.7-xhigh-fast` → `sonnet`)、会話ログの場所、`/swarm` のクラウド実行 → ローカルの worktree、など
-4. frontmatter を Claude Code の形に揃える(スキル名をディレクトリ名に。Cursor 専用のキーを外す)
+4. frontmatter を Claude Code の形に揃える(スキル名をディレクトリ名に。Cursor 専用のキーを外す。`MODEL_INVOCABLE` のスキルは `disable-model-invocation` を外し、Claude からも呼べるようにする。今は `create-verification-skill` だけ)
 5. 各スキルの先頭に「`claude-code.md` を読んで」という一文を入れる
-6. `plugin.json` と README を生成する
+6. `plugin.json` と README を生成する(版は `<上流の版>-cc.<上流のコミット>.<生成物のハッシュ>`。こちらの変換だけを変えても版が変わる)
 
 **安全装置**: ルールごとに「最低何回当たるはずか」を決めてある。上流の文章が変わってルールが当たらなくなったり、`~/.cursor/` などが変換されずに残ったりしたら、build は失敗して該当箇所を表示する。
 
