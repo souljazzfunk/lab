@@ -10,6 +10,7 @@
 """
 
 import filecmp
+import hashlib
 import json
 import re
 import shutil
@@ -32,6 +33,11 @@ TEXT_SUFFIXES = {".md", ".sh", ".ts", ".mjs", ".js", ".json"}
 # Cursor 専用で Claude Code では意味を持たない frontmatter のキー
 DROP_SKILL_KEYS = {"mode", "icon", "color", "reminder"}
 DROP_AGENT_KEYS = {"is_background"}
+
+# 上流は人が送ったときだけ動く (disable-model-invocation: true) が、ここでは Claude からも呼べるようにするスキル。
+# create-verification-skill: Project のスレッドが仕事の最初に自分の検証スキルを作るため (Laiken 2026-10-12)。
+# correct と recall は Laiken が送ったときだけ動かすので入れない。
+MODEL_INVOCABLE = {"create-verification-skill"}
 
 
 @dataclass
@@ -182,6 +188,10 @@ def normalize_skill(path: Path) -> None:
     lines, body = split_frontmatter(path.read_text(), path)
     # Claude Code のスキル名は小文字とハイフンだけ。ディレクトリ名に揃える("Poteto Mode" → poteto-mode)
     lines = set_key(drop_keys(lines, DROP_SKILL_KEYS), "name", path.parent.name)
+    if path.parent.name in MODEL_INVOCABLE:
+        if "disable-model-invocation: true" not in lines:
+            sys.exit(f"上流で disable-model-invocation が変わりました。MODEL_INVOCABLE を見直す: {path.parent.name}")
+        lines = drop_keys(lines, {"disable-model-invocation"})
     path.write_text(join_frontmatter(lines, SKILL_NOTICE, body))
 
 
@@ -237,12 +247,21 @@ def upstream_info() -> dict[str, str]:
     return info
 
 
+def content_hash(out: Path) -> str:
+    """生成した中身の短いハッシュ。上流が同じでもこちらの変換を変えたら版が変わり、配布先が更新に気づく。"""
+    h = hashlib.sha256()
+    for p in sorted(out.rglob("*")):
+        if p.is_file():
+            h.update(p.relative_to(out).as_posix().encode() + b"\0" + p.read_bytes() + b"\0")
+    return h.hexdigest()[:7]
+
+
 def write_manifest(out: Path) -> None:
     up = json.loads((VENDOR / ".cursor-plugin" / "plugin.json").read_text())
     info = upstream_info()
     manifest = {
         "name": up["name"],
-        "version": f"{up['version']}-cc.{info['commit'][:7]}",
+        "version": f"{up['version']}-cc.{info['commit'][:7]}.{content_hash(out)}",
         "description": up["description"] + " (Claude Code conversion of the Cursor plugin.)",
         "author": up["author"],
         "homepage": up["homepage"],

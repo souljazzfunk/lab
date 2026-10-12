@@ -1,7 +1,6 @@
 ---
 name: create-verification-skill
 description: "Generate a project-local verification skill that drives your app the way a user does — any language, framework, or platform. Use for /create-verification-skill, \"make a control skill for this repo\", or when a project has no scripted way to prove UI/CLI/service behavior."
-disable-model-invocation: true
 ---
 
 > **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read `claude-code.md` at the plugin root (two directories above this skill's base directory). It maps Cursor tools, models and paths to Claude Code.
