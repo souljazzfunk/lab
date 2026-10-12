@@ -15,6 +15,13 @@
           { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/dispatch.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "f=/home/claude/life-automation/.claude/hooks/dispatch.py; [ ! -f \"$f\" ] || python3 \"$f\"" }
+        ]
+      }
     ]
   }
 }
