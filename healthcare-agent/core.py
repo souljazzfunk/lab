@@ -189,6 +189,16 @@ class DoctorIndex:
         return s + d.get("rating", 0) / 5 + d.get("hospital_rating", 0) / 10 + d.get("score", 0) / 1000
 
 
+def doctor_view(d: dict, slots=None) -> dict:
+    """Patient-facing doctor info (internal number / score are not exposed)."""
+    return {
+        "name": d["name"], "specialty": d["specialty"], "specialty_ja": SPECIALTY_JA.get(d["specialty"]),
+        "gender": d.get("gender"), "languages": d["languages"], "hospital": d.get("hospital"),
+        "region": d.get("region"), "rating": d.get("rating"), "personality": d.get("personality"),
+        "available_slots": [s.strftime("%Y-%m-%d %H:%M") for s in (slots if slots is not None else d["slots"])][:4],
+    }
+
+
 def _has(text: str, low: str, words) -> bool:
     return any(w in text or w in low for w in words)
 

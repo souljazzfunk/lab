@@ -30,6 +30,11 @@
       "name": "life-automation-guards",
       "source": "./life-automation-guards/plugin",
       "description": "life-automation の hooks を Project のクラウドのスレッドでも動かす (リポジトリが複数ある Project では各リポジトリの .claude/settings.json の hooks が読まれないため)。"
+    },
+    {
+      "name": "doctor-finder",
+      "source": "./healthcare-agent/plugin",
+      "description": "ヘルスケア受付エージェント（グループワーク課題）: 自然言語の問い合わせから、院内の医師データ(JSON)で最適な医師と空き枠を案内するスキル。API キー不要で、検索と Ticket 記録はローカルの CLI が行う。"
     }
   ]
 }
