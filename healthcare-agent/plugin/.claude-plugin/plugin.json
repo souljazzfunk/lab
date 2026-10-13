@@ -1,0 +1,7 @@
+{
+  "name": "doctor-finder",
+  "description": "ヘルスケア受付エージェント: 自然言語の問い合わせから、院内の医師データ(JSON)で最適な医師と空き枠を案内する。API キー不要、検索はローカル。",
+  "version": "0.1.0",
+  "author": {"name": "souljazzfunk"},
+  "keywords": ["healthcare", "agent", "search"]
+}
