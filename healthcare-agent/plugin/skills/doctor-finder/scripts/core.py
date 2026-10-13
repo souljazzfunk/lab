@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -65,6 +66,8 @@ SURNAME_JA = {"田中": "Tanaka", "佐藤": "Sato", "中村": "Nakamura", "山�
               "小林": "Kobayashi", "伊藤": "Ito", "森": "Mori", "藤田": "Fujita", "渡辺": "Watanabe",
               "加藤": "Kato", "石川": "Ishikawa", "林": "Hayashi", "青木": "Aoki", "井上": "Inoue"}
 WEEKDAY_JA = "月火水木金土日"
+SCREEN_KEYS = {"region": "region", "specialty": "specialty", "gender": "gender"}
+ANY_REGION = ["どこでも", "どちらでも", "問わない", "指定なし", "特になし", "特にない", "anywhere"]
 OUT_OF_SCOPE = ["請求", "支払", "領収書", "駐車場", "面会", "診断書", "保険証", "キャンセル", "予約の変更",
                 "invoice", "billing", "parking"]
 
@@ -79,6 +82,7 @@ class Query:
     gender: str | None = None
     language: str | None = None
     region: str | None = None
+    region_any: bool = False        # 「どこでもいい」→ 地域の聞き返しをしない
     weekday: int | None = None      # 0=Mon
     date: str | None = None         # MM-DD
     ampm: str | None = None         # am | pm
@@ -100,6 +104,48 @@ class DoctorIndex:
         for d in self.doctors:
             for kw in d.get("keywords", []):
                 self.aliases.setdefault(kw.lower(), d["specialty"])
+        # スクリーニング用の転置インデックス: 地域・専門・性別 → 医師 ID の集合
+        self.by_id = {d["id"]: d for d in self.doctors}
+        self.screen_index: dict[str, dict[str, set[str]]] = {k: defaultdict(set) for k in SCREEN_KEYS}
+        for d in self.doctors:
+            for key, field_ in SCREEN_KEYS.items():
+                self.screen_index[key][d.get(field_, "")].add(d["id"])
+
+    def screen(self, region: str | None = None, specialties: list[str] | None = None,
+               gender: str | None = None) -> set[str]:
+        """地域・専門・性別で候補を先に絞る（集合の積なので全件走査しない）。"""
+        ids = set(self.by_id)
+        if region:
+            ids &= self.screen_index["region"].get(region, set())
+        if specialties:
+            ids &= set().union(*(self.screen_index["specialty"].get(s, set()) for s in specialties))
+        if gender:
+            ids &= self.screen_index["gender"].get(gender, set())
+        return ids
+
+    def facets(self, ids: set[str]) -> dict[str, dict[str, int]]:
+        """候補を地域・専門・性別ごとに数える（次に何を聞けば一番絞れるかの判断材料）。"""
+        out = {}
+        for key, field_ in SCREEN_KEYS.items():
+            cnt: dict[str, int] = defaultdict(int)
+            for i in ids:
+                cnt[self.by_id[i].get(field_, "")] += 1
+            out[key] = dict(sorted(cnt.items(), key=lambda kv: -kv[1]))
+        return out
+
+    def screening_question(self, q: Query) -> str | None:
+        """専門は分かったが地域が未指定で、候補が複数地域にまたがるときの聞き返し文。"""
+        if q.region or q.region_any or not q.specialties:
+            return None
+        ids = self.screen(None, q.specialties, q.gender)
+        if q.language:  # 言語の希望も満たせる候補があれば、それだけで数える
+            ids = {i for i in ids if q.language in self.by_id[i]["languages"]} or ids
+        regions = self.facets(ids)["region"]
+        if len(regions) <= 1:
+            return None
+        opts = "、".join(f"{REGION_JA.get(r, r)}（{n}名）" for r, n in regions.items())
+        gender = "" if q.gender else "先生の性別にご希望があれば、あわせてお知らせください。"
+        return f"ご案内できる先生は {opts} にいます。どちらの地域がご希望ですか？{gender}"
 
     def _normalize(self, d: dict) -> dict:
         n = dict(d)
@@ -142,39 +188,34 @@ class DoctorIndex:
         return True
 
     def search(self, q: Query, limit: int = 3) -> tuple[list[tuple[float, dict, list[datetime]]], list[str]]:
-        """Return ranked (score, doctor, matching_slots) and notes about relaxed constraints."""
+        """Return ranked (score, doctor, matching_slots) and notes about relaxed constraints.
+
+        1) 地域・専門・性別でスクリーニング → 2) 日時・言語で絞り込み → 3) スコア順に並べる。
+        0 件なら 日時 → 言語 → 性別 → 地域 の順に条件を緩める（専門は緩めない）。
+        """
         notes: list[str] = []
-        filters = [("性別", "gender"), ("言語", "language"), ("地域", "region"), ("日時", "slot")]
-        active = [f for f in filters if (f[1] != "slot" and getattr(q, f[1])) or
+        relax = [("地域", "region"), ("性別", "gender"), ("言語", "language"), ("日時", "slot")]
+        active = [f for f in relax if (f[1] != "slot" and getattr(q, f[1])) or
                   (f[1] == "slot" and (q.weekday is not None or q.date or q.ampm))]
         while True:
+            keys = {k for _, k in active}
+            pool = self.screen(q.region if "region" in keys else None, q.specialties,
+                               q.gender if "gender" in keys else None)
             ranked = []
-            for d in self.doctors:
-                slots = [s for s in d["slots"] if self.slot_ok(s, q)] if ("日時", "slot") in active else d["slots"]
-                if not self._passes(d, q, active, slots):
+            for i in pool:
+                d = self.by_id[i]
+                slots = [s for s in d["slots"] if self.slot_ok(s, q)] if "slot" in keys else d["slots"]
+                if "slot" in keys and not slots:
                     continue
-                score = self._score(d, q)
-                if score > 0:
-                    ranked.append((score, d, slots))
+                if "language" in keys and q.language not in d["languages"]:
+                    continue
+                ranked.append((self._score(d, q), d, slots))
             if ranked or not active:
                 break
             dropped = active.pop()  # 条件を緩めてゼロ件回答を避ける（再問い合わせ＝チケット増を防ぐ）
             notes.append(f"ご希望の{dropped[0]}に合う医師がいないため、その条件を外して探しました。")
-        ranked.sort(key=lambda r: -r[0])
+        ranked.sort(key=lambda r: (-r[0], r[1]["id"]))
         return ranked[:limit], notes
-
-    @staticmethod
-    def _passes(d: dict, q: Query, active, slots) -> bool:
-        keys = {k for _, k in active}
-        if "gender" in keys and d.get("gender") != q.gender:
-            return False
-        if "language" in keys and q.language not in d["languages"]:
-            return False
-        if "region" in keys and d.get("region") != q.region:
-            return False
-        if "slot" in keys and not slots:
-            return False
-        return True
 
     @staticmethod
     def _score(d: dict, q: Query) -> float:
@@ -248,6 +289,7 @@ def parse(text: str, index: DoctorIndex) -> Query:
     for region, words in REGION_WORDS.items():
         if _has(t, low, words):
             q.region = region
+    q.region_any = q.region is None and _has(t, low, ANY_REGION)
     m = re.search(r"([月火水木金土日])曜", t)
     if m:
         q.weekday = WEEKDAY_JA.index(m.group(1))

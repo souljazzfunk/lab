@@ -15,6 +15,15 @@
 - **安全**: 緊急ワードの判定は `open` の時点でルールが行い、`emergency: true` なら検索せずに 119 を案内する。
 - **LLM なしでも動く**: `chat` / `ask` / `batch` はルールだけで即答する（デモや大量処理向け）。
 
+## 検索の流れ（スクリーニング → 絞り込み → 並べ替え）
+1. **スクリーニング**: 地域・専門・性別の転置インデックス（値 → 医師 ID の集合）で、集合の積をとって候補を絞る。全件走査はしない。
+2. **地域の聞き返し**: 専門は分かったが地域が未指定で、候補が複数の地域にまたがるときは、地域ごとの人数を添えて 1 回だけ聞く（「どこでもいい」なら聞かない）。
+3. **絞り込み**: 日時（曜日・日付・午前/午後）と言語で絞る。
+4. **並べ替え**: 専門の優先度 → 人柄の希望 → 医師評価 → 病院評価 → score の順。
+5. **0 件のとき**: 日時 → 言語 → 性別 → 地域 の順に条件を緩め、その理由を伝える。専門は緩めない。
+
+`python3 agent.py screen --specialty Pediatrics --gender female` で、候補数と地域・専門・性別ごとの内訳（facets）を JSON で確認できる。
+
 ## データの扱い（実 JSON に対応）
 - `aliases`（ENT / Pedia / Heart doctor）と医師ごとの `keywords` を辞書に取り込む
 - 症状（頭痛→Neurology など）と日本語の診療科名（耳鼻科→Otolaryngology など）を英語の `expertise` に対応づける
@@ -48,7 +57,7 @@ python3 agent.py ask "Looking for an ENT doctor in Yokohama"
 python3 agent.py batch samples/inquiries.jsonl  # 一括処理
 python3 agent.py metrics                        # Ticket 数 / 自動解決率 / SLA / CSAT / エンジン別
 ```
-スキルが使う JSON の API: `open` / `search` / `doctor` / `close` / `rate`（`python3 agent.py -h`）。
+スキルが使う JSON の API: `open` / `screen` / `search` / `doctor` / `close` / `rate`（`python3 agent.py -h`）。
 環境変数: `HC_DOCTORS_JSON`（医師データ）、`HC_AGENT_HOME`（Ticket ログ。既定は `~/.healthcare-agent`）。
 
 ## 構成

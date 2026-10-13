@@ -24,7 +24,16 @@ CLI="python3 <このスキルのベースディレクトリ>/scripts/agent.py"
    - 結果が `"emergency": true` なら、検索せずに `emergency_reply` をそのまま伝え、`close <id> --intent emergency --outcome escalated` で閉じる。ここでは自分の判断で緊急度を下げない。
    - `rule_hints` はルールによる抽出結果。参考にしつつ、言葉の意味はあなたが判断する。たとえば「子どもの発熱」なら小児科を優先する。
 
-2. **検索**: 文章から条件を組み立てて CLI を呼ぶ。条件の値は `open` が返した `available_specialties` / `available_regions` の中から選ぶ。
+2. **スクリーニング（地域・専門・性別を先に）**: 文章から分かる範囲で CLI を呼ぶ。
+   ```
+   $CLI screen --specialty <expertise> [--specialty ...] [--region <地域>] [--gender female|male]
+   ```
+   - 結果の `count` は候補数、`facets` は地域・専門・性別ごとの内訳。
+   - `suggested_question` があれば（地域が未指定で、候補が複数の地域にまたがる場合）、検索する前にその質問を 1 回だけする。voice なら「東京と大阪にいらっしゃいます。どちらがご希望ですか？」くらいに短くする。
+   - 「どこでもいい」と言われたら、地域なしで 3. へ進む。同じ ticket の中で同じ質問は繰り返さない。
+   - 専門がまだ決まらないときは 5. の聞き返しへ。
+
+3. **検索**: スクリーニングの条件に、日時・言語・人柄の希望を加えて呼ぶ。条件の値は `open` が返した `available_specialties` / `available_regions` の中から選ぶ。
    ```
    $CLI search --specialty Pediatrics [--specialty "General Practice"] \
        [--region Tokyo] [--gender female] [--language English] \
@@ -33,19 +42,19 @@ CLI="python3 <このスキルのベースディレクトリ>/scripts/agent.py"
    - `--specialty` は優先度順に複数指定できる。症状からの推定もあなたが行う（頭痛→Neurology、動悸→Cardiology、鼻・喉・耳→Otolaryngology、眠れない・不安→Psychiatry など）。
    - 「優しい」→ kind / gentle / empathetic、「落ち着いた」→ calm、「ベテラン」→ professional、「明るい」→ humor、「気さく」→ friendly。
    - 特定の先生について聞かれたら `$CLI doctor "<姓のローマ字 または 日本語の姓+先生>"` を使う。
-   - 結果に `notes` があれば、条件を緩めた理由を一言で伝える。
+   - 0 件のときは CLI が 日時 → 言語 → 性別 → 地域 の順に条件を緩める（専門は緩めない）。結果に `notes` があれば、緩めた理由を一言で伝える。
 
-3. **返答**（相手と同じ言語で書く）
+4. **返答**（相手と同じ言語で書く）
    - **voice**: 読み上げ前提。医師は 1 名だけ、1〜2 文、記号・箇条書き・URL は使わない。最後に「この枠でご予約を進めますか？」。
    - **message**: 最大 3 名。各 1 行で「名前｜診療科（日本語）｜病院（地域）｜評価｜対応言語｜直近の空き 2 枠」。最後に受付番号（ticket_id）を伝える。
    - 日時は `8/5(水) 10:00` の形で書く（JST）。
    - **ツール結果にない医師・空き枠・情報は絶対に作らない。** 診断や治療の助言はしない（診療科の案内まで）。内部番号やスコアは出さない。
 
-4. **聞き返し**: 診療科を決められないときは、症状・地域・希望日時のうち一番効くものを 1 つだけ聞く。答えをもらったら同じ ticket のまま 2. に進む。
+5. **聞き返し**: 診療科を決められないときは、症状・地域・希望日時のうち一番効くものを 1 つだけ聞く。答えをもらったら同じ ticket のまま 2. に進む。
 
-5. **対象外の用件**（請求・予約変更・診断書など）: 「担当スタッフにおつなぎします。受付番号 <ticket_id> をお伝えください」と伝え、`--intent out_of_scope --outcome escalated` で閉じる。
+6. **対象外の用件**（請求・予約変更・診断書など）: 「担当スタッフにおつなぎします。受付番号 <ticket_id> をお伝えください」と伝え、`--intent out_of_scope --outcome escalated` で閉じる。
 
-6. **クローズ**（返答したらすぐ）
+7. **クローズ**（返答したらすぐ）
    `$CLI close <ticket_id> --intent search|doctor_info|emergency|out_of_scope|unclear --outcome resolved|escalated|clarify [--turns N]`
    - 最後に「今回の対応を 1〜5 で評価いただけますか？」と 1 行添える。評価をもらったら `$CLI rate <ticket_id> <1-5>`。
 
