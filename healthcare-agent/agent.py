@@ -11,13 +11,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from core import DoctorIndex, Query, mask_pii, parse
+from core import REGION_JA, SPECIALTY_JA, DoctorIndex, Query, mask_pii, parse
 
 JST = timezone(timedelta(hours=9))
 HERE = Path(__file__).parent
@@ -25,52 +26,62 @@ DEFAULT_DATA = HERE / "sample_doctors.json"
 TICKET_LOG = HERE / "data" / "tickets.jsonl"
 SLA_MS = {"voice": 1000, "message": 3000}  # 一次応答の SLA 目標
 HANDOFF = "担当スタッフにおつなぎします。受付番号 {tid} をお伝えください。"
+EMERGENCY_REPLY = ("緊急の可能性があります。すぐに 119 番に電話してください。"
+                   "迷う場合は救急安心センター #7119 へ。")
 
 
 def now_jst() -> str:
     return datetime.now(JST).isoformat(timespec="seconds")
 
 
+WD = "月火水木金土日"
+
+
+def fmt_slot(s) -> str:
+    return f"{s.month}/{s.day}({WD[s.weekday()]}) {s:%H:%M}"
+
+
 def render(q: Query, index: DoctorIndex, channel: str, tid: str) -> tuple[str, str]:
-    """Return (reply, outcome). outcome: resolved | escalated | clarify."""
+    """Rule-based reply. Return (reply, outcome). outcome: resolved | escalated | clarify."""
     voice = channel == "voice"
     if q.intent == "emergency":
-        return ("緊急の可能性があります。すぐに 119 番に電話してください。"
-                "迷う場合は救急安心センター #7119 へ。", "escalated")
+        return (EMERGENCY_REPLY, "escalated")
     if q.intent == "out_of_scope":
         return ("医師のご案内以外のご用件ですね。" + HANDOFF.format(tid=tid), "escalated")
     if q.intent == "unclear":
         return ("どのような症状でお困りですか？（例：頭痛、子どもの発熱、膝の痛み）"
-                "診療科・性別・曜日・言語のご希望もあればお知らせください。", "clarify")
+                "地域・希望日時・先生の性別や言語のご希望もあればお知らせください。", "clarify")
     if q.intent == "doctor_info":
-        d = next(x for x in index.doctors if x["id"] == q.name)
-        days = "・".join(d.get("available_days", []))
-        return (f"{d['name']}先生（{d['specialty']}）は {days}曜日 に {d.get('location', '')} で診察しています。"
-                + ("" if d.get("accepting_new_patients", True) else "現在、新患の受付は停止中です。"), "resolved")
+        lines = []
+        for d in (x for x in index.doctors if x["id"] in q.doctor_ids):
+            slots = "、".join(fmt_slot(s) for s in d["slots"][:3])
+            lines.append(f"{d['name']}（{SPECIALTY_JA.get(d['specialty'], d['specialty'])}／{d.get('hospital')}）"
+                         f"の空き枠: {slots}")
+        return ("\n".join(lines), "resolved")
 
     ranked, notes = index.search(q, limit=1 if voice else 3)
     if not ranked:
         return ("ご希望に合う医師が見つかりませんでした。" + HANDOFF.format(tid=tid), "escalated")
     lines = list(notes)
-    for score, d in ranked:
-        days = "・".join(d.get("available_days", []))
-        if voice:  # 音声: 1名・1文で短く（通話時間短縮 = AHT/SLA 改善）
-            lines.append(f"{d['specialty']}の{d['name']}先生をおすすめします。{days}曜日に診察しています。")
+    for _, d, slots in ranked:
+        spec = SPECIALTY_JA.get(d["specialty"], d["specialty"])
+        first = fmt_slot(slots[0]) if slots else "要確認"
+        if voice:  # 音声: 1名・1文で短く（通話時間短縮 = SLA 改善）
+            lines.append(f"{REGION_JA.get(d['region'], d['region'])}の{d.get('hospital')}、{spec}の"
+                         f"{d['name']}をおすすめします。最短の空きは{first}です。")
         else:
-            extra = []
-            if d.get("telehealth"):
-                extra.append("オンライン可")
-            if d.get("accepting_new_patients") is False:
-                extra.append("新患受付停止中")
-            extra.append("対応言語: " + "/".join(d.get("languages", [])))
-            lines.append(f"- {d['name']}先生｜{d['specialty']}（{'・'.join(d.get('sub_specialties', []))}）"
-                         f"｜{days}曜｜{d.get('location', '')}｜{'、'.join(extra)}")
-    lines.append("この先生でご予約を進めますか？" if voice else "ご予約の際は受付番号 " + tid + " をお伝えください。")
+            lines.append(f"- {d['name']}｜{spec}｜{d.get('hospital')}（{REGION_JA.get(d['region'], d['region'])}）"
+                         f"｜評価 {d.get('rating')}｜対応言語: {'/'.join(d['languages'])}"
+                         f"｜空き: {'、'.join(fmt_slot(s) for s in slots[:2]) or '要確認'}")
+    lines.append("この枠でご予約を進めますか？" if voice else f"ご予約の際は受付番号 {tid} をお伝えください。")
     return ("\n".join(lines), "resolved")
 
 
 class Ticket:
-    def __init__(self, channel: str):
+    def __init__(self, channel: str, llm=None):
+        self.llm = llm
+        self.messages: list = []
+        self.engine = "rules"
         self.id = "T" + datetime.now(JST).strftime("%m%d") + "-" + uuid.uuid4().hex[:6].upper()
         self.channel = channel
         self.created_at = now_jst()
@@ -85,7 +96,20 @@ class Ticket:
         # clarify の後は直前の文脈と結合して再解析（聞き直しの往復を減らす）
         ctx = " ".join([x["user"] for x in self.turns if x.get("outcome") == "clarify"] + [text])
         q = parse(ctx, index)
-        reply, outcome = render(q, index, self.channel, self.id)
+        reply = None
+        # 緊急判定は常にルールで先に行う（LLM の判断に依存させない）
+        if self.llm and q.intent != "emergency":
+            snapshot = len(self.messages)
+            try:
+                reply, state = self.llm.reply(self.messages, text, self.channel, self.id)
+                q.intent = state["intent"] or ("unclear" if q.intent == "unclear" else q.intent)
+                outcome = "escalated" if state["escalated"] else ("clarify" if not state["intent"] else "resolved")
+                self.engine = "claude"
+            except Exception as e:  # noqa: BLE001  API 障害時はルールで即応答（SLA を落とさない）
+                del self.messages[snapshot:]
+                print(f"(LLM 利用不可のためルールで応答: {type(e).__name__})", file=sys.stderr)
+        if reply is None:
+            reply, outcome = render(q, index, self.channel, self.id)
         ms = (time.perf_counter() - t0) * 1000
         if self.first_response_ms is None:
             self.first_response_ms = ms
@@ -97,7 +121,7 @@ class Ticket:
         TICKET_LOG.parent.mkdir(exist_ok=True)
         rec = {
             "id": self.id, "channel": self.channel, "created_at": self.created_at, "closed_at": now_jst(),
-            "intent": self.intent, "outcome": self.outcome, "turns": len(self.turns),
+            "intent": self.intent, "engine": self.engine, "outcome": self.outcome, "turns": len(self.turns),
             "first_response_ms": round(self.first_response_ms or 0, 2),
             "sla_met": (self.first_response_ms or 0) <= SLA_MS[self.channel],
             "csat": self.csat,
@@ -109,7 +133,7 @@ class Ticket:
 
 
 def cmd_chat(args, index):
-    tk = Ticket(args.channel)
+    tk = Ticket(args.channel, args.llm)
     print(f"[{tk.id}] こんにちは。症状やご希望の先生を教えてください（終了: exit）")
     while True:
         try:
@@ -132,7 +156,7 @@ def cmd_chat(args, index):
 
 
 def cmd_ask(args, index):
-    tk = Ticket(args.channel)
+    tk = Ticket(args.channel, args.llm)
     print(tk.handle(args.text, index))
     tk.close()
 
@@ -143,7 +167,7 @@ def cmd_batch(args, index):
         if not line.strip():
             continue
         item = json.loads(line)
-        tk = Ticket(item.get("channel", "message"))
+        tk = Ticket(item.get("channel", "message"), args.llm)
         reply = tk.handle(item["text"], index)
         tk.close()
         n += 1
@@ -171,12 +195,32 @@ def cmd_metrics(args, index):
     by = {}
     for r in recs:
         by[r["intent"]] = by.get(r["intent"], 0) + 1
+    eng = {}
+    for r in recs:
+        eng[r.get("engine", "rules")] = eng.get(r.get("engine", "rules"), 0) + 1
+    print("エンジン別         : " + ", ".join(f"{k}={v}" for k, v in eng.items()))
     print("意図別内訳         : " + ", ".join(f"{k}={v}" for k, v in sorted(by.items(), key=lambda x: -x[1])))
+
+
+def make_llm(engine: str, index: DoctorIndex):
+    if engine == "rules":
+        return None
+    has_cred = any(os.environ.get(k) for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"))
+    if engine == "auto" and not has_cred:
+        return None
+    try:
+        from llm import ClaudeAgent
+        return ClaudeAgent(index)
+    except Exception as e:  # noqa: BLE001
+        print(f"(Claude を初期化できないためルールで動作: {e})", file=sys.stderr)
+        return None
 
 
 def main(argv=None):
     p = argparse.ArgumentParser(description="ヘルスケア医師案内エージェント（クローズド構成）")
     p.add_argument("--data", default=str(DEFAULT_DATA), help="医師データ JSON")
+    p.add_argument("--engine", choices=["auto", "claude", "rules"], default="auto",
+                   help="auto: 認証情報があれば Claude、なければルール")
     sub = p.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("chat"); c.add_argument("--channel", choices=["message", "voice"], default="message")
     a = sub.add_parser("ask"); a.add_argument("text"); a.add_argument("--channel", choices=["message", "voice"], default="message")
@@ -184,6 +228,7 @@ def main(argv=None):
     sub.add_parser("metrics")
     args = p.parse_args(argv)
     index = DoctorIndex(args.data)
+    args.llm = make_llm(args.engine, index) if args.cmd != "metrics" else None
     {"chat": cmd_chat, "ask": cmd_ask, "batch": cmd_batch, "metrics": cmd_metrics}[args.cmd](args, index)
 
 

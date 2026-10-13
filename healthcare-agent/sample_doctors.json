@@ -1,14 +1,323 @@
-[
-  {"id": "D001", "name": "佐藤 健一", "name_en": "Kenichi Sato", "specialty": "循環器内科", "sub_specialties": ["不整脈", "高血圧"], "conditions": ["動悸", "胸の痛み", "高血圧", "息切れ"], "languages": ["日本語", "英語"], "gender": "男性", "years_experience": 22, "rating": 4.7, "available_days": ["月", "水", "金"], "accepting_new_patients": true, "telehealth": true, "location": "本館 3F"},
-  {"id": "D002", "name": "鈴木 美咲", "name_en": "Misaki Suzuki", "specialty": "小児科", "sub_specialties": ["小児アレルギー", "予防接種"], "conditions": ["子どもの発熱", "予防接種", "アトピー", "喘息"], "languages": ["日本語"], "gender": "女性", "years_experience": 12, "rating": 4.9, "available_days": ["月", "火", "木", "土"], "accepting_new_patients": true, "telehealth": true, "location": "別館 1F"},
-  {"id": "D003", "name": "高橋 誠", "name_en": "Makoto Takahashi", "specialty": "整形外科", "sub_specialties": ["スポーツ医学", "膝関節"], "conditions": ["膝の痛み", "腰痛", "捻挫", "骨折"], "languages": ["日本語", "英語"], "gender": "男性", "years_experience": 18, "rating": 4.5, "available_days": ["火", "木"], "accepting_new_patients": true, "telehealth": false, "location": "本館 2F"},
-  {"id": "D004", "name": "田中 由紀", "name_en": "Yuki Tanaka", "specialty": "皮膚科", "sub_specialties": ["アトピー性皮膚炎", "美容皮膚"], "conditions": ["湿疹", "かゆみ", "ニキビ", "アトピー"], "languages": ["日本語", "中国語"], "gender": "女性", "years_experience": 9, "rating": 4.6, "available_days": ["月", "水", "土"], "accepting_new_patients": false, "telehealth": true, "location": "別館 2F"},
-  {"id": "D005", "name": "伊藤 大輔", "name_en": "Daisuke Ito", "specialty": "神経内科", "sub_specialties": ["頭痛外来", "脳卒中"], "conditions": ["頭痛", "めまい", "しびれ", "物忘れ"], "languages": ["日本語"], "gender": "男性", "years_experience": 25, "rating": 4.8, "available_days": ["火", "金"], "accepting_new_patients": true, "telehealth": true, "location": "本館 4F"},
-  {"id": "D006", "name": "渡辺 さくら", "name_en": "Sakura Watanabe", "specialty": "産婦人科", "sub_specialties": ["妊婦健診", "更年期"], "conditions": ["妊娠", "生理痛", "更年期", "不正出血"], "languages": ["日本語", "英語"], "gender": "女性", "years_experience": 15, "rating": 4.9, "available_days": ["月", "火", "水", "木"], "accepting_new_patients": true, "telehealth": false, "location": "別館 3F"},
-  {"id": "D007", "name": "山本 浩", "name_en": "Hiroshi Yamamoto", "specialty": "消化器内科", "sub_specialties": ["内視鏡", "肝臓"], "conditions": ["腹痛", "胃もたれ", "下痢", "便秘", "胸やけ"], "languages": ["日本語"], "gender": "男性", "years_experience": 20, "rating": 4.4, "available_days": ["月", "木", "金"], "accepting_new_patients": true, "telehealth": true, "location": "本館 3F"},
-  {"id": "D008", "name": "中村 愛", "name_en": "Ai Nakamura", "specialty": "精神科", "sub_specialties": ["うつ病", "睡眠障害"], "conditions": ["不眠", "気分の落ち込み", "不安", "ストレス"], "languages": ["日本語", "英語"], "gender": "女性", "years_experience": 11, "rating": 4.7, "available_days": ["水", "金", "土"], "accepting_new_patients": true, "telehealth": true, "location": "別館 4F"},
-  {"id": "D009", "name": "小林 翔太", "name_en": "Shota Kobayashi", "specialty": "耳鼻咽喉科", "sub_specialties": ["アレルギー性鼻炎"], "conditions": ["鼻水", "花粉症", "喉の痛み", "耳鳴り"], "languages": ["日本語"], "gender": "男性", "years_experience": 7, "rating": 4.3, "available_days": ["月", "火", "水", "木", "金"], "accepting_new_patients": true, "telehealth": false, "location": "本館 1F"},
-  {"id": "D010", "name": "加藤 恵子", "name_en": "Keiko Kato", "specialty": "内科", "sub_specialties": ["総合診療", "糖尿病"], "conditions": ["発熱", "咳", "風邪", "糖尿病", "だるさ"], "languages": ["日本語", "英語", "韓国語"], "gender": "女性", "years_experience": 30, "rating": 4.8, "available_days": ["月", "火", "水", "木", "金", "土"], "accepting_new_patients": true, "telehealth": true, "location": "本館 1F"},
-  {"id": "D011", "name": "吉田 拓也", "name_en": "Takuya Yoshida", "specialty": "眼科", "sub_specialties": ["白内障", "緑内障"], "conditions": ["目のかすみ", "目の痛み", "視力低下"], "languages": ["日本語"], "gender": "男性", "years_experience": 16, "rating": 4.5, "available_days": ["火", "水", "土"], "accepting_new_patients": true, "telehealth": false, "location": "別館 1F"},
-  {"id": "D012", "name": "山田 花子", "name_en": "Hanako Yamada", "specialty": "循環器内科", "sub_specialties": ["心不全", "女性の心臓病"], "conditions": ["動悸", "むくみ", "息切れ", "高血圧"], "languages": ["日本語", "英語"], "gender": "女性", "years_experience": 14, "rating": 4.6, "available_days": ["火", "木", "土"], "accepting_new_patients": true, "telehealth": true, "location": "本館 3F"}
-]
+{
+  "hospitals": [
+    {
+      "name": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "rating": 4.6,
+      "address": "1-1 Chiyoda, Tokyo",
+      "internal_number": "H-TOKYO-001"
+    },
+    {
+      "name": "Osaka General Hospital",
+      "region": "Osaka",
+      "rating": 4.4,
+      "address": "2-2 Kita-ku, Osaka",
+      "internal_number": "H-OSAKA-001"
+    },
+    {
+      "name": "Yokohama Bay Clinic",
+      "region": "Yokohama",
+      "rating": 4.2,
+      "address": "3-3 Nishi-ku, Yokohama",
+      "internal_number": "H-YOKO-001"
+    },
+    {
+      "name": "Sapporo North Hospital",
+      "region": "Sapporo",
+      "rating": 4.3,
+      "address": "4-4 Chuo-ku, Sapporo",
+      "internal_number": "H-SAPP-001"
+    }
+  ],
+  "aliases": [
+    {"keyword": "Otolaryngology", "alias": "ENT"},
+    {"keyword": "Pediatrics", "alias": "Pedia"},
+    {"keyword": "Cardiology", "alias": "Heart doctor"}
+  ],
+  "doctors": [
+    {
+      "name": "Dr. Aiko Tanaka",
+      "gender": "female",
+      "age": 42,
+      "expertise": "Pediatrics",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese, English",
+      "internal_number": "D-1001",
+      "rating": 4.8,
+      "score": 92,
+      "personality": "kind",
+      "available_slots": [
+        "2026-08-04 10:00",
+        "2026-08-04 14:00",
+        "2026-08-05 09:30",
+        "2026-08-06 11:00"
+      ],
+      "register_date": "2018-04-01"
+    },
+    {
+      "name": "Dr. Kenji Sato",
+      "gender": "male",
+      "age": 51,
+      "expertise": "Pediatrics",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese",
+      "internal_number": "D-1002",
+      "rating": 4.5,
+      "score": 88,
+      "personality": "professional",
+      "available_slots": [
+        "2026-08-04 16:00",
+        "2026-08-05 10:00",
+        "2026-08-07 13:00"
+      ],
+      "register_date": "2015-06-15"
+    },
+    {
+      "name": "Dr. Yuki Nakamura",
+      "gender": "female",
+      "age": 38,
+      "expertise": "Dermatology",
+      "hospital": "Yokohama Bay Clinic",
+      "region": "Yokohama",
+      "language": "Japanese, English",
+      "internal_number": "D-2001",
+      "rating": 4.7,
+      "score": 90,
+      "personality": "gentle",
+      "available_slots": [
+        "2026-08-04 11:00",
+        "2026-08-05 15:00",
+        "2026-08-08 09:00"
+      ],
+      "register_date": "2019-09-01"
+    },
+    {
+      "name": "Dr. Hiroshi Yamamoto",
+      "gender": "male",
+      "age": 55,
+      "expertise": "Cardiology",
+      "hospital": "Osaka General Hospital",
+      "region": "Osaka",
+      "language": "Japanese, English",
+      "internal_number": "D-3001",
+      "rating": 4.9,
+      "score": 95,
+      "personality": "professional",
+      "available_slots": [
+        "2026-08-05 09:00",
+        "2026-08-06 10:30",
+        "2026-08-07 14:00"
+      ],
+      "register_date": "2010-03-20"
+    },
+    {
+      "name": "Dr. Mei Suzuki",
+      "gender": "female",
+      "age": 45,
+      "expertise": "Cardiology",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese",
+      "internal_number": "D-1003",
+      "rating": 4.6,
+      "score": 89,
+      "personality": "empathetic",
+      "available_slots": [
+        "2026-08-04 13:00",
+        "2026-08-06 16:00"
+      ],
+      "register_date": "2016-11-01"
+    },
+    {
+      "name": "Dr. Ryo Kobayashi",
+      "gender": "male",
+      "age": 40,
+      "expertise": "Otolaryngology",
+      "hospital": "Yokohama Bay Clinic",
+      "region": "Yokohama",
+      "language": "Japanese, English",
+      "internal_number": "D-2002",
+      "rating": 4.4,
+      "score": 85,
+      "personality": "humor",
+      "available_slots": [
+        "2026-08-04 09:00",
+        "2026-08-05 11:00",
+        "2026-08-06 15:30"
+      ],
+      "register_date": "2017-07-12",
+      "keywords": ["ENT"]
+    },
+    {
+      "name": "Dr. Sora Ito",
+      "gender": "female",
+      "age": 36,
+      "expertise": "Otolaryngology",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese, English, Chinese",
+      "internal_number": "D-1004",
+      "rating": 4.7,
+      "score": 91,
+      "personality": "kind",
+      "available_slots": [
+        "2026-08-04 15:00",
+        "2026-08-05 09:00",
+        "2026-08-07 10:00"
+      ],
+      "register_date": "2020-01-15"
+    },
+    {
+      "name": "Dr. Takeshi Mori",
+      "gender": "male",
+      "age": 48,
+      "expertise": "Orthopedics",
+      "hospital": "Osaka General Hospital",
+      "region": "Osaka",
+      "language": "Japanese",
+      "internal_number": "D-3002",
+      "rating": 4.5,
+      "score": 87,
+      "personality": "professional",
+      "available_slots": [
+        "2026-08-05 13:00",
+        "2026-08-06 09:00",
+        "2026-08-08 11:00"
+      ],
+      "register_date": "2014-05-08"
+    },
+    {
+      "name": "Dr. Hana Fujita",
+      "gender": "female",
+      "age": 41,
+      "expertise": "Neurology",
+      "hospital": "Sapporo North Hospital",
+      "region": "Sapporo",
+      "language": "Japanese, English",
+      "internal_number": "D-4001",
+      "rating": 4.8,
+      "score": 93,
+      "personality": "calm",
+      "available_slots": [
+        "2026-08-05 10:00",
+        "2026-08-07 14:30"
+      ],
+      "register_date": "2013-08-22"
+    },
+    {
+      "name": "Dr. Daiki Watanabe",
+      "gender": "male",
+      "age": 39,
+      "expertise": "Psychiatry",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese, English",
+      "internal_number": "D-1005",
+      "rating": 4.6,
+      "score": 88,
+      "personality": "empathetic",
+      "available_slots": [
+        "2026-08-04 17:00",
+        "2026-08-06 10:00",
+        "2026-08-08 16:00"
+      ],
+      "register_date": "2018-02-01"
+    },
+    {
+      "name": "Dr. Emi Kato",
+      "gender": "female",
+      "age": 44,
+      "expertise": "General Practice",
+      "hospital": "Yokohama Bay Clinic",
+      "region": "Yokohama",
+      "language": "Japanese",
+      "internal_number": "D-2003",
+      "rating": 4.3,
+      "score": 84,
+      "personality": "friendly",
+      "available_slots": [
+        "2026-08-04 08:30",
+        "2026-08-04 12:00",
+        "2026-08-05 08:30",
+        "2026-08-06 08:30"
+      ],
+      "register_date": "2016-04-10"
+    },
+    {
+      "name": "Dr. Naoki Ishikawa",
+      "gender": "male",
+      "age": 50,
+      "expertise": "Gastroenterology",
+      "hospital": "Osaka General Hospital",
+      "region": "Osaka",
+      "language": "Japanese, English",
+      "internal_number": "D-3003",
+      "rating": 4.7,
+      "score": 90,
+      "personality": "professional",
+      "available_slots": [
+        "2026-08-05 11:30",
+        "2026-08-07 09:00"
+      ],
+      "register_date": "2012-12-01"
+    },
+    {
+      "name": "Dr. Rina Hayashi",
+      "gender": "female",
+      "age": 37,
+      "expertise": "Obstetrics and Gynecology",
+      "hospital": "Tokyo Central Medical Center",
+      "region": "Tokyo",
+      "language": "Japanese, English",
+      "internal_number": "D-1006",
+      "rating": 4.9,
+      "score": 96,
+      "personality": "kind",
+      "available_slots": [
+        "2026-08-04 10:30",
+        "2026-08-05 14:00",
+        "2026-08-06 11:00"
+      ],
+      "register_date": "2019-05-20"
+    },
+    {
+      "name": "Dr. Kenta Aoki",
+      "gender": "male",
+      "age": 46,
+      "expertise": "Ophthalmology",
+      "hospital": "Sapporo North Hospital",
+      "region": "Sapporo",
+      "language": "Japanese",
+      "internal_number": "D-4002",
+      "rating": 4.4,
+      "score": 86,
+      "personality": "humor",
+      "available_slots": [
+        "2026-08-06 13:00",
+        "2026-08-08 10:00"
+      ],
+      "register_date": "2015-09-30"
+    },
+    {
+      "name": "Dr. Misaki Inoue",
+      "gender": "female",
+      "age": 43,
+      "expertise": "Pediatrics",
+      "hospital": "Osaka General Hospital",
+      "region": "Osaka",
+      "language": "Japanese, English",
+      "internal_number": "D-3004",
+      "rating": 4.8,
+      "score": 94,
+      "personality": "kind",
+      "available_slots": [
+        "2026-08-04 09:30",
+        "2026-08-05 15:30",
+        "2026-08-07 11:00"
+      ],
+      "register_date": "2017-03-01"
+    }
+  ]
+}
