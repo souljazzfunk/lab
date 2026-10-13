@@ -9,6 +9,7 @@ Rules mode (no LLM):
 
 Skill mode (Claude Code の doctor-finder スキルが呼ぶ JSON API):
   python agent.py open "<問い合わせ原文>" --channel voice   # Ticket 発行 + 緊急判定 + 抽出ヒント
+  python agent.py screen --specialty Pediatrics [--region Tokyo] [--gender female]   # 先に絞り込み
   python agent.py search --specialty Pediatrics --region Tokyo --ampm am
   python agent.py doctor "Tanaka"
   python agent.py close <ticket_id> --intent search --outcome resolved [--csat 5]
@@ -51,7 +52,7 @@ def fmt_slot(s) -> str:
     return f"{s.month}/{s.day}({WD[s.weekday()]}) {s:%H:%M}"
 
 
-def render(q: Query, index: DoctorIndex, channel: str, tid: str) -> tuple[str, str]:
+def render(q: Query, index: DoctorIndex, channel: str, tid: str, ask_screen: bool = True) -> tuple[str, str]:
     """Rule-based reply. Return (reply, outcome). outcome: resolved | escalated | clarify."""
     voice = channel == "voice"
     if q.intent == "emergency":
@@ -69,6 +70,10 @@ def render(q: Query, index: DoctorIndex, channel: str, tid: str) -> tuple[str, s
                          f"の空き枠: {slots}")
         return ("\n".join(lines), "resolved")
 
+    # 地域が未指定で候補が複数地域にまたがるなら、先にスクリーニングの質問をする（1 回だけ）
+    question = index.screening_question(q) if ask_screen else None
+    if question:
+        return (question, "clarify")
     ranked, notes = index.search(q, limit=1 if voice else 3)
     if not ranked:
         return ("ご希望に合う医師が見つかりませんでした。" + HANDOFF.format(tid=tid), "escalated")
@@ -104,7 +109,8 @@ class Ticket:
         # clarify の後は直前の文脈と結合して再解析（聞き直しの往復を減らす）
         ctx = " ".join([x["user"] for x in self.turns if x.get("outcome") == "clarify"] + [text])
         q = parse(ctx, index)
-        reply, outcome = render(q, index, self.channel, self.id)
+        asked = any(x.get("outcome") == "clarify" for x in self.turns)
+        reply, outcome = render(q, index, self.channel, self.id, ask_screen=not asked)
         ms = (time.perf_counter() - t0) * 1000
         if self.first_response_ms is None:
             self.first_response_ms = ms
@@ -235,6 +241,19 @@ def cmd_search(args, index):
     emit({"notes": notes, "doctors": [doctor_view(d, s) for _, d, s in ranked]})
 
 
+def cmd_screen(args, index):
+    """Skill mode: 地域・専門・性別で先に絞り、候補数と内訳（facets）を返す。"""
+    bad = [s for s in args.specialty if s not in index.specialties]
+    if bad:
+        emit({"error": f"unknown specialty: {bad}", "available_specialties": index.specialties})
+        return 2
+    ids = index.screen(args.region, args.specialty, args.gender)
+    q = Query(text="", specialties=args.specialty, region=args.region, gender=args.gender)
+    emit({"count": len(ids), "facets": index.facets(ids),
+          "doctors": sorted(index.by_id[i]["name"] for i in ids),
+          "suggested_question": index.screening_question(q)})
+
+
 def cmd_doctor(args, index):
     emit({"doctors": [doctor_view(d) for d in index.find_by_name(args.name)]})
 
@@ -284,6 +303,9 @@ def main(argv=None):
     s.add_argument("--ampm", choices=["am", "pm"])
     s.add_argument("--personality", action="append", default=[])
     s.add_argument("--limit", type=int, default=3)
+    sc = sub.add_parser("screen", help="地域・専門・性別で先に絞り込む")
+    sc.add_argument("--region"); sc.add_argument("--specialty", action="append", default=[])
+    sc.add_argument("--gender", choices=["female", "male"])
     d = sub.add_parser("doctor"); d.add_argument("name")
     cl = sub.add_parser("close"); cl.add_argument("ticket_id")
     cl.add_argument("--intent", required=True, choices=["search", "doctor_info", "emergency", "out_of_scope", "unclear"])
@@ -294,7 +316,7 @@ def main(argv=None):
     args = p.parse_args(argv)
     index = DoctorIndex(args.data)
     cmds = {"chat": cmd_chat, "ask": cmd_ask, "batch": cmd_batch, "metrics": cmd_metrics, "open": cmd_open,
-            "search": cmd_search, "doctor": cmd_doctor, "close": cmd_close, "rate": cmd_rate}
+            "search": cmd_search, "screen": cmd_screen, "doctor": cmd_doctor, "close": cmd_close, "rate": cmd_rate}
     return cmds[args.cmd](args, index)
 
 
