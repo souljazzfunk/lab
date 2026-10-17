@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-160本のコーパスに対してNaive正規表現とLookaround正規表現（yomiyasu_lint.py）を
-実行し、精度・誤検出率・リライト前後のスコア変化を計測するベンチマークスクリプト
+保存済みコーパスに対し、単純な正規表現とyomiyasu_lint.pyの検出件数・スコア（規則に当たった候補の密度の目安）を集計する。
+スコアは lint の rule_penalty_score で、文章の品質の点数ではない。
+検出件数の比は精度や誤検出率ではない。実行するとbenchmark_results.jsonを上書きする。
+
+human 群（tests/corpus/human/ の16本）は、人が書いた文だけの群ではない。人が書いた文は human_oga_01〜08
+（作者の記事1本の抜粋）の8本だけで、human_doc_09〜16 の8本はモデルに人の文章らしく書かせた例文
+（setup_corpus_static.py の中に書いたもの）。この群の平均点を「人の文の点数」として読まない。
 """
 import os
 import sys
@@ -51,6 +56,7 @@ def run_naive_lint(text: str):
 
 def benchmark_corpus():
     groups = {
+        # human_oga（人が書いた抜粋8本）と human_doc（AI の例文8本）をまとめた群（上の説明）
         "human": os.path.join(CORPUS_DIR, "human"),
         "edge_cases": os.path.join(CORPUS_DIR, "edge_cases"),
         "raw_ai": os.path.join(CORPUS_DIR, "raw_ai"),
@@ -86,22 +92,23 @@ def benchmark_corpus():
 
             g_naive_matches += naive_count
             g_lookaround_findings += len(res["findings"])
-            g_scores.append(res["score"])
+            g_scores.append(res["rule_penalty_score"])
 
             for finding in res["findings"]:
                 rule = finding.get("rule", "")
                 if "metaphor_verb" in rule:
                     g_metaphor_verbs += 1
-                elif rule in ["symbol_colon", "symbol_bracket", "symbol_space_around_ascii", "symbol_emoji"]:
+                elif rule in {"trailing_colon", "redundant_bracket", "emoji_prohibited", "dash_decoration", "dash_list_ending", "dash_insertion", "heading_colon"}:
                     g_symbols += 1
-                elif rule in ["excessive_bold", "excessive_bullet", "contrast_negation"]:
+                elif rule in {"excess_bold", "excess_list", "negative_parallelism", "negative_parallelism_density",
+                              "bold_label_list", "short_summary_heading"}:
                     g_formatting += 1
 
             results[gname].append({
                 "file": f,
                 "naive_matches": naive_count,
                 "lookaround_findings": len(res["findings"]),
-                "score": res["score"],
+                "score": res["rule_penalty_score"],
                 "char_count": res.get("metrics", {}).get("char_count", len(content))
             })
 
@@ -126,9 +133,9 @@ def benchmark_corpus():
         json.dump(out_data, fp, ensure_ascii=False, indent=2)
 
     print("\n" + "="*70)
-    print(f"コーパス較正ベンチマーク結果 (対象ファイル数: {total_files}本)")
+    print(f"コーパスの検出件数とスコア（規則に当たった候補の密度の目安） (対象ファイル数: {total_files}本)")
     print("="*70)
-    print(f"{'グループ':<20} | {'本数':<5} | {'平均点':<6} | {'Naive検出':<10} | {'Lookaround検出':<14} | {'誤検出抑制率':<10}")
+    print(f"{'グループ':<20} | {'本数':<5} | {'平均点':<6} | {'単純一致件数':<10} | {'リンター指摘件数':<14} | {'件数減少率':<10}")
     print("-" * 75)
 
     for gname, s in summary.items():
@@ -137,6 +144,7 @@ def benchmark_corpus():
         reduction = f"{(1 - look/naive)*100:.1f}%" if naive > 0 else "N/A"
         print(f"{gname:<20} | {s['file_count']:<5} | {s['avg_score']:<6} | {naive:<10} | {look:<14} | {reduction:<10}")
 
+    print("平均点は規則の減点の目安です。文章の品質の点数ではありません。")
     print("\n" + "="*70)
     print(f"詳細結果を保存しました: {RESULTS_PATH}")
     return out_data

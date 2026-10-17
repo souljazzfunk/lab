@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-人間が執筆した文章（16本）および境界値・正当な日本語テスト用文章（48本）をセットアップするスクリプト
+記事の抜粋と、コード内に定義した例文・境界確認用の文章を保存する初期検証用スクリプト。
+実行すると保存済みファイルを上書きする。現行SKILLの実走検証には使わない。
+
+tests/corpus/human/ の中身（フォルダの名前は human だが、人が書いた文は半分だけ）:
+- human_oga_01〜08: 作者の Zenn の記事1本を見出しで8つに分けた抜粋。人が書いた文はこの8本だけ。
+  01 は本文がなく、ページの飾りと記事の題だけ。
+- human_doc_09〜16: このファイルの中に書いた例文（モデルに人の文章らしく書かせたもの）。人が書いた文ではない。
 """
+import argparse
 import os
 import re
 from html.parser import HTMLParser
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORPUS_DIR = os.path.join(BASE_DIR, "tests", "corpus")
-HUMAN_DIR = os.path.join(CORPUS_DIR, "human")
-EDGE_DIR = os.path.join(CORPUS_DIR, "edge_cases")
-
-os.makedirs(HUMAN_DIR, exist_ok=True)
-os.makedirs(EDGE_DIR, exist_ok=True)
 
 
 class TextExtractor(HTMLParser):
@@ -40,12 +42,12 @@ class TextExtractor(HTMLParser):
                 self.texts.append(data)
 
 
-def setup_human_docs():
-    # 1. 大賀さんのZenn記事から8本抽出
-    source_html = "/Users/aiichiro.oga/.gemini/antigravity/brain/e6973c17-fdf9-4a3d-ab6e-e3775a349e8a/.system_generated/steps/1621/content.md"
-    if os.path.exists(source_html):
-        with open(source_html, "r", encoding="utf-8") as f:
-            html = f.read()
+def setup_human_docs(html=None, output_dir=CORPUS_DIR):
+    human_dir = os.path.join(output_dir, "human")
+    os.makedirs(human_dir, exist_ok=True)
+    # 1. 作者の Zenn の記事1本を見出しで8つに分けて保存する（human_oga_01〜08。人が書いた文はこの8本だけ。
+    #    01 は本文がなく、ページの飾りと記事の題だけ）
+    if html is not None:
         parser = TextExtractor()
         parser.feed(html)
         full_text = "".join(parser.texts)
@@ -60,11 +62,12 @@ def setup_human_docs():
                 valid_chunks.append(clean)
         
         for idx in range(min(8, len(valid_chunks))):
-            path = os.path.join(HUMAN_DIR, f"human_oga_{idx+1:02d}.md")
+            path = os.path.join(human_dir, f"human_oga_{idx+1:02d}.md")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(f"# 大賀愛一郎 実務エッセイ 抜粋 {idx+1}\n\n" + valid_chunks[idx])
 
-    # 2. その他、自然な人間執筆の技術解説・障害メモ・READMEなどから8本
+    # 2. コード内に定義した技術解説・障害メモ・READMEなどの例文8本を保存する（human_doc_09〜16）。
+    #    モデルに人の文章らしく書かせた例文で、人が書いた文ではない。変数名は前のまま残している
     additional_human_texts = [
         # 09: Pythonパッケージ設計のベストプラクティス
         """# Pythonライブラリのディレクトリ構成方針
@@ -138,14 +141,16 @@ npm run dev
     ]
 
     for idx, text in enumerate(additional_human_texts, 9):
-        path = os.path.join(HUMAN_DIR, f"human_doc_{idx:02d}.md")
+        path = os.path.join(human_dir, f"human_doc_{idx:02d}.md")
         with open(path, "w", encoding="utf-8") as f:
             f.write(text.strip())
 
-    print(f"Human docs created: {len(os.listdir(HUMAN_DIR))} files.")
+    print(f"Human docs created: {len(os.listdir(human_dir))} files.")
 
 
-def setup_edge_cases():
+def setup_edge_cases(output_dir=CORPUS_DIR):
+    edge_dir = os.path.join(output_dir, "edge_cases")
+    os.makedirs(edge_dir, exist_ok=True)
     # 48本の正当な日本語・境界値テスト文書
     # 単純な正規表現（握る、倒す、溶かす、割る、壊れる等）が誤爆しやすい文脈
     edge_cases_data = [
@@ -211,13 +216,30 @@ def setup_edge_cases():
     ]
 
     for name, content in edge_cases_data:
-        path = os.path.join(EDGE_DIR, f"{name}.md")
+        path = os.path.join(edge_dir, f"{name}.md")
         with open(path, "w", encoding="utf-8") as f:
             f.write(f"# 境界値検証: {name}\n\n{content}\n")
 
-    print(f"Edge case docs created: {len(os.listdir(EDGE_DIR))} files.")
+    print(f"Edge case docs created: {len(os.listdir(edge_dir))} files.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Build static corpus documents and optional HTML excerpts.")
+    parser.add_argument('--source-html', metavar='FILE',
+                        help='Read UTF-8 HTML excerpts only from this explicitly selected file.')
+    parser.add_argument('--output-dir', metavar='DIR', default=CORPUS_DIR,
+                        help='Write corpus documents here (default: repository tests/corpus).')
+    args = parser.parse_args()
+    html = None
+    if args.source_html is not None:
+        try:
+            with open(args.source_html, 'r', encoding='utf-8') as source:
+                html = source.read()
+        except (OSError, UnicodeError) as error:
+            parser.error('Cannot read --source-html: ' + str(error))
+    setup_human_docs(html, args.output_dir)
+    setup_edge_cases(args.output_dir)
 
 
 if __name__ == "__main__":
-    setup_human_docs()
-    setup_edge_cases()
+    main()
