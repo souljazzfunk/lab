@@ -1,0 +1,66 @@
+name: asiandocs-1080p
+
+# Stable download (fixed tag, not /releases/latest):
+# https://github.com/souljazzfunk/lab/releases/download/asiandocs-1080p-latest/asiandocs-1080p.zip
+#
+# /releases/latest follows whichever non-prerelease was published most recently.
+# This repository ships other projects, so a later release would move that URL
+# off this extension. The tag asiandocs-1080p-latest stays put, and each run
+# overwrites the zip asset on that release. The release is not marked Latest.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'asiandocs-1080p/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: asiandocs-1080p-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Pack the runtime zip
+        run: |
+          set -euo pipefail
+          python3 asiandocs-1080p/pack_release.py --self-test
+          python3 asiandocs-1080p/pack_release.py dist/asiandocs-1080p.zip
+          echo '--- unzip -l ---'
+          unzip -l dist/asiandocs-1080p.zip
+
+      - name: Publish the release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG=asiandocs-1080p-latest
+          ZIP=dist/asiandocs-1080p.zip
+          cat > dist/notes.md <<'EOF'
+          Unpacked Chrome extension.
+
+          Download: https://github.com/souljazzfunk/lab/releases/download/asiandocs-1080p-latest/asiandocs-1080p.zip
+
+          Unzip the archive and load the `asiandocs-1080p` folder (the one that contains `manifest.json`) from `chrome://extensions` with Developer mode on.
+
+          This tag is fixed so the URL stays on this extension when other projects in the repository publish releases. This release is not marked Latest.
+          EOF
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file dist/notes.md
+          else
+            gh release create "$TAG" "$ZIP" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "asiandocs-1080p" \
+              --latest=false \
+              --notes-file dist/notes.md
+          fi
