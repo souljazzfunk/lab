@@ -1,0 +1,41 @@
+#pwf-bar {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 30, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  font-size: 13px;
+  color: #fff;
+}
+#pwf-bar button {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: #33373d;
+  color: #fff;
+}
+#pwf-bar button[aria-pressed="true"] {
+  background: #1a98ff;
+}
+#pwf-bar button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+#pwf-count {
+  min-width: 64px;
+  text-align: center;
+  color: #c7ccd1;
+}
+.pwf-hidden {
+  display: none !important;
+}

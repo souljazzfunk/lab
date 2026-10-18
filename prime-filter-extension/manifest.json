@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Prime Watchlist Filter",
+  "version": "1.0.0",
+  "description": "Amazon Prime Video のウォッチリストをプライム見放題だけに絞り込む",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.amazon.co.jp/gp/video/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
