@@ -14,29 +14,27 @@ Git の知識は要りません。下の手順は、ZIP をダウンロードし
 
 ## インストール
 
+https://github.com/souljazzfunk/lab/releases/download/asiandocs-1080p-latest/asiandocs-1080p.zip
+
+上のリンクは、この拡張機能だけの ZIP です。リポジトリ全体の ZIP ではありません。
+
 ### 1. ZIP をダウンロードする
 
-1. ブラウザでこのリポジトリのページを開きます。  
-   https://github.com/souljazzfunk/lab
-2. ファイル一覧の上にある緑色の **Code** ボタンを押します。
-3. **Download ZIP** を押します。
-
-`lab-main.zip` というファイルが保存されます。
+上のリンクをブラウザで開きます。`asiandocs-1080p.zip` が保存されます。
 
 ### 2. 解凍する
 
-ZIP を解凍します。フォルダは次のように二重になっています。
+ZIP を解凍します。できるフォルダは次のとおりです。
 
 ```text
-lab-main
-└── asiandocs-1080p
-    ├── manifest.json
-    └── （ほかのファイル）
+asiandocs-1080p
+├── manifest.json
+└── （拡張機能のファイル）
 ```
 
-このあと Chrome に渡すのは、内側の **asiandocs-1080p** です。このフォルダを開くと、すぐそこに `manifest.json` というファイルがあります。
+Chrome に渡すのは、この **asiandocs-1080p** です。フォルダを開くと、すぐそこに `manifest.json` があります。
 
-外側の **lab-main** を選ぶと失敗します。Chrome は「拡張機能を読み込めませんでした」「マニフェストを読み込めませんでした。」と表示します。`manifest.json` が直接入っているフォルダを選び直してください。
+ひとつ外側のフォルダを選ぶと失敗します。Chrome は「拡張機能を読み込めませんでした」「マニフェストを読み込めませんでした。」と表示します。`manifest.json` が直接入っているフォルダを選び直してください。
 
 解凍した場所は、あとから分かるところ（ドキュメントフォルダなど）にしてください。読み込んだあとに、このフォルダを消したり別の場所へ移したりすると、拡張機能は動かなくなります。
 
@@ -46,7 +44,7 @@ lab-main
    メニューから開く場合は、右上のその他アイコン（点が縦に3つ）→ **拡張機能** → **拡張機能を管理** です。
 2. 画面右上の **デベロッパー モード** をオンにします。
 3. 左上に出る **パッケージ化されていない拡張機能を読み込む** を押します。
-4. `manifest.json` が直接入っている **asiandocs-1080p** フォルダを選びます。`lab-main` ではありません。
+4. 解凍した **asiandocs-1080p** フォルダ（`manifest.json` が直接入っているフォルダ）を選びます。
 
 読み込めると、一覧に **Asiandocs 1080p** のカードが追加され、「拡張機能を読み込みました」と出ます。
 
@@ -58,7 +56,7 @@ lab-main
 
 ### 5. 更新する
 
-1. もう一度 ZIP をダウンロードして解凍します。
+1. インストールの先頭と同じリンクから ZIP をもう一度ダウンロードして解凍します。
 2. 今 Chrome に読み込ませている **asiandocs-1080p** フォルダの中身を、新しい ZIP の中身で入れ替えます。フォルダの場所は変えないでください。
 3. `chrome://extensions` を開きます。
 4. **Asiandocs 1080p** のカードにある丸い矢印のボタンを押します。マウスを乗せると **再読み込み** と出ます。終わると「再読み込みされました」と出ます。
@@ -74,7 +72,7 @@ Chrome から削除したあとも、パソコンに残った解凍フォルダ�
 
 **フォルダが違う**
 
-`lab-main` を選ぶと、「拡張機能を読み込めませんでした」「マニフェストを読み込めませんでした。」と出ます。内側の `asiandocs-1080p`（`manifest.json` が直接入っているフォルダ）を選び直してください。
+`manifest.json` が直接見えない、ひとつ外側のフォルダを選ぶと、「拡張機能を読み込めませんでした」「マニフェストを読み込めませんでした。」と出ます。解凍してできた `asiandocs-1080p`（`manifest.json` が直接入っているフォルダ）を選び直してください。
 
 **デベロッパー モードがオフ**
 
@@ -96,7 +94,7 @@ Chrome は、読み込んだときのフォルダを見にいって動きます�
 
 次のことを知らせてください。個人のページアドレスやログイン情報は不要です。
 
-- 選んだフォルダの名前（`asiandocs-1080p` か `lab-main` か）
+- 選んだフォルダの名前と、その中に `manifest.json` が直接あったか
 - **デベロッパー モード** がオンか
 - カードのスイッチがオンか
 - Chrome が出した文言（「マニフェストを読み込めませんでした。」など）
@@ -119,3 +117,26 @@ Cookie を読む権限も、開いているタブ一覧を見る権限もあり�
 ## English
 
 This Chrome extension switches the player on Asiandocs member pages to 1080p. If 1080p is not listed, it selects the highest available quality and never selects Auto. It only clicks the quality control on the page. It does not use the cookies or tabs permissions, does not make network requests, and does not collect data. It runs only on `asiandocs.co.jp`, `*.asiandocs.co.jp`, `stream.ne.jp`, and `*.stream.ne.jp`. Switching to 1080p was confirmed on a real member page.
+
+### Install
+
+https://github.com/souljazzfunk/lab/releases/download/asiandocs-1080p-latest/asiandocs-1080p.zip
+
+1. Open the link above and download `asiandocs-1080p.zip`. This zip is the extension only, not the whole repository.
+2. Unzip it. You get one `asiandocs-1080p` folder, with `manifest.json` directly inside.
+3. Open `chrome://extensions`.
+4. Turn on **Developer mode**.
+5. Click **Load unpacked** and choose that unzipped `asiandocs-1080p` folder. Choose the folder that contains `manifest.json` directly. A parent folder makes Chrome report that it could not load the manifest.
+6. Leave the unzipped folder where it is. Moving or deleting it stops the extension.
+7. Open a member video page and start playback. Reload the page if it was already open. The quality should move to 1080p, or to the highest listed quality when 1080p is absent.
+
+### Update
+
+1. Download the ZIP again from the same link and unzip it.
+2. Replace the files inside the `asiandocs-1080p` folder Chrome is already loading. Do not move that folder.
+3. On `chrome://extensions`, click the reload button on the Asiandocs 1080p card (the tooltip says **Reload**).
+4. Reload the video page.
+
+### Uninstall
+
+On `chrome://extensions`, click **Remove** on the Asiandocs 1080p card, then confirm. You can delete the unzipped folder after that.
