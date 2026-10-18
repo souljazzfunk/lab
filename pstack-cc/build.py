@@ -103,12 +103,26 @@ RULES = [
     ),
     Rule("Read these from trunk at program start.", "Read these at program start.",
          only="skills/poteto-mode/playbooks/multi-phase-plan.md"),
-    Rule("re-read this playbook from trunk with `git show origin/main:pstack/skills/",
-         "re-read this playbook with `cat <pstack plugin root>/skills/", min_hits=2),
+    # 上流は tick のたびに playbook を trunk から読み直す。プラグインに trunk は無いので、入れたファイルを cat する。
+    # autopilot-full / autopilot-stack で文言が分かれた (旧: 両方とも `git show origin/main:pstack/skills/...`)。
+    Rule(
+        "re-reads this playbook from trunk",
+        "re-reads this playbook with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md`",
+        only="skills/poteto-mode/playbooks/autopilot-full.md",
+    ),
+    Rule(
+        "re-reads both playbooks from trunk",
+        "re-reads both playbooks with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md` "
+        "and `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-stack.md`",
+        only="skills/poteto-mode/playbooks/autopilot-stack.md",
+    ),
     # 計画に「trunk から読み直す」手順があるかの検査。pstack のファイルは trunk から読まなくなったので、
     # 同じ手順の文言「Re-read them at every tick」を目印にする
     Rule('"git show origin/main:",', '"Re-read them at every tick",',
          only="skills/poteto-mode/scripts/check-plan.mjs"),
+    # 同じ目印。テスト台本はテンプレートリテラル内なのでバッククォートがエスケープされている。
+    Rule("\\`git show origin/main:\\`", "Re-read them at every tick",
+         only="skills/poteto-mode/scripts/check-plan.test.ts"),
     # --- 全体の置き換え ---
     # pstack リポジトリ内のパス(claude-code.md の "Paths to pstack's own files" を参照)
     Rule("`git show origin/main:pstack/skills/", "`cat <pstack plugin root>/skills/", min_hits=4),
