@@ -16,12 +16,21 @@ on:
       - '.github/workflows/pstack-cc.yml'
   # pstack-upstream-sync.yml が自動の PR に対して起動する
   workflow_dispatch:
+  # pstack-upstream-sync.yml が自動マージの前にこの検査を呼ぶ
+  workflow_call:
+    inputs:
+      ref:
+        description: 検査するコミット
+        type: string
+        required: true
 
 jobs:
   check:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
       - uses: actions/setup-python@v7
         with:
           python-version: '3.11'

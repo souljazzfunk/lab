@@ -1,6 +1,7 @@
 name: pstack 上流の同期
 
 # 毎日 cursor/plugins の pstack を確認し、更新があれば取り込んで build し直した PR を出す。
+# 手作業の要る変更(スキルの増減、overrides の上流版の変更)がなければ、検査が通りしだい自動で merge する。
 # build が通らない(置き換えルールが上流の新しい文章に当たらない)ときは PR ではなく issue を立てる。
 on:
   schedule:
@@ -24,6 +25,9 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.pr.outputs.sha }}
+      auto: ${{ steps.pr.outputs.auto }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -51,6 +55,14 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # 手で取り込むなどして main が上流に追いついたら、古くなった自動の PR を閉じる
+      - name: 古くなった自動の PR を閉じる
+        if: steps.sync.outputs.old == steps.sync.outputs.new
+        run: |
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
+            gh pr close "$BRANCH" --delete-branch --comment "main が上流 \`${{ steps.sync.outputs.new }}\` に追いついたので閉じます。"
           fi
 
       - name: build し直す
@@ -90,6 +102,7 @@ jobs:
           exit 1
 
       - name: PR を出す(既にあれば更新する)
+        id: pr
         if: steps.sync.outputs.changed == 'true' && steps.build.outputs.ok == 'true'
         env:
           OLD: ${{ steps.sync.outputs.old }}
@@ -103,6 +116,7 @@ jobs:
           title="pstack-cc: pstack $version に追従"
           git commit -q -m "$title" -m "cursor/plugins ${OLD:0:7} → ${NEW:0:7} を取り込み、pstack-cc/plugin/ を再生成"
           git push --force origin "$BRANCH"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           added="$(git diff --name-only --diff-filter=A HEAD~1 -- 'vendor/pstack/skills/*/SKILL.md' | cut -d/ -f4)"
           removed="$(git diff --name-only --diff-filter=D HEAD~1 -- 'vendor/pstack/skills/*/SKILL.md' | cut -d/ -f4)"
@@ -133,8 +147,13 @@ jobs:
               for f in $touched; do echo "- \`vendor/pstack/$f\`"; done
             fi
             echo
-            echo '## merge する前に'
-            echo "- poteto-mode などの方針の変更が \`pstack-cc/claude-code.md\` の対応表と食い違っていないか見る"
+            if [ -n "$added$removed$touched" ]; then
+              echo '## merge する前に'
+              echo "- 上の手作業を済ませる(自動では merge しない)"
+              echo "- poteto-mode などの方針の変更が \`pstack-cc/claude-code.md\` の対応表と食い違っていないか見る"
+            else
+              echo "手作業は要らないので、検査が通りしだい自動で merge する。poteto-mode の方針の変更が \`pstack-cc/claude-code.md\` の対応表とずれていないかは、後でまとめて見ればよい。"
+            fi
           } > "$body"
 
           if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
@@ -144,5 +163,27 @@ jobs:
               --title "$title" --body-file "$body"
           fi
 
-          # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
-          gh workflow run pstack-cc.yml --ref "$BRANCH"
+          if [ -n "$added$removed$touched" ]; then
+            echo "auto=false" >> "$GITHUB_OUTPUT"
+            # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
+            gh workflow run pstack-cc.yml --ref "$BRANCH"
+          else
+            echo "auto=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # 手作業の要らない更新は、検査が通ったらそのまま merge する
+  check:
+    needs: sync
+    if: needs.sync.outputs.auto == 'true'
+    uses: ./.github/workflows/pstack-cc.yml
+    with:
+      ref: ${{ needs.sync.outputs.sha }}
+
+  merge:
+    needs: [sync, check]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: merge する
+        env:
+          SHA: ${{ needs.sync.outputs.sha }}
+        run: gh pr merge "$BRANCH" --repo "$GITHUB_REPOSITORY" --squash --delete-branch --match-head-commit "$SHA"

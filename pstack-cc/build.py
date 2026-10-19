@@ -69,6 +69,17 @@ RULES = [
         "`~/.claude/projects/<slug>/` (`claude-code.md` at the plugin root explains the slug).",
         only="skills/reflect/SKILL.md",
     ),
+    # 上流の公式 Claude Code 版の入れ方を案内しているので、この変換版の入れ方と対応表に差し替える
+    Rule(
+        "pstack is built for Cursor, and it also installs in Claude Code with `/plugin marketplace add cursor/plugins`, "
+        "then `/plugin install pstack@cursor-plugins`. There, each command takes a `pstack:` prefix, such as "
+        "`/pstack:poteto-mode`. The [Claude Code adapter](../../docs/harness/claude-code.md) maps the Cursor names, "
+        "and a step that needs a Cursor-only feature, such as Bugbot or Automations, is skipped with a one-line note.",
+        "pstack is built for Cursor. This copy is the Claude Code conversion installed with `/plugin install pstack@lab`. "
+        "There, each command takes a `pstack:` prefix, such as `/pstack:poteto-mode`. "
+        "`claude-code.md` at the plugin root maps the Cursor names.",
+        only="skills/poteto-help/SKILL.md",
+    ),
     Rule(
         "# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.\n"
         "slug=$(printf '%s' \"$main_wt\" | sed 's#^/##; s#/#-#g')\n"

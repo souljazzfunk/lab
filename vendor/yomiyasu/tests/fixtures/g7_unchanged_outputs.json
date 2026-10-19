@@ -1,0 +1,3219 @@
+{
+  "description": "指定しない（--doc-type と --reader を付けない）ときの lint、diff、check の出力の要約。tests/test_v200_doc_type.py の UnchangedOutputTest が今の出力と照らす（種類と読者を指定しない利用者の出力を、知らないうちに変えないための見張り）。行ごとに出どころが違う。lint の行は種類と読者のオプション（--doc-type と --reader）を入れる前の作業ツリー（45a5885 に check の固めを入れたもの）の出力で、作り直していない（指定しないときの lint の出力が、そのオプションを入れる前と1字も違わないことを見る）。diff と check の行は、diff の詰め（文体の硬化、勢い、否定対比の逆転、気持ちの語の検査と、意味が変わる恐れの判定の詰め）とその直し（反証で見つけた例の直しを3回と、そのあとの数値と否定対比の判定の直し）のあとの作業ツリーの出力で作り直した。オプションを入れる前の出力とは違い、そのあとの変更で出力が変わらないことを見る（オプションを入れる前からの変化と、終了コードが変わった組は updates）。行ごとの出どころは generated_by、source_commit、source_sha256 の lint、diff、check。値は、終了コード、標準出力、標準エラー（check は一時の状態フォルダと実行IDを伏せたもの、JSON は context を除いたもの）をつないだ SHA-256 の先頭16字。今の版の文字列が tool_version の値と違うときは、tool_version の値に読み替えてから数える。",
+  "generated_by": {
+    "lint": "種類と読者のオプション（--doc-type と --reader）を入れる前に tests/test_v200_doc_type.py の unchanged_lint() で作った値。作り直していない（作り直すたびに、今の unchanged_lint() と1字も違わないことを確かめる）",
+    "diff": "tests/test_v200_doc_type.py の unchanged_diff()。状態の語の消えと約束・因果の検出追加に合わせて再計測（評価と一般化の足しの検出は外した）。lint の要約は旧版のまま。",
+    "check": "tests/test_v200_doc_type.py の unchanged_check()。状態の語の消えと約束・因果の検出追加に合わせて再計測（評価と一般化の足しの検出は外した）。lint の要約は旧版のまま。"
+  },
+  "source_commit": {
+    "lint": "45a5885（scripts に未コミットの変更あり: check の固め）",
+    "diff": "状態の語の消えと書き足しの検出を追加し、そのあとに事実の復元の道具（照合の該当行、確度の注意、--fact-gaps、区切りの出典）を入れ、run --stdin の1行目で返す直前の verify を案内するようにし、推量の印が同じ強さの慎重な言い方に替わっただけの文を意味が変わる恐れの候補から外した作業ツリー（既存9キーと既存候補は変更なし）。",
+    "check": "状態の語の消えと書き足しの検出、見直し候補の行と直した箇所の節を追加し、lint の rule_penalty_score の式を直したあとに事実の復元の道具（照合の該当行、確度の注意、--fact-gaps、区切りの出典）を入れ、run --stdin の1行目で返す直前の verify を案内するようにし、推量の印が同じ強さの慎重な言い方に替わっただけの文を意味が変わる恐れの候補から外した作業ツリー（既存9キーと既存候補は変更なし）。"
+  },
+  "source_sha256": {
+    "lint": {
+      "yomiyasu_lint.py": "636970d026504a4229d612b9ed1abebfcc1e41b12d6ea8998c1b5d048540dd11",
+      "yomiyasu_diff.py": "f69d7e199455f2831af5ddae90bab45d0757e322a41a17990528ae00e2a88c78",
+      "yomiyasu_check.py": "072dea9657111bcbd1799e3bc7a02cd710d26e15d0b74f900f650f531bc0151b",
+      "markdown_visibility.py": "c0e89e684694d9602d8ff0da5ee0ecfad23f7390fa61c326cc201870613df691"
+    },
+    "diff": {
+      "yomiyasu_lint.py": "73c370d607399b4408368c53785c9f9bebc5234180a4c4c1e5d4006365c3aa23",
+      "yomiyasu_diff.py": "2ea2a5d4eeed731aad93b3d2fd916fe60ef0173ccb9aa7ab2041de124eaf17f3",
+      "yomiyasu_check.py": "3f0be402b8c56591ec2e0c09ca030645948b0cd94f2cc17d569e909d7a47ae13",
+      "markdown_visibility.py": "4d296be7fc1c1cb6b908cd16cf3de51449d7902db9bc1888f095fc7a65ae843c",
+      "references/lists/feelings.txt": "5f71a66f5e2679de04ecd30395ab74ca61962297c22ef3f4efa5c8e625446166",
+      "references/lists/hedges.txt": "ed666036f63f4705d2c129d3fd30e971018d50732bbef2c18081412a61ccd771",
+      "references/lists/intensifiers.txt": "3e4829226d871ce10e4ae89c49ae218b6d9ed77cafcd6ddfd0fdb6cecd1fec2e",
+      "references/lists/nominalization.txt": "2f685bbcd7dfc5ea871ff5655368195d471cea6ac4ff57e75a0648aadd466048"
+    },
+    "check": "3f0be402b8c56591ec2e0c09ca030645948b0cd94f2cc17d569e909d7a47ae13"
+  },
+  "tool_version": "2.0.0",
+  "python": "3.14.5",
+  "lint": {
+    "blacklist_ai/01_tech_arch_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "4910502275352094",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "7d8c6ac62ce6e691"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "daf0d9ecfd06ad29",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "85b66b6945769e07",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d169d4b1e9d56db3"
+    },
+    "blacklist_ai/02_incident_report_sonnet_casual.md": {
+      "plain": "16993b74c2ed521c",
+      "strict": "685c76b8a348830d",
+      "fail_error": "16993b74c2ed521c",
+      "json": "c20339cd60c2f18a",
+      "stdin": "16993b74c2ed521c",
+      "diff_endings": "802a47dedc071dc7"
+    },
+    "blacklist_ai/02_incident_report_sonnet_default.md": {
+      "plain": "e26f1306eaa63a0c",
+      "strict": "16fb02ac71625d60",
+      "fail_error": "e26f1306eaa63a0c",
+      "json": "8710b342c487989f",
+      "stdin": "e26f1306eaa63a0c",
+      "diff_endings": "e6dd887f36647083"
+    },
+    "blacklist_ai/02_incident_report_sonnet_formal.md": {
+      "plain": "5a872a02911b399b",
+      "strict": "6ded706f52161ae3",
+      "fail_error": "5a872a02911b399b",
+      "json": "64f867d8f361ad34",
+      "stdin": "5a872a02911b399b",
+      "diff_endings": "631bef8c695e66a1"
+    },
+    "blacklist_ai/03_pr_description_sonnet_casual.md": {
+      "plain": "bff67ed41431bcf8",
+      "strict": "ef2c428e631b009c",
+      "fail_error": "bff67ed41431bcf8",
+      "json": "2f1e36925c0c82c2",
+      "stdin": "bff67ed41431bcf8",
+      "diff_endings": "acedcfe6d6dc3b8e"
+    },
+    "blacklist_ai/03_pr_description_sonnet_default.md": {
+      "plain": "141be463502a9579",
+      "strict": "f09feefee0c655b5",
+      "fail_error": "141be463502a9579",
+      "json": "4f269f5c1e108609",
+      "stdin": "141be463502a9579",
+      "diff_endings": "3ca0b03286e8f1d2"
+    },
+    "blacklist_ai/03_pr_description_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "c6352f93d63d373b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "76a69326cc15f3b8"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "54956c29483a2995",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "cefb3004f31b3f4b"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "cb48939f537441bb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "95d0c318cd8f32d4"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ebd4a87a2f2bd02c",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "02d2336eba567b28"
+    },
+    "blacklist_ai/05_comparison_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "01813d8cb38b2842",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "blacklist_ai/05_comparison_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "d3488821b7cd98d6",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "a6e67aa30705c7ba"
+    },
+    "blacklist_ai/05_comparison_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "27757e06cbd1f9e8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d27715fb00e8f25c"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "de9e33c2261d9d44",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "083426d9dc73e70f",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "3df79699e33dea7d"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "96331064cbdc9229",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "blacklist_ai/07_code_review_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "9c2327278ac21ab5",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "e144dd3b10d746dd"
+    },
+    "blacklist_ai/07_code_review_sonnet_default.md": {
+      "plain": "f3a4da10474745fc",
+      "strict": "66bb6a5212ac3a68",
+      "fail_error": "f3a4da10474745fc",
+      "json": "f247a246834e9c1e",
+      "stdin": "f3a4da10474745fc",
+      "diff_endings": "683c5592fb6aece5"
+    },
+    "blacklist_ai/07_code_review_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "943716898782d608",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "786737bcae4a65d7"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "40e12b0298211e7a",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d169d4b1e9d56db3"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_default.md": {
+      "plain": "8b375fb285084fb6",
+      "strict": "8b375fb285084fb6",
+      "fail_error": "8b375fb285084fb6",
+      "json": "88d8110e12f733fb",
+      "stdin": "8b375fb285084fb6",
+      "diff_endings": "0f5bcdb6235c3984"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "a19ba34f3fa84a03",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "edge_cases/edge_kiku_45.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "c63f048a9f4803b4",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kiku_46.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "e62a8ac523a04147"
+    },
+    "edge_cases/edge_kowareru_37.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_38.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0190c300a42c7052",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_39.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "d09b8dc8445c5ecd",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_40.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ffa905d9470603f1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_41.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "88fc2c8bc47abfd9",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_42.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0190c300a42c7052",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_kowareru_43.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0e42c616946de8aa",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "09e49d4ad8d6dceb"
+    },
+    "edge_cases/edge_kowareru_44.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_nigiru_01.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ffa905d9470603f1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5c4543083b375f9f"
+    },
+    "edge_cases/edge_nigiru_02.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "c63f048a9f4803b4",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6d8ab29fb30e24c5"
+    },
+    "edge_cases/edge_nigiru_03.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0cf7057cf485c985",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "88e0552ab142a488"
+    },
+    "edge_cases/edge_nigiru_04.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "bd620929059de9cb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_nigiru_05.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2dd003b32f3b1287",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_nigiru_06.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0cf7057cf485c985",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_nigiru_07.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6202ca3f3f219268"
+    },
+    "edge_cases/edge_nigiru_08.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5e8e59586b0caa4b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_nigiru_09.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ffa905d9470603f1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_nigiru_10.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "a3a384cbebbb86c3",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6d8ab29fb30e24c5"
+    },
+    "edge_cases/edge_taosu_11.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "4b70b65cfc72aecb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_12.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0cf7057cf485c985",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_13.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_14.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab302a5dc2083e58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_15.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab302a5dc2083e58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_taosu_16.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab302a5dc2083e58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6202ca3f3f219268"
+    },
+    "edge_cases/edge_taosu_17.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_18.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0cf7057cf485c985",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_19.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "bd620929059de9cb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_taosu_20.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_tokasu_21.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "c63f048a9f4803b4",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_tokasu_22.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab302a5dc2083e58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_tokasu_23.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "4b70b65cfc72aecb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_tokasu_24.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab302a5dc2083e58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_tokasu_25.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_tokasu_26.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2dd003b32f3b1287",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_tokasu_27.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ffa905d9470603f1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_tokasu_28.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "bd620929059de9cb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_v111_keep_01.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "d72bbf589400e4e7",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "7951877801c8b54f"
+    },
+    "edge_cases/edge_waru_29.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "1aa6297e28d84d4e"
+    },
+    "edge_cases/edge_waru_30.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "80611f6e5224b549",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_31.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "a3a384cbebbb86c3",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_32.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "bd620929059de9cb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_33.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3bf62030d06aac13",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_34.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_35.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_waru_36.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "a55d072c8d1104f9",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_watasu_47.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "80611f6e5224b549",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "edge_cases/edge_watasu_48.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ff912e8ada1a3ddf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22cfa09644caa366"
+    },
+    "human/human_doc_09.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ae591a2550dc8f18",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ea4aa5e3c2d8cf34"
+    },
+    "human/human_doc_10.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "4e9d277e4ab06414",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "c9ffc7b5a4b52802"
+    },
+    "human/human_doc_11.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "87c8446813f84f1c",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "612b794d4eb94049"
+    },
+    "human/human_doc_12.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "eaf5873da86cee20",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "8ae1a94c84c6aedd"
+    },
+    "human/human_doc_13.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7dbde3eeedd73ef4",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "b5382c1dee8a3e7c"
+    },
+    "human/human_doc_14.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "33cc065c4a8a3cfb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6d7446369e648e32"
+    },
+    "human/human_doc_15.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "1bbfbd96a9866c9f",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d8b3c13f32258ffd"
+    },
+    "human/human_doc_16.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "68b2890b96409f7f",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "99a4403fb61a9fe1"
+    },
+    "human/human_oga_01.md": {
+      "plain": "82bfef7208f459c7",
+      "strict": "9b8b87a5c907c892",
+      "fail_error": "82bfef7208f459c7",
+      "json": "e2273d25157e859f",
+      "stdin": "82bfef7208f459c7",
+      "diff_endings": "44ee92b1d65e1ef5"
+    },
+    "human/human_oga_02.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "769d1aed0835d64c",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "b1416f75613a57cb"
+    },
+    "human/human_oga_03.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "90a2eaec17a3a115",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ff6a408317c70026"
+    },
+    "human/human_oga_04.md": {
+      "plain": "a87968d8275e1754",
+      "strict": "e125de709292ed2b",
+      "fail_error": "a87968d8275e1754",
+      "json": "1f26b7265969ba2b",
+      "stdin": "a87968d8275e1754",
+      "diff_endings": "75482f7f16919c0f"
+    },
+    "human/human_oga_05.md": {
+      "plain": "7430c6369245cbba",
+      "strict": "292baf7c397e4c27",
+      "fail_error": "7430c6369245cbba",
+      "json": "45d3a77a41947b2f",
+      "stdin": "7430c6369245cbba",
+      "diff_endings": "fd4f8177d8f3636e"
+    },
+    "human/human_oga_06.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "9813d6407165ba43",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "f2b4ed675b0a4ebc"
+    },
+    "human/human_oga_07.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7f9c9e722466012a",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "3c6667462c5e18f6"
+    },
+    "human/human_oga_08.md": {
+      "plain": "f7c8935e94b33865",
+      "strict": "f7c8935e94b33865",
+      "fail_error": "f7c8935e94b33865",
+      "json": "a043c3becc40a6df",
+      "stdin": "f7c8935e94b33865",
+      "diff_endings": "74d4f4a04b52389a"
+    },
+    "raw_ai/01_tech_arch_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "61e331b819b54d3d",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "058c7f30e832ec16"
+    },
+    "raw_ai/01_tech_arch_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "ab1ce518ed6bcea8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "raw_ai/01_tech_arch_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "fa483be6e508f582",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "raw_ai/02_incident_report_sonnet_casual.md": {
+      "plain": "9ce00291a7a92719",
+      "strict": "c2fdb8f669d476c6",
+      "fail_error": "9ce00291a7a92719",
+      "json": "15dca7de7a8b55cb",
+      "stdin": "9ce00291a7a92719",
+      "diff_endings": "a406e6c9d6fa202b"
+    },
+    "raw_ai/02_incident_report_sonnet_default.md": {
+      "plain": "bbceb47bca893767",
+      "strict": "9e9de933ff5017f4",
+      "fail_error": "bbceb47bca893767",
+      "json": "692564296510afdc",
+      "stdin": "bbceb47bca893767",
+      "diff_endings": "0c9a03a033fed56f"
+    },
+    "raw_ai/02_incident_report_sonnet_formal.md": {
+      "plain": "e721b5513adf9ac6",
+      "strict": "2d7b7a644d224e8b",
+      "fail_error": "e721b5513adf9ac6",
+      "json": "b990faf349593561",
+      "stdin": "e721b5513adf9ac6",
+      "diff_endings": "dbbaf58feb05b824"
+    },
+    "raw_ai/03_pr_description_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2526dd5855ca357a",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "76a69326cc15f3b8"
+    },
+    "raw_ai/03_pr_description_sonnet_default.md": {
+      "plain": "04a4bb4838edadd9",
+      "strict": "adf90a0997abd8bd",
+      "fail_error": "04a4bb4838edadd9",
+      "json": "25e35fcc256bdb19",
+      "stdin": "04a4bb4838edadd9",
+      "diff_endings": "2ff8305344a0b72b"
+    },
+    "raw_ai/03_pr_description_sonnet_formal.md": {
+      "plain": "8d42ec66a1fe5489",
+      "strict": "5ec93ab047546017",
+      "fail_error": "8d42ec66a1fe5489",
+      "json": "127c4f0fc26a8638",
+      "stdin": "8d42ec66a1fe5489",
+      "diff_endings": "2077ad401ec85f5f"
+    },
+    "raw_ai/04_slack_announce_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "46f9e0c8e3d8fe58",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "05973c9f50097479"
+    },
+    "raw_ai/04_slack_announce_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "9fcc1bd0d56c9619",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "037588126c73393e"
+    },
+    "raw_ai/04_slack_announce_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f81da8e67425bb9d",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "af5d9da2b0233217"
+    },
+    "raw_ai/05_comparison_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f0c1318f06c518aa",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "23c34dc645d053ff"
+    },
+    "raw_ai/05_comparison_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5c4065515c33d6db",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6658f97de333aba6"
+    },
+    "raw_ai/05_comparison_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "364e4d2b80804171",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "76a69326cc15f3b8"
+    },
+    "raw_ai/06_spec_draft_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7202abd8746cbb66",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "raw_ai/06_spec_draft_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "488df71a2b3c0573",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d169d4b1e9d56db3"
+    },
+    "raw_ai/06_spec_draft_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7a1d3366d47ccf6b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "raw_ai/07_code_review_sonnet_casual.md": {
+      "plain": "d16417303652a1e5",
+      "strict": "8da502f7873efdcd",
+      "fail_error": "d16417303652a1e5",
+      "json": "5e69742a9c24fa11",
+      "stdin": "d16417303652a1e5",
+      "diff_endings": "2fce17b5c1c1151b"
+    },
+    "raw_ai/07_code_review_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "30c494ecf106ce83",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "075c686ce5d6c4f0"
+    },
+    "raw_ai/07_code_review_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "84cb58c18e117abf",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "7f322623f9e55a58"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "b9e18834dbcf4ed6",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d169d4b1e9d56db3"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "92907e39f8f77ecc",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_formal.md": {
+      "plain": "53a2d4bda050f967",
+      "strict": "53a2d4bda050f967",
+      "fail_error": "53a2d4bda050f967",
+      "json": "da72a9d727dfc4d4",
+      "stdin": "53a2d4bda050f967",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "raw_ai/09_listicle_patterns.md": {
+      "plain": "c41bf8a3c02ef466",
+      "strict": "394686897073024b",
+      "fail_error": "c41bf8a3c02ef466",
+      "json": "da073c3b9a9b6f17",
+      "stdin": "c41bf8a3c02ef466",
+      "diff_endings": "75c95f096d5b18ce"
+    },
+    "raw_ai/10_essay_fragments.md": {
+      "plain": "81b0b88c8f87d092",
+      "strict": "dc2e8aa3884050cc",
+      "fail_error": "81b0b88c8f87d092",
+      "json": "8367c843d5816b6c",
+      "stdin": "81b0b88c8f87d092",
+      "diff_endings": "f6fc8298961b9c5d"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2dfb3e1d01efa4aa",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "058c7f30e832ec16"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "3eb4296c9430c2b8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "62cdc9ce70f47b82"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_default.md": {
+      "plain": "bed631333e76ca48",
+      "strict": "96a3fd5305ab3af7",
+      "fail_error": "bed631333e76ca48",
+      "json": "54a4237bec8b8cea",
+      "stdin": "bed631333e76ca48",
+      "diff_endings": "06b0a217db792e64"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "175341f3db5b753b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "23c34dc645d053ff"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "8d918547b4095b02",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6658f97de333aba6"
+    },
+    "yomiyasu_rewritten/01_tech_arch_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f4336b1c5e60327b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_casual.md": {
+      "plain": "7a29f019fc320bec",
+      "strict": "99dd0a5ebc9fe06a",
+      "fail_error": "7a29f019fc320bec",
+      "json": "781845c6245b3c54",
+      "stdin": "7a29f019fc320bec",
+      "diff_endings": "888582bbaf9dc9be"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "537c1410048f3c70",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6658f97de333aba6"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_default.md": {
+      "plain": "0e7f46f0c26e2961",
+      "strict": "165ef1fe159ddff2",
+      "fail_error": "0e7f46f0c26e2961",
+      "json": "a4f6e3e17de66d6d",
+      "stdin": "0e7f46f0c26e2961",
+      "diff_endings": "8ffcb14b0e9503cf"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "b0859cb597a85f9b",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "608673bc9645d6e1"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "80643db67d2886d8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/02_incident_report_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5324e8f6b87bdbfe",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "608673bc9645d6e1"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "c64cbbac0627e5b1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "76a69326cc15f3b8"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_casual_bl.md": {
+      "plain": "054a256b190889b8",
+      "strict": "9f14a321347a75b1",
+      "fail_error": "054a256b190889b8",
+      "json": "c00c03133aaf62ae",
+      "stdin": "054a256b190889b8",
+      "diff_endings": "5816b1cf682cc2ed"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_default.md": {
+      "plain": "5dceb5defbe2f9a2",
+      "strict": "9d1db0d4988c6e71",
+      "fail_error": "5dceb5defbe2f9a2",
+      "json": "760b0c543b7c68fa",
+      "stdin": "5dceb5defbe2f9a2",
+      "diff_endings": "2ff8305344a0b72b"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_default_bl.md": {
+      "plain": "53a5f60e77f060f8",
+      "strict": "1740679fa575fdcb",
+      "fail_error": "53a5f60e77f060f8",
+      "json": "3887078c06d06f99",
+      "stdin": "53a5f60e77f060f8",
+      "diff_endings": "ebacceec125e31fd"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_formal.md": {
+      "plain": "4ddb96bbf1e8f999",
+      "strict": "16e9533de44a656d",
+      "fail_error": "4ddb96bbf1e8f999",
+      "json": "74b0f5804e36eb8e",
+      "stdin": "4ddb96bbf1e8f999",
+      "diff_endings": "3b72c1b82b68a5e8"
+    },
+    "yomiyasu_rewritten/03_pr_description_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "a32e66d7e89747de",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2cabde5648de3f86",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "622f72cc99e47b6b"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "75b4e65b95c45c9d",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "62a98f2aeac144b2"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "e6e113bb17d9d1cb",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6c3fe725e0b94a03"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f65e4fb5e2656696",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "41eab253437a3b00"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "4aed679f6f99b328",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "22c0f9db6474446f"
+    },
+    "yomiyasu_rewritten/04_slack_announce_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "6637eaf7bddee842",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "be9cc68d91c43f36"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "fada643cd28dda5d",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "23c34dc645d053ff"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "2c36de2031a8e571",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5d94da1ea3365dd0",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "6658f97de333aba6"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7d81b83a41111551",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "dbbaf58feb05b824"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "6437bf55b5a6c6d5",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/05_comparison_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f56340a8d61f9230",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "31a86d590cad80f6"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "41b4623076576ea6",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "8575b53c12f7c208",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "23c34dc645d053ff"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "b0d76b63b26c8dd8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "23c34dc645d053ff"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "f871367d474fd075",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "3df79699e33dea7d"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "471dec0cc1bd50e2",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/06_spec_draft_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "efee5a06c46f639e",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "4b1b0e01655a821c"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_casual.md": {
+      "plain": "cc07d5081a6f2f34",
+      "strict": "49f48c529d34573c",
+      "fail_error": "cc07d5081a6f2f34",
+      "json": "55215cec38a9d866",
+      "stdin": "cc07d5081a6f2f34",
+      "diff_endings": "e1206597aafabb1b"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5ca0da69d2728b04",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "50f682c18f0b63a5"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7bfa7e701e0e0aa8",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "f5fe7a3517814ec7"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_default_bl.md": {
+      "plain": "87d896c37807b4cd",
+      "strict": "81d6e7a62470cb3b",
+      "fail_error": "87d896c37807b4cd",
+      "json": "dd9a2d9dab3c84bd",
+      "stdin": "87d896c37807b4cd",
+      "diff_endings": "1b2c51be62bef521"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "7b7e0bf49d83afd7",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d344edb8a0f192bb"
+    },
+    "yomiyasu_rewritten/07_code_review_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "dd50cf007aa455e1",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "40ca5cec2e79ec81"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_casual.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0de8bd9fe4f39c3c",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "d169d4b1e9d56db3"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_casual_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "9b82fb2614c808f6",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_default.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "fada643cd28dda5d",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_default_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "626c2905d0e32f29",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "0f5bcdb6235c3984"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_formal.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "5f6ea2078c36bce5",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "5ac1897bdf47fb48"
+    },
+    "yomiyasu_rewritten/08_essay_retrospective_sonnet_formal_bl.md": {
+      "plain": "10fa74b964043101",
+      "strict": "10fa74b964043101",
+      "fail_error": "10fa74b964043101",
+      "json": "0e99649db62d009a",
+      "stdin": "10fa74b964043101",
+      "diff_endings": "ccaee2c4fa382a63"
+    }
+  },
+  "diff": {
+    "raw_ai/01_tech_arch_sonnet_casual.md|yomiyasu_rewritten/01_tech_arch_sonnet_casual.md": {
+      "plain": "f9cb8c49d548826e",
+      "stance": "f9cb8c49d548826e",
+      "fail_on": "f9cb8c49d548826e",
+      "json": "b0d27e8a4487b50c",
+      "stdin": "f9cb8c49d548826e"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_casual.md|yomiyasu_rewritten/01_tech_arch_sonnet_casual_bl.md": {
+      "plain": "f977faa277ffaf70",
+      "stance": "eb3da9989bb448eb",
+      "fail_on": "5cd4ea67d6a690a5",
+      "json": "736ad90f0d2318b5",
+      "stdin": "f977faa277ffaf70"
+    },
+    "raw_ai/01_tech_arch_sonnet_default.md|yomiyasu_rewritten/01_tech_arch_sonnet_default.md": {
+      "plain": "39d81ec6a8873c4a",
+      "stance": "39d81ec6a8873c4a",
+      "fail_on": "39d81ec6a8873c4a",
+      "json": "9af475cf484bbc0f",
+      "stdin": "39d81ec6a8873c4a"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_default.md|yomiyasu_rewritten/01_tech_arch_sonnet_default_bl.md": {
+      "plain": "32f0e38d59cccff9",
+      "stance": "32f0e38d59cccff9",
+      "fail_on": "32f0e38d59cccff9",
+      "json": "4f75d6f90e9cba69",
+      "stdin": "32f0e38d59cccff9"
+    },
+    "raw_ai/01_tech_arch_sonnet_formal.md|yomiyasu_rewritten/01_tech_arch_sonnet_formal.md": {
+      "plain": "a1181e7f83d23535",
+      "stance": "a1181e7f83d23535",
+      "fail_on": "35dca73762b38f79",
+      "json": "498f88d2c91459d3",
+      "stdin": "a1181e7f83d23535"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_formal.md|yomiyasu_rewritten/01_tech_arch_sonnet_formal_bl.md": {
+      "plain": "0a1edc55d27d80ed",
+      "stance": "0a1edc55d27d80ed",
+      "fail_on": "0a1edc55d27d80ed",
+      "json": "dee41f71d2e14742",
+      "stdin": "0a1edc55d27d80ed"
+    },
+    "raw_ai/02_incident_report_sonnet_casual.md|yomiyasu_rewritten/02_incident_report_sonnet_casual.md": {
+      "plain": "ef72a247f1ed2dc5",
+      "stance": "ef72a247f1ed2dc5",
+      "fail_on": "c027aa9b3987ea77",
+      "json": "9d6b40d8dce6edb9",
+      "stdin": "ef72a247f1ed2dc5"
+    },
+    "blacklist_ai/02_incident_report_sonnet_casual.md|yomiyasu_rewritten/02_incident_report_sonnet_casual_bl.md": {
+      "plain": "a877b741f1b0391f",
+      "stance": "a877b741f1b0391f",
+      "fail_on": "a877b741f1b0391f",
+      "json": "ba550762c7e8cf29",
+      "stdin": "a877b741f1b0391f"
+    },
+    "raw_ai/02_incident_report_sonnet_default.md|yomiyasu_rewritten/02_incident_report_sonnet_default.md": {
+      "plain": "09849bcb366f4628",
+      "stance": "09849bcb366f4628",
+      "fail_on": "09849bcb366f4628",
+      "json": "cf0aa78f7cfebc8b",
+      "stdin": "09849bcb366f4628"
+    },
+    "blacklist_ai/02_incident_report_sonnet_default.md|yomiyasu_rewritten/02_incident_report_sonnet_default_bl.md": {
+      "plain": "8c0f2c9fc0c48ea8",
+      "stance": "8c0f2c9fc0c48ea8",
+      "fail_on": "8c0f2c9fc0c48ea8",
+      "json": "461658b3db6446aa",
+      "stdin": "8c0f2c9fc0c48ea8"
+    },
+    "raw_ai/02_incident_report_sonnet_formal.md|yomiyasu_rewritten/02_incident_report_sonnet_formal.md": {
+      "plain": "b18b11b1d18b5ab8",
+      "stance": "b18b11b1d18b5ab8",
+      "fail_on": "b18b11b1d18b5ab8",
+      "json": "c18e7379715bda00",
+      "stdin": "b18b11b1d18b5ab8"
+    },
+    "blacklist_ai/02_incident_report_sonnet_formal.md|yomiyasu_rewritten/02_incident_report_sonnet_formal_bl.md": {
+      "plain": "2dee4ff5c70a2ed9",
+      "stance": "2dee4ff5c70a2ed9",
+      "fail_on": "2dee4ff5c70a2ed9",
+      "json": "a2a95725838c85b8",
+      "stdin": "2dee4ff5c70a2ed9"
+    },
+    "raw_ai/03_pr_description_sonnet_casual.md|yomiyasu_rewritten/03_pr_description_sonnet_casual.md": {
+      "plain": "9f150e6ef7156515",
+      "stance": "9f150e6ef7156515",
+      "fail_on": "9f150e6ef7156515",
+      "json": "97b532f02bf13be8",
+      "stdin": "9f150e6ef7156515"
+    },
+    "blacklist_ai/03_pr_description_sonnet_casual.md|yomiyasu_rewritten/03_pr_description_sonnet_casual_bl.md": {
+      "plain": "59c9740452fbedc0",
+      "stance": "59c9740452fbedc0",
+      "fail_on": "59c9740452fbedc0",
+      "json": "4927c76647bab17a",
+      "stdin": "59c9740452fbedc0"
+    },
+    "raw_ai/03_pr_description_sonnet_default.md|yomiyasu_rewritten/03_pr_description_sonnet_default.md": {
+      "plain": "c078b4123c062bbd",
+      "stance": "c078b4123c062bbd",
+      "fail_on": "c078b4123c062bbd",
+      "json": "c783aff916821c03",
+      "stdin": "c078b4123c062bbd"
+    },
+    "blacklist_ai/03_pr_description_sonnet_default.md|yomiyasu_rewritten/03_pr_description_sonnet_default_bl.md": {
+      "plain": "75d355d9bcd3fcd3",
+      "stance": "75d355d9bcd3fcd3",
+      "fail_on": "75d355d9bcd3fcd3",
+      "json": "d4fb067351686c61",
+      "stdin": "75d355d9bcd3fcd3"
+    },
+    "raw_ai/03_pr_description_sonnet_formal.md|yomiyasu_rewritten/03_pr_description_sonnet_formal.md": {
+      "plain": "30c221b6b19f399c",
+      "stance": "30c221b6b19f399c",
+      "fail_on": "72be6113b9adefba",
+      "json": "86427315c75bdec0",
+      "stdin": "30c221b6b19f399c"
+    },
+    "blacklist_ai/03_pr_description_sonnet_formal.md|yomiyasu_rewritten/03_pr_description_sonnet_formal_bl.md": {
+      "plain": "8eab82b3dcd165ed",
+      "stance": "8eab82b3dcd165ed",
+      "fail_on": "8eab82b3dcd165ed",
+      "json": "aa704a9b15c2dc98",
+      "stdin": "8eab82b3dcd165ed"
+    },
+    "raw_ai/04_slack_announce_sonnet_casual.md|yomiyasu_rewritten/04_slack_announce_sonnet_casual.md": {
+      "plain": "5c2b143d9ecd351c",
+      "stance": "321d839632302de6",
+      "fail_on": "5c2b143d9ecd351c",
+      "json": "66e642b0822ee451",
+      "stdin": "5c2b143d9ecd351c"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_casual.md|yomiyasu_rewritten/04_slack_announce_sonnet_casual_bl.md": {
+      "plain": "2a246dbe1f7f65a2",
+      "stance": "b99418fcd56fbd3b",
+      "fail_on": "2a246dbe1f7f65a2",
+      "json": "6bbd8a7e273a5afe",
+      "stdin": "2a246dbe1f7f65a2"
+    },
+    "raw_ai/04_slack_announce_sonnet_default.md|yomiyasu_rewritten/04_slack_announce_sonnet_default.md": {
+      "plain": "781fa61cf1a7f3ee",
+      "stance": "870e21bd47ee20ca",
+      "fail_on": "bc25d20b3218da3a",
+      "json": "1aaa32731889b262",
+      "stdin": "781fa61cf1a7f3ee"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_default.md|yomiyasu_rewritten/04_slack_announce_sonnet_default_bl.md": {
+      "plain": "c059842d299c857a",
+      "stance": "07f2e2bb19f6cde3",
+      "fail_on": "c059842d299c857a",
+      "json": "f667f8cfd41c7746",
+      "stdin": "c059842d299c857a"
+    },
+    "raw_ai/04_slack_announce_sonnet_formal.md|yomiyasu_rewritten/04_slack_announce_sonnet_formal.md": {
+      "plain": "de473bc041d4254b",
+      "stance": "e7660993278763e5",
+      "fail_on": "de473bc041d4254b",
+      "json": "c8d6c9c0569e83f5",
+      "stdin": "de473bc041d4254b"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_formal.md|yomiyasu_rewritten/04_slack_announce_sonnet_formal_bl.md": {
+      "plain": "5c39129337d33a67",
+      "stance": "f82073666b38d3a5",
+      "fail_on": "5c39129337d33a67",
+      "json": "6e953f73a5001515",
+      "stdin": "5c39129337d33a67"
+    },
+    "raw_ai/05_comparison_sonnet_casual.md|yomiyasu_rewritten/05_comparison_sonnet_casual.md": {
+      "plain": "a02740ff256cc7a0",
+      "stance": "a02740ff256cc7a0",
+      "fail_on": "a02740ff256cc7a0",
+      "json": "51bb2f9dfb3b2bda",
+      "stdin": "a02740ff256cc7a0"
+    },
+    "blacklist_ai/05_comparison_sonnet_casual.md|yomiyasu_rewritten/05_comparison_sonnet_casual_bl.md": {
+      "plain": "821c494b6357ba4c",
+      "stance": "821c494b6357ba4c",
+      "fail_on": "5be7acbcd7fc805d",
+      "json": "94f81f0c2c59819e",
+      "stdin": "821c494b6357ba4c"
+    },
+    "raw_ai/05_comparison_sonnet_default.md|yomiyasu_rewritten/05_comparison_sonnet_default.md": {
+      "plain": "584e671c1a000563",
+      "stance": "584e671c1a000563",
+      "fail_on": "584e671c1a000563",
+      "json": "1188cae9128bfbd3",
+      "stdin": "584e671c1a000563"
+    },
+    "blacklist_ai/05_comparison_sonnet_default.md|yomiyasu_rewritten/05_comparison_sonnet_default_bl.md": {
+      "plain": "96e52734af94555e",
+      "stance": "96e52734af94555e",
+      "fail_on": "96e52734af94555e",
+      "json": "e306e6d985adf9fb",
+      "stdin": "96e52734af94555e"
+    },
+    "raw_ai/05_comparison_sonnet_formal.md|yomiyasu_rewritten/05_comparison_sonnet_formal.md": {
+      "plain": "4a2ece38b4064e81",
+      "stance": "4a2ece38b4064e81",
+      "fail_on": "4a2ece38b4064e81",
+      "json": "bba105fd4f570dc4",
+      "stdin": "4a2ece38b4064e81"
+    },
+    "blacklist_ai/05_comparison_sonnet_formal.md|yomiyasu_rewritten/05_comparison_sonnet_formal_bl.md": {
+      "plain": "966137105c51863a",
+      "stance": "966137105c51863a",
+      "fail_on": "966137105c51863a",
+      "json": "53361ec0caf07686",
+      "stdin": "966137105c51863a"
+    },
+    "raw_ai/06_spec_draft_sonnet_casual.md|yomiyasu_rewritten/06_spec_draft_sonnet_casual.md": {
+      "plain": "ad144d7149a068df",
+      "stance": "ad144d7149a068df",
+      "fail_on": "e3cdfebea0cf594e",
+      "json": "328f4263e3548588",
+      "stdin": "ad144d7149a068df"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_casual.md|yomiyasu_rewritten/06_spec_draft_sonnet_casual_bl.md": {
+      "plain": "9d1dc0c83372ab2b",
+      "stance": "9d1dc0c83372ab2b",
+      "fail_on": "9d1dc0c83372ab2b",
+      "json": "924d1c3d381f5504",
+      "stdin": "9d1dc0c83372ab2b"
+    },
+    "raw_ai/06_spec_draft_sonnet_default.md|yomiyasu_rewritten/06_spec_draft_sonnet_default.md": {
+      "plain": "43f1a5950f5643fc",
+      "stance": "43f1a5950f5643fc",
+      "fail_on": "43f1a5950f5643fc",
+      "json": "c13e3774a2b2152d",
+      "stdin": "43f1a5950f5643fc"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_default.md|yomiyasu_rewritten/06_spec_draft_sonnet_default_bl.md": {
+      "plain": "f2b783a8c5704f21",
+      "stance": "f2b783a8c5704f21",
+      "fail_on": "f2b783a8c5704f21",
+      "json": "e1082659030d6d4c",
+      "stdin": "f2b783a8c5704f21"
+    },
+    "raw_ai/06_spec_draft_sonnet_formal.md|yomiyasu_rewritten/06_spec_draft_sonnet_formal.md": {
+      "plain": "44ab64e55c413f2b",
+      "stance": "44ab64e55c413f2b",
+      "fail_on": "44ab64e55c413f2b",
+      "json": "ad29ec234664f28f",
+      "stdin": "44ab64e55c413f2b"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_formal.md|yomiyasu_rewritten/06_spec_draft_sonnet_formal_bl.md": {
+      "plain": "839f6f20fddf6be6",
+      "stance": "839f6f20fddf6be6",
+      "fail_on": "839f6f20fddf6be6",
+      "json": "ecb5c92d2f6394dd",
+      "stdin": "839f6f20fddf6be6"
+    },
+    "raw_ai/07_code_review_sonnet_casual.md|yomiyasu_rewritten/07_code_review_sonnet_casual.md": {
+      "plain": "84a8e23ac7ebe6af",
+      "stance": "84a8e23ac7ebe6af",
+      "fail_on": "84a8e23ac7ebe6af",
+      "json": "fcd80237dc96d56e",
+      "stdin": "84a8e23ac7ebe6af"
+    },
+    "blacklist_ai/07_code_review_sonnet_casual.md|yomiyasu_rewritten/07_code_review_sonnet_casual_bl.md": {
+      "plain": "0632fabe2bbd83a3",
+      "stance": "09e5445c9b62bdbc",
+      "fail_on": "0632fabe2bbd83a3",
+      "json": "1ad6db9cc2de2f72",
+      "stdin": "0632fabe2bbd83a3"
+    },
+    "raw_ai/07_code_review_sonnet_default.md|yomiyasu_rewritten/07_code_review_sonnet_default.md": {
+      "plain": "de1808055c1647e6",
+      "stance": "60e17788c0886de9",
+      "fail_on": "2c03c2c8ca5d5c11",
+      "json": "a166f447a0ec34b5",
+      "stdin": "de1808055c1647e6"
+    },
+    "blacklist_ai/07_code_review_sonnet_default.md|yomiyasu_rewritten/07_code_review_sonnet_default_bl.md": {
+      "plain": "7e1986a419992436",
+      "stance": "7e1986a419992436",
+      "fail_on": "4e0b10ecda5ff089",
+      "json": "3505d064069da99d",
+      "stdin": "7e1986a419992436"
+    },
+    "raw_ai/07_code_review_sonnet_formal.md|yomiyasu_rewritten/07_code_review_sonnet_formal.md": {
+      "plain": "d7c0ad9461bced3d",
+      "stance": "42297a02bcda4d5d",
+      "fail_on": "d7c0ad9461bced3d",
+      "json": "eceb3beb00682000",
+      "stdin": "d7c0ad9461bced3d"
+    },
+    "blacklist_ai/07_code_review_sonnet_formal.md|yomiyasu_rewritten/07_code_review_sonnet_formal_bl.md": {
+      "plain": "55c353dc6eeb5720",
+      "stance": "f32ee5a0428a9419",
+      "fail_on": "0b4439662398899c",
+      "json": "6a1ee7f94f701db9",
+      "stdin": "55c353dc6eeb5720"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_casual.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_casual.md": {
+      "plain": "77066d2980b7ede9",
+      "stance": "77066d2980b7ede9",
+      "fail_on": "77066d2980b7ede9",
+      "json": "0c97a831ed830eda",
+      "stdin": "77066d2980b7ede9"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_casual.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_casual_bl.md": {
+      "plain": "ece125c6ba375343",
+      "stance": "ece125c6ba375343",
+      "fail_on": "ece125c6ba375343",
+      "json": "f324d65eda5f3f29",
+      "stdin": "ece125c6ba375343"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_default.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_default.md": {
+      "plain": "a13b173e05fca46b",
+      "stance": "a13b173e05fca46b",
+      "fail_on": "a13b173e05fca46b",
+      "json": "52cf18179cd355c7",
+      "stdin": "a13b173e05fca46b"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_default.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_default_bl.md": {
+      "plain": "19d49f3602ca2a1c",
+      "stance": "19d49f3602ca2a1c",
+      "fail_on": "19d49f3602ca2a1c",
+      "json": "9a23732d8f917059",
+      "stdin": "19d49f3602ca2a1c"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_formal.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_formal.md": {
+      "plain": "81d48df7f5184341",
+      "stance": "81d48df7f5184341",
+      "fail_on": "81d48df7f5184341",
+      "json": "7a5270ad62c88d02",
+      "stdin": "81d48df7f5184341"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_formal.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_formal_bl.md": {
+      "plain": "be3d8ca156ec8502",
+      "stance": "be3d8ca156ec8502",
+      "fail_on": "be3d8ca156ec8502",
+      "json": "02621be1e62793f3",
+      "stdin": "be3d8ca156ec8502"
+    },
+    "edge_cases/edge_kiku_45.md|edge_cases/edge_kiku_46.md": {
+      "plain": "fbbce51fadc90479",
+      "stance": "fbbce51fadc90479",
+      "fail_on": "54b1df7179bbb261",
+      "json": "395d824e6aca3848",
+      "stdin": "fbbce51fadc90479"
+    },
+    "edge_cases/edge_kiku_46.md|edge_cases/edge_kowareru_37.md": {
+      "plain": "53083ac80972459a",
+      "stance": "53083ac80972459a",
+      "fail_on": "e2954cec6a802d32",
+      "json": "86d7de0071ca5958",
+      "stdin": "53083ac80972459a"
+    },
+    "edge_cases/edge_kowareru_37.md|edge_cases/edge_kowareru_38.md": {
+      "plain": "743b98a745d2c176",
+      "stance": "743b98a745d2c176",
+      "fail_on": "743b98a745d2c176",
+      "json": "3ec34fb12fac8486",
+      "stdin": "743b98a745d2c176"
+    },
+    "edge_cases/edge_kowareru_38.md|edge_cases/edge_kowareru_39.md": {
+      "plain": "69a23b697ff3c330",
+      "stance": "69a23b697ff3c330",
+      "fail_on": "69a23b697ff3c330",
+      "json": "e7a174dd63088f9f",
+      "stdin": "69a23b697ff3c330"
+    },
+    "edge_cases/edge_kowareru_39.md|edge_cases/edge_kowareru_40.md": {
+      "plain": "58fa946679e250fe",
+      "stance": "58fa946679e250fe",
+      "fail_on": "58fa946679e250fe",
+      "json": "25d5d8d5aa165c24",
+      "stdin": "58fa946679e250fe"
+    },
+    "edge_cases/edge_kowareru_40.md|edge_cases/edge_kowareru_41.md": {
+      "plain": "75895a3745c027c3",
+      "stance": "75895a3745c027c3",
+      "fail_on": "75895a3745c027c3",
+      "json": "c35e556af052a108",
+      "stdin": "75895a3745c027c3"
+    },
+    "edge_cases/edge_kowareru_41.md|edge_cases/edge_kowareru_42.md": {
+      "plain": "4a6660bda95dda97",
+      "stance": "4a6660bda95dda97",
+      "fail_on": "4a6660bda95dda97",
+      "json": "c4d5732412040c8a",
+      "stdin": "4a6660bda95dda97"
+    },
+    "edge_cases/edge_kowareru_42.md|edge_cases/edge_kowareru_43.md": {
+      "plain": "2d780a9b8ade90bf",
+      "stance": "2d780a9b8ade90bf",
+      "fail_on": "2d780a9b8ade90bf",
+      "json": "a90b712e28411b92",
+      "stdin": "2d780a9b8ade90bf"
+    },
+    "edge_cases/edge_kowareru_43.md|edge_cases/edge_kowareru_44.md": {
+      "plain": "44e34f9877f701a5",
+      "stance": "44e34f9877f701a5",
+      "fail_on": "44e34f9877f701a5",
+      "json": "218986c6f3045e35",
+      "stdin": "44e34f9877f701a5"
+    },
+    "edge_cases/edge_kowareru_44.md|edge_cases/edge_nigiru_01.md": {
+      "plain": "cc24b34d56e0908a",
+      "stance": "cc24b34d56e0908a",
+      "fail_on": "cc24b34d56e0908a",
+      "json": "c3aa6bc727a3bac0",
+      "stdin": "cc24b34d56e0908a"
+    },
+    "edge_cases/edge_nigiru_01.md|edge_cases/edge_nigiru_02.md": {
+      "plain": "1f797c462564d159",
+      "stance": "1f797c462564d159",
+      "fail_on": "1f797c462564d159",
+      "json": "77e574c304c37ad7",
+      "stdin": "1f797c462564d159"
+    },
+    "edge_cases/edge_nigiru_02.md|edge_cases/edge_nigiru_03.md": {
+      "plain": "ef2e3213efc68ff4",
+      "stance": "ef2e3213efc68ff4",
+      "fail_on": "99f7b5ea078805dd",
+      "json": "8374725569972af6",
+      "stdin": "ef2e3213efc68ff4"
+    },
+    "edge_cases/edge_nigiru_03.md|edge_cases/edge_nigiru_04.md": {
+      "plain": "53bb6681b5f794eb",
+      "stance": "53bb6681b5f794eb",
+      "fail_on": "a648f5855b441e75",
+      "json": "d9f56e3c85e4747d",
+      "stdin": "53bb6681b5f794eb"
+    },
+    "edge_cases/edge_nigiru_04.md|edge_cases/edge_nigiru_05.md": {
+      "plain": "5577dfc3da8f9f9f",
+      "stance": "5577dfc3da8f9f9f",
+      "fail_on": "5577dfc3da8f9f9f",
+      "json": "fe56e3281aeccb4a",
+      "stdin": "5577dfc3da8f9f9f"
+    },
+    "edge_cases/edge_nigiru_05.md|edge_cases/edge_nigiru_06.md": {
+      "plain": "4d0cd4c3eee81f54",
+      "stance": "4d0cd4c3eee81f54",
+      "fail_on": "4d0cd4c3eee81f54",
+      "json": "03df47ec5c81d384",
+      "stdin": "4d0cd4c3eee81f54"
+    },
+    "edge_cases/edge_nigiru_06.md|edge_cases/edge_nigiru_07.md": {
+      "plain": "1d72787675824605",
+      "stance": "1d72787675824605",
+      "fail_on": "1d72787675824605",
+      "json": "1742043a3010e826",
+      "stdin": "1d72787675824605"
+    },
+    "edge_cases/edge_nigiru_07.md|edge_cases/edge_nigiru_08.md": {
+      "plain": "42bee20bd47d2170",
+      "stance": "42bee20bd47d2170",
+      "fail_on": "42bee20bd47d2170",
+      "json": "010d86dfcefe33e0",
+      "stdin": "42bee20bd47d2170"
+    },
+    "edge_cases/edge_nigiru_08.md|edge_cases/edge_nigiru_09.md": {
+      "plain": "fea517841a49c253",
+      "stance": "fea517841a49c253",
+      "fail_on": "fea517841a49c253",
+      "json": "0de57e39acfa7ee3",
+      "stdin": "fea517841a49c253"
+    },
+    "edge_cases/edge_nigiru_09.md|edge_cases/edge_nigiru_10.md": {
+      "plain": "314c5d7efae9529c",
+      "stance": "314c5d7efae9529c",
+      "fail_on": "314c5d7efae9529c",
+      "json": "6bca701b045e1c37",
+      "stdin": "314c5d7efae9529c"
+    },
+    "edge_cases/edge_nigiru_10.md|edge_cases/edge_taosu_11.md": {
+      "plain": "c90439bf25753826",
+      "stance": "c90439bf25753826",
+      "fail_on": "c90439bf25753826",
+      "json": "033eb54477c84310",
+      "stdin": "c90439bf25753826"
+    },
+    "edge_cases/edge_taosu_11.md|edge_cases/edge_taosu_12.md": {
+      "plain": "1961f8626459c7de",
+      "stance": "1961f8626459c7de",
+      "fail_on": "1961f8626459c7de",
+      "json": "9feedf3fb2660745",
+      "stdin": "1961f8626459c7de"
+    },
+    "edge_cases/edge_taosu_12.md|edge_cases/edge_taosu_13.md": {
+      "plain": "3d29072ab22673b3",
+      "stance": "3d29072ab22673b3",
+      "fail_on": "3d29072ab22673b3",
+      "json": "e7694786b6d972f4",
+      "stdin": "3d29072ab22673b3"
+    },
+    "edge_cases/edge_taosu_13.md|edge_cases/edge_taosu_14.md": {
+      "plain": "c97ef6983a360b8a",
+      "stance": "c97ef6983a360b8a",
+      "fail_on": "c97ef6983a360b8a",
+      "json": "da052650735a6b84",
+      "stdin": "c97ef6983a360b8a"
+    },
+    "edge_cases/edge_taosu_14.md|edge_cases/edge_taosu_15.md": {
+      "plain": "23d2aa4203101d59",
+      "stance": "23d2aa4203101d59",
+      "fail_on": "23d2aa4203101d59",
+      "json": "9dab8d44962b7fa6",
+      "stdin": "23d2aa4203101d59"
+    },
+    "edge_cases/edge_taosu_15.md|edge_cases/edge_taosu_16.md": {
+      "plain": "fabce8c002bbfd3d",
+      "stance": "fabce8c002bbfd3d",
+      "fail_on": "fabce8c002bbfd3d",
+      "json": "01ad0232d90b391f",
+      "stdin": "fabce8c002bbfd3d"
+    },
+    "edge_cases/edge_taosu_16.md|edge_cases/edge_taosu_17.md": {
+      "plain": "dbc1836bac84a7c7",
+      "stance": "dbc1836bac84a7c7",
+      "fail_on": "dbc1836bac84a7c7",
+      "json": "b4efd9e5d1706a28",
+      "stdin": "dbc1836bac84a7c7"
+    },
+    "edge_cases/edge_taosu_17.md|edge_cases/edge_taosu_18.md": {
+      "plain": "f7969a00289cc7cd",
+      "stance": "f7969a00289cc7cd",
+      "fail_on": "f7969a00289cc7cd",
+      "json": "80622280b613dae8",
+      "stdin": "f7969a00289cc7cd"
+    },
+    "edge_cases/edge_taosu_18.md|edge_cases/edge_taosu_19.md": {
+      "plain": "b86a77578ad9f430",
+      "stance": "b86a77578ad9f430",
+      "fail_on": "b86a77578ad9f430",
+      "json": "b983a9f9d7760045",
+      "stdin": "b86a77578ad9f430"
+    },
+    "edge_cases/edge_taosu_19.md|edge_cases/edge_taosu_20.md": {
+      "plain": "0551f676783d5655",
+      "stance": "0551f676783d5655",
+      "fail_on": "0551f676783d5655",
+      "json": "05e8ff2d9693fe2d",
+      "stdin": "0551f676783d5655"
+    },
+    "edge_cases/edge_taosu_20.md|edge_cases/edge_tokasu_21.md": {
+      "plain": "84978d8df15cbcf0",
+      "stance": "84978d8df15cbcf0",
+      "fail_on": "84978d8df15cbcf0",
+      "json": "0a4f1078eeec5301",
+      "stdin": "84978d8df15cbcf0"
+    },
+    "edge_cases/edge_tokasu_21.md|edge_cases/edge_tokasu_22.md": {
+      "plain": "b7ed34f62ca2e9a6",
+      "stance": "b7ed34f62ca2e9a6",
+      "fail_on": "b7ed34f62ca2e9a6",
+      "json": "7983969ac7093318",
+      "stdin": "b7ed34f62ca2e9a6"
+    },
+    "edge_cases/edge_tokasu_22.md|edge_cases/edge_tokasu_23.md": {
+      "plain": "037cffdb07078a57",
+      "stance": "037cffdb07078a57",
+      "fail_on": "037cffdb07078a57",
+      "json": "a796c3d246fa326b",
+      "stdin": "037cffdb07078a57"
+    },
+    "edge_cases/edge_tokasu_23.md|edge_cases/edge_tokasu_24.md": {
+      "plain": "d9d6ac182f014cba",
+      "stance": "d9d6ac182f014cba",
+      "fail_on": "d9d6ac182f014cba",
+      "json": "87768e5cf0320a5e",
+      "stdin": "d9d6ac182f014cba"
+    },
+    "edge_cases/edge_tokasu_24.md|edge_cases/edge_tokasu_25.md": {
+      "plain": "ec50f3d400f22bd2",
+      "stance": "ec50f3d400f22bd2",
+      "fail_on": "ec50f3d400f22bd2",
+      "json": "630665ccbf2505d7",
+      "stdin": "ec50f3d400f22bd2"
+    },
+    "edge_cases/edge_tokasu_25.md|edge_cases/edge_tokasu_26.md": {
+      "plain": "5dc89679897965ac",
+      "stance": "5dc89679897965ac",
+      "fail_on": "5dc89679897965ac",
+      "json": "f26a1a1d0aaa0a99",
+      "stdin": "5dc89679897965ac"
+    },
+    "edge_cases/edge_tokasu_26.md|edge_cases/edge_tokasu_27.md": {
+      "plain": "ca22f5e7ffe22031",
+      "stance": "ca22f5e7ffe22031",
+      "fail_on": "ca22f5e7ffe22031",
+      "json": "e7a3b9312745a8fe",
+      "stdin": "ca22f5e7ffe22031"
+    },
+    "edge_cases/edge_tokasu_27.md|edge_cases/edge_tokasu_28.md": {
+      "plain": "19d2a544d36c6e54",
+      "stance": "19d2a544d36c6e54",
+      "fail_on": "19d2a544d36c6e54",
+      "json": "caeb65e04f34ae44",
+      "stdin": "19d2a544d36c6e54"
+    },
+    "edge_cases/edge_tokasu_28.md|edge_cases/edge_v111_keep_01.md": {
+      "plain": "82854010338e4d2b",
+      "stance": "e27f4a9f287f0bab",
+      "fail_on": "b507efdb375dd0af",
+      "json": "08d85c2651cf7d2f",
+      "stdin": "82854010338e4d2b"
+    },
+    "edge_cases/edge_v111_keep_01.md|edge_cases/edge_waru_29.md": {
+      "plain": "0329bdcc74b940ee",
+      "stance": "0329bdcc74b940ee",
+      "fail_on": "baf71c5ef2f35816",
+      "json": "44a7f0b2f8d2f884",
+      "stdin": "0329bdcc74b940ee"
+    },
+    "edge_cases/edge_waru_29.md|edge_cases/edge_waru_30.md": {
+      "plain": "5ab066ca2e6f82c8",
+      "stance": "5ab066ca2e6f82c8",
+      "fail_on": "5ab066ca2e6f82c8",
+      "json": "899619297a98e4a7",
+      "stdin": "5ab066ca2e6f82c8"
+    },
+    "edge_cases/edge_waru_30.md|edge_cases/edge_waru_31.md": {
+      "plain": "2a513bd843d9ef96",
+      "stance": "2a513bd843d9ef96",
+      "fail_on": "2a513bd843d9ef96",
+      "json": "c540447a0b4fcdc4",
+      "stdin": "2a513bd843d9ef96"
+    },
+    "edge_cases/edge_waru_31.md|edge_cases/edge_waru_32.md": {
+      "plain": "ceffeb1359649310",
+      "stance": "ceffeb1359649310",
+      "fail_on": "ceffeb1359649310",
+      "json": "e1243daa11287ef9",
+      "stdin": "ceffeb1359649310"
+    },
+    "edge_cases/edge_waru_32.md|edge_cases/edge_waru_33.md": {
+      "plain": "62fd9491c3155d9c",
+      "stance": "62fd9491c3155d9c",
+      "fail_on": "62fd9491c3155d9c",
+      "json": "cb8f737acdafeee2",
+      "stdin": "62fd9491c3155d9c"
+    },
+    "edge_cases/edge_waru_33.md|edge_cases/edge_waru_34.md": {
+      "plain": "51d3a504e866e4f9",
+      "stance": "51d3a504e866e4f9",
+      "fail_on": "51d3a504e866e4f9",
+      "json": "45e45d09b48e8c62",
+      "stdin": "51d3a504e866e4f9"
+    },
+    "edge_cases/edge_waru_34.md|edge_cases/edge_waru_35.md": {
+      "plain": "2a919ee750491f67",
+      "stance": "2a919ee750491f67",
+      "fail_on": "2a919ee750491f67",
+      "json": "6703ad817f89b49b",
+      "stdin": "2a919ee750491f67"
+    },
+    "edge_cases/edge_waru_35.md|edge_cases/edge_waru_36.md": {
+      "plain": "df3d8ac461a117b6",
+      "stance": "df3d8ac461a117b6",
+      "fail_on": "df3d8ac461a117b6",
+      "json": "13d588a7e76563e4",
+      "stdin": "df3d8ac461a117b6"
+    },
+    "edge_cases/edge_waru_36.md|edge_cases/edge_watasu_47.md": {
+      "plain": "1d3ac2ece3480678",
+      "stance": "1d3ac2ece3480678",
+      "fail_on": "1d3ac2ece3480678",
+      "json": "c12b4c635267d1e2",
+      "stdin": "1d3ac2ece3480678"
+    },
+    "edge_cases/edge_watasu_47.md|edge_cases/edge_watasu_48.md": {
+      "plain": "48cadefce14a117e",
+      "stance": "48cadefce14a117e",
+      "fail_on": "48cadefce14a117e",
+      "json": "ab77fa45ba0a39ad",
+      "stdin": "48cadefce14a117e"
+    },
+    "human/human_doc_09.md|human/human_doc_10.md": {
+      "plain": "4e8b3d59ed7847cd",
+      "stance": "4e8b3d59ed7847cd",
+      "fail_on": "d03b0839aede6f6b",
+      "json": "7fb7437c9a0f1211",
+      "stdin": "4e8b3d59ed7847cd"
+    },
+    "human/human_doc_10.md|human/human_doc_11.md": {
+      "plain": "427d4812ac3fef3f",
+      "stance": "427d4812ac3fef3f",
+      "fail_on": "ed3b4fd696302e95",
+      "json": "5fd7af8b329b026c",
+      "stdin": "427d4812ac3fef3f"
+    },
+    "human/human_doc_11.md|human/human_doc_12.md": {
+      "plain": "e9df5675cebe4767",
+      "stance": "44c64c727b0ba1a6",
+      "fail_on": "ad03ec5704a29561",
+      "json": "1987d43a0f914da8",
+      "stdin": "e9df5675cebe4767"
+    },
+    "human/human_doc_12.md|human/human_doc_13.md": {
+      "plain": "9d184e5ec1bdf589",
+      "stance": "9d184e5ec1bdf589",
+      "fail_on": "4ac1970f5dc9496c",
+      "json": "4c5db7d42b131ae1",
+      "stdin": "9d184e5ec1bdf589"
+    },
+    "human/human_doc_13.md|human/human_doc_14.md": {
+      "plain": "5e368c4f3ef0fa21",
+      "stance": "5e368c4f3ef0fa21",
+      "fail_on": "e8659783433e0354",
+      "json": "82304f77fd88d291",
+      "stdin": "5e368c4f3ef0fa21"
+    },
+    "human/human_doc_14.md|human/human_doc_15.md": {
+      "plain": "fac1d3f186fbdaf4",
+      "stance": "ceb2dcbdccdc49f2",
+      "fail_on": "99db48a24c750884",
+      "json": "c30b4bd2c0258c65",
+      "stdin": "fac1d3f186fbdaf4"
+    },
+    "human/human_doc_15.md|human/human_doc_16.md": {
+      "plain": "d25ad4db0476b01b",
+      "stance": "d25ad4db0476b01b",
+      "fail_on": "cab9c617ab9176f9",
+      "json": "94d403aa15dcd321",
+      "stdin": "d25ad4db0476b01b"
+    },
+    "human/human_doc_16.md|human/human_oga_01.md": {
+      "plain": "5e232ed439e9b556",
+      "stance": "5e232ed439e9b556",
+      "fail_on": "5222bbb7338cbde1",
+      "json": "80fe1aa4c66c194a",
+      "stdin": "5e232ed439e9b556"
+    },
+    "human/human_oga_01.md|human/human_oga_02.md": {
+      "plain": "62ebc29c2ad7832b",
+      "stance": "62ebc29c2ad7832b",
+      "fail_on": "1a5752d7feb82196",
+      "json": "96f8ed4ef76b2a52",
+      "stdin": "62ebc29c2ad7832b"
+    },
+    "human/human_oga_02.md|human/human_oga_03.md": {
+      "plain": "496d0b3a27b0c51b",
+      "stance": "496d0b3a27b0c51b",
+      "fail_on": "d7cd4b456e848855",
+      "json": "de3bbef23b0ff88c",
+      "stdin": "496d0b3a27b0c51b"
+    },
+    "human/human_oga_03.md|human/human_oga_04.md": {
+      "plain": "d3ecbf819eec00f7",
+      "stance": "34703586122c06ad",
+      "fail_on": "070d3c1835481ea6",
+      "json": "b0ebeb74730c4e69",
+      "stdin": "d3ecbf819eec00f7"
+    },
+    "human/human_oga_04.md|human/human_oga_05.md": {
+      "plain": "83027d21d0ee7b79",
+      "stance": "65ae6782d5cb8e9f",
+      "fail_on": "a9869eddf8bd9a63",
+      "json": "0a6389e3f62cca26",
+      "stdin": "83027d21d0ee7b79"
+    },
+    "human/human_oga_05.md|human/human_oga_06.md": {
+      "plain": "5d092ca95a45bbd0",
+      "stance": "5d092ca95a45bbd0",
+      "fail_on": "853c1a9a887e6791",
+      "json": "51c1f6f72cdb7623",
+      "stdin": "5d092ca95a45bbd0"
+    },
+    "human/human_oga_06.md|human/human_oga_07.md": {
+      "plain": "d38a84891df1f194",
+      "stance": "8a7849e19b306521",
+      "fail_on": "c92e4408f549708a",
+      "json": "1a1f97228f871f94",
+      "stdin": "d38a84891df1f194"
+    },
+    "human/human_oga_07.md|human/human_oga_08.md": {
+      "plain": "374984e09f4ac353",
+      "stance": "e527064d4af57c32",
+      "fail_on": "d84f95703ae7eb5a",
+      "json": "87a02dc0e2e239b7",
+      "stdin": "374984e09f4ac353"
+    },
+    "raw_ai/01_tech_arch_sonnet_casual.md|raw_ai/01_tech_arch_sonnet_default.md": {
+      "plain": "e46a4828b3391d06",
+      "stance": "e46a4828b3391d06",
+      "fail_on": "ecf085b2721815e6",
+      "json": "e567ad6198aeddce",
+      "stdin": "e46a4828b3391d06"
+    },
+    "raw_ai/01_tech_arch_sonnet_default.md|raw_ai/01_tech_arch_sonnet_formal.md": {
+      "plain": "5aa64e692e894281",
+      "stance": "5aa64e692e894281",
+      "fail_on": "c7842c8352e810bb",
+      "json": "6884d20b46e00b04",
+      "stdin": "5aa64e692e894281"
+    },
+    "raw_ai/01_tech_arch_sonnet_formal.md|raw_ai/02_incident_report_sonnet_casual.md": {
+      "plain": "2bb050e2bc173732",
+      "stance": "2bb050e2bc173732",
+      "fail_on": "2ff09db831b093cc",
+      "json": "cbbf35fd229c137f",
+      "stdin": "2bb050e2bc173732"
+    },
+    "raw_ai/02_incident_report_sonnet_casual.md|raw_ai/02_incident_report_sonnet_default.md": {
+      "plain": "ef6d8dd0093e528c",
+      "stance": "ef6d8dd0093e528c",
+      "fail_on": "1cc6131767f77f4e",
+      "json": "5bafa773308263e3",
+      "stdin": "ef6d8dd0093e528c"
+    },
+    "raw_ai/02_incident_report_sonnet_default.md|raw_ai/02_incident_report_sonnet_formal.md": {
+      "plain": "a2f0e5ff9c7016fb",
+      "stance": "a2f0e5ff9c7016fb",
+      "fail_on": "1b884ebac94ffc76",
+      "json": "3cec9bb84c1f958d",
+      "stdin": "a2f0e5ff9c7016fb"
+    },
+    "raw_ai/02_incident_report_sonnet_formal.md|raw_ai/03_pr_description_sonnet_casual.md": {
+      "plain": "039edaad3218479f",
+      "stance": "039edaad3218479f",
+      "fail_on": "30113a0386835813",
+      "json": "4c462eec6de87721",
+      "stdin": "039edaad3218479f"
+    },
+    "raw_ai/03_pr_description_sonnet_casual.md|raw_ai/03_pr_description_sonnet_default.md": {
+      "plain": "ad1e21ce28fcbfcc",
+      "stance": "ad1e21ce28fcbfcc",
+      "fail_on": "0a6f79bc8efba893",
+      "json": "f68dc6017de6acf3",
+      "stdin": "ad1e21ce28fcbfcc"
+    },
+    "raw_ai/03_pr_description_sonnet_default.md|raw_ai/03_pr_description_sonnet_formal.md": {
+      "plain": "d472c210226304a5",
+      "stance": "7da60abe1675969d",
+      "fail_on": "2295fa39f5c550a8",
+      "json": "1af7515c24619269",
+      "stdin": "d472c210226304a5"
+    },
+    "raw_ai/03_pr_description_sonnet_formal.md|raw_ai/04_slack_announce_sonnet_casual.md": {
+      "plain": "de64bcf6c90acf7a",
+      "stance": "85d7a5504941b2f5",
+      "fail_on": "854fb21e0e173352",
+      "json": "e50edc9a02c2db59",
+      "stdin": "de64bcf6c90acf7a"
+    },
+    "raw_ai/04_slack_announce_sonnet_casual.md|raw_ai/04_slack_announce_sonnet_default.md": {
+      "plain": "b9448bf4effeb737",
+      "stance": "b1817266d1a75874",
+      "fail_on": "b6ad0953bf13d627",
+      "json": "82f20efc5e2f22ad",
+      "stdin": "b9448bf4effeb737"
+    },
+    "raw_ai/04_slack_announce_sonnet_default.md|raw_ai/04_slack_announce_sonnet_formal.md": {
+      "plain": "74b9361b5a2641a0",
+      "stance": "453e5b499ccf157c",
+      "fail_on": "c1d2029681a4efb3",
+      "json": "8f31e81b7a801ad8",
+      "stdin": "74b9361b5a2641a0"
+    },
+    "raw_ai/04_slack_announce_sonnet_formal.md|raw_ai/05_comparison_sonnet_casual.md": {
+      "plain": "8233177d926ef940",
+      "stance": "8233177d926ef940",
+      "fail_on": "387eb5f1db904d1f",
+      "json": "71a0d3b6a8cce8a1",
+      "stdin": "8233177d926ef940"
+    },
+    "raw_ai/05_comparison_sonnet_casual.md|raw_ai/05_comparison_sonnet_default.md": {
+      "plain": "3c56d69c05234505",
+      "stance": "3c56d69c05234505",
+      "fail_on": "f2e3770b03d49559",
+      "json": "a1f1abd9320aa182",
+      "stdin": "3c56d69c05234505"
+    },
+    "raw_ai/05_comparison_sonnet_default.md|raw_ai/05_comparison_sonnet_formal.md": {
+      "plain": "3e08602666baa0e4",
+      "stance": "3e08602666baa0e4",
+      "fail_on": "3e08602666baa0e4",
+      "json": "aef27a014441244b",
+      "stdin": "3e08602666baa0e4"
+    },
+    "raw_ai/05_comparison_sonnet_formal.md|raw_ai/06_spec_draft_sonnet_casual.md": {
+      "plain": "c0b0af7e087056a9",
+      "stance": "c0b0af7e087056a9",
+      "fail_on": "229589e378e6b2b3",
+      "json": "2fc00354f74ea33d",
+      "stdin": "c0b0af7e087056a9"
+    },
+    "raw_ai/06_spec_draft_sonnet_casual.md|raw_ai/06_spec_draft_sonnet_default.md": {
+      "plain": "a7dc1cde43a4336c",
+      "stance": "a7dc1cde43a4336c",
+      "fail_on": "1af11d02cd0bfb10",
+      "json": "379454e14866f7da",
+      "stdin": "a7dc1cde43a4336c"
+    },
+    "raw_ai/06_spec_draft_sonnet_default.md|raw_ai/06_spec_draft_sonnet_formal.md": {
+      "plain": "b3cebcd001ba6f19",
+      "stance": "b3cebcd001ba6f19",
+      "fail_on": "6b5d303909e77a3d",
+      "json": "9ef68ad3dc953056",
+      "stdin": "b3cebcd001ba6f19"
+    },
+    "raw_ai/06_spec_draft_sonnet_formal.md|raw_ai/07_code_review_sonnet_casual.md": {
+      "plain": "50999c114f4d1497",
+      "stance": "50999c114f4d1497",
+      "fail_on": "e7464954e982e235",
+      "json": "5726ffe3a95fd788",
+      "stdin": "50999c114f4d1497"
+    },
+    "raw_ai/07_code_review_sonnet_casual.md|raw_ai/07_code_review_sonnet_default.md": {
+      "plain": "40544d019985ef44",
+      "stance": "ff84f0acfaef3fce",
+      "fail_on": "6c6c835edbdc93fd",
+      "json": "0d3318c16af75344",
+      "stdin": "40544d019985ef44"
+    },
+    "raw_ai/07_code_review_sonnet_default.md|raw_ai/07_code_review_sonnet_formal.md": {
+      "plain": "f820b7c154db7369",
+      "stance": "93e224a8784ab470",
+      "fail_on": "197f71410e37066f",
+      "json": "eb9f5ab4e635f179",
+      "stdin": "f820b7c154db7369"
+    },
+    "raw_ai/07_code_review_sonnet_formal.md|raw_ai/08_essay_retrospective_sonnet_casual.md": {
+      "plain": "e27ebf7a83837009",
+      "stance": "e27ebf7a83837009",
+      "fail_on": "dbd5fcc4af60833d",
+      "json": "32bb60dadaa364e8",
+      "stdin": "e27ebf7a83837009"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_casual.md|raw_ai/08_essay_retrospective_sonnet_default.md": {
+      "plain": "d7c5b3dd4a160a96",
+      "stance": "d7c5b3dd4a160a96",
+      "fail_on": "4a4ca537e9173116",
+      "json": "43202b39dec1413b",
+      "stdin": "d7c5b3dd4a160a96"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_default.md|raw_ai/08_essay_retrospective_sonnet_formal.md": {
+      "plain": "f6520af0a377e3bf",
+      "stance": "f6520af0a377e3bf",
+      "fail_on": "47c006009121c008",
+      "json": "b7f8020b59adba99",
+      "stdin": "f6520af0a377e3bf"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_formal.md|raw_ai/09_listicle_patterns.md": {
+      "plain": "13e20a3bc6559c2d",
+      "stance": "2b7bbd6362899e9f",
+      "fail_on": "cd054fb01007d463",
+      "json": "3f2f312f78f145ef",
+      "stdin": "13e20a3bc6559c2d"
+    },
+    "raw_ai/09_listicle_patterns.md|raw_ai/10_essay_fragments.md": {
+      "plain": "94e447449395b594",
+      "stance": "dfb995323f10836c",
+      "fail_on": "462a5abea7454f84",
+      "json": "a00c4aaada72c045",
+      "stdin": "94e447449395b594"
+    }
+  },
+  "check": {
+    "raw_ai/01_tech_arch_sonnet_casual.md|yomiyasu_rewritten/01_tech_arch_sonnet_casual.md": {
+      "run": "40d2412a73b920e0",
+      "verify": "dfb2123bdc1b4f8a",
+      "replay": "5e7c8249603ef7d8",
+      "rerun": "a071ca0940a42dba",
+      "compose": "d12f1c9f312d882f",
+      "stdin": "3698d7280b8b27f6",
+      "fail_on": "40d2412a73b920e0",
+      "no_record": "46aea0d7a8890df6",
+      "json": "624c8551ece008be"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_casual.md|yomiyasu_rewritten/01_tech_arch_sonnet_casual_bl.md": {
+      "run": "5251dac1818b753b",
+      "verify": "cd177b97cc6f1df8",
+      "replay": "a83c2f4beb8f19c0",
+      "rerun": "920f3d68a7608bb0",
+      "compose": "a4b34ec4e237488f",
+      "stdin": "8c43ae1d647ab17f",
+      "fail_on": "e342bcd1d273d925",
+      "no_record": "3ebf4f74251e42d4",
+      "json": "f531972fba6340dd"
+    },
+    "raw_ai/01_tech_arch_sonnet_default.md|yomiyasu_rewritten/01_tech_arch_sonnet_default.md": {
+      "run": "8797dd268a21a369",
+      "verify": "eeb5a7003463c918",
+      "replay": "ff7b15ddf3fe3783",
+      "rerun": "f60cc4a192fed736",
+      "compose": "9a57727b08151f7e",
+      "stdin": "b973c3eec2af811a",
+      "fail_on": "d58d14adadc7b61c",
+      "no_record": "a4becd2acacf2e7a",
+      "json": "a29cd704749a4e4c"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_default.md|yomiyasu_rewritten/01_tech_arch_sonnet_default_bl.md": {
+      "run": "941547ddc46f8de3",
+      "verify": "d9e2c6e34631dd04",
+      "replay": "c29424cd98a7e1d2",
+      "rerun": "e98d5f6193d03965",
+      "compose": "d7c1bac602d9c465",
+      "stdin": "1f256fd6a1d1e14c",
+      "fail_on": "941547ddc46f8de3",
+      "no_record": "27794906d9344a41",
+      "json": "a9bb3738f0a719fa"
+    },
+    "raw_ai/01_tech_arch_sonnet_formal.md|yomiyasu_rewritten/01_tech_arch_sonnet_formal.md": {
+      "run": "4981ccd23f47168b",
+      "verify": "ecbf6be717c7d4c1",
+      "replay": "475786ca8c9b4d4c",
+      "rerun": "978dcb9c76964a8d",
+      "compose": "9cfa4e1ac72c6622",
+      "stdin": "70bfc061c3f73287",
+      "fail_on": "adc8366c3b533d42",
+      "no_record": "9d50d3c70afd3b63",
+      "json": "c9efe4a26ab53663"
+    },
+    "blacklist_ai/01_tech_arch_sonnet_formal.md|yomiyasu_rewritten/01_tech_arch_sonnet_formal_bl.md": {
+      "run": "8efe40d184ba5dc4",
+      "verify": "a44e29481c143f1b",
+      "replay": "36d5a0de04b5d377",
+      "rerun": "0262479601e700ce",
+      "compose": "f9628398b0bbddb8",
+      "stdin": "913c339059a85364",
+      "fail_on": "8efe40d184ba5dc4",
+      "no_record": "b253cd5f044fa1d2",
+      "json": "bc6bf1418c443203"
+    },
+    "raw_ai/02_incident_report_sonnet_casual.md|yomiyasu_rewritten/02_incident_report_sonnet_casual.md": {
+      "run": "a4d691be38ddf919",
+      "verify": "eccea00f2a5151f7",
+      "replay": "57ae4efe96eef0d1",
+      "rerun": "99409bbf18e12d5e",
+      "compose": "c20f8d857da2f5cb",
+      "stdin": "66123a966d0efe25",
+      "fail_on": "dc772678f63b2796",
+      "no_record": "74b9a8abebc9ed58",
+      "json": "3d178b154c84d9b3"
+    },
+    "blacklist_ai/02_incident_report_sonnet_casual.md|yomiyasu_rewritten/02_incident_report_sonnet_casual_bl.md": {
+      "run": "32e33e7c969d56f6",
+      "verify": "a93ed3805dad5a94",
+      "replay": "ae5826c59c1bd9a1",
+      "rerun": "269a2c925b7c1343",
+      "compose": "fd84448a9ebc6571",
+      "stdin": "c54a2afc6ba5e5d2",
+      "fail_on": "32e33e7c969d56f6",
+      "no_record": "b396792ca3024c9b",
+      "json": "8a9a760ec5c2ac55"
+    },
+    "raw_ai/02_incident_report_sonnet_default.md|yomiyasu_rewritten/02_incident_report_sonnet_default.md": {
+      "run": "87591779e7bedd4e",
+      "verify": "9dafbeefbb1613b6",
+      "replay": "3ff27f7b4e0e997b",
+      "rerun": "26f762fcd7aecbca",
+      "compose": "edae184148050a24",
+      "stdin": "aabdfcfd6321912f",
+      "fail_on": "1e02a7f9af090dca",
+      "no_record": "206d7472f0f7bdfe",
+      "json": "f9953731776e39a8"
+    },
+    "blacklist_ai/02_incident_report_sonnet_default.md|yomiyasu_rewritten/02_incident_report_sonnet_default_bl.md": {
+      "run": "588846c7a1bfa3d0",
+      "verify": "d3931d9102246e29",
+      "replay": "de7da5c81a9414b1",
+      "rerun": "c6d323b8b478a0ba",
+      "compose": "c61194703e9859ea",
+      "stdin": "36c400c4ec3ec977",
+      "fail_on": "588846c7a1bfa3d0",
+      "no_record": "2dd9157d28d95d1e",
+      "json": "a84cf59b9167b30b"
+    },
+    "raw_ai/02_incident_report_sonnet_formal.md|yomiyasu_rewritten/02_incident_report_sonnet_formal.md": {
+      "run": "7822d24ac2296e64",
+      "verify": "2efc5bc98336793c",
+      "replay": "dda8244985d61816",
+      "rerun": "c033c836014030ef",
+      "compose": "5d9429dbe58564a1",
+      "stdin": "f0f108be57f7ef4c",
+      "fail_on": "7822d24ac2296e64",
+      "no_record": "7e3814489cf00a70",
+      "json": "b1af3443a40bdacd"
+    },
+    "blacklist_ai/02_incident_report_sonnet_formal.md|yomiyasu_rewritten/02_incident_report_sonnet_formal_bl.md": {
+      "run": "97299ace6e413316",
+      "verify": "aabb1300ed5a4120",
+      "replay": "d37165da605f77b7",
+      "rerun": "e58907d5d2e9cc67",
+      "compose": "defa3a2ce1658afc",
+      "stdin": "10dcabe7bebb5c7a",
+      "fail_on": "97299ace6e413316",
+      "no_record": "6df41f151f1df96f",
+      "json": "71f8f00395e305f6"
+    },
+    "raw_ai/03_pr_description_sonnet_casual.md|yomiyasu_rewritten/03_pr_description_sonnet_casual.md": {
+      "run": "3f607201a4e7b613",
+      "verify": "5cabcd22b9fd007c",
+      "replay": "089d02a1634337a4",
+      "rerun": "d21f1264939569bd",
+      "compose": "cc700634a26d88e2",
+      "stdin": "2ac05873fc27e490",
+      "fail_on": "3f607201a4e7b613",
+      "no_record": "169690b524f7a98b",
+      "json": "97ca66d7bc7e5c72"
+    },
+    "blacklist_ai/03_pr_description_sonnet_casual.md|yomiyasu_rewritten/03_pr_description_sonnet_casual_bl.md": {
+      "run": "9e64a898ca7a7e84",
+      "verify": "c737dd83d34d169a",
+      "replay": "1ed55de45bc3369f",
+      "rerun": "0c054435dc9524d1",
+      "compose": "7b2db182ee36e915",
+      "stdin": "23e52e7b2d0b72f2",
+      "fail_on": "354868681ffcf29f",
+      "no_record": "0832f681d66770d0",
+      "json": "991ad7a52f20c5f4"
+    },
+    "raw_ai/03_pr_description_sonnet_default.md|yomiyasu_rewritten/03_pr_description_sonnet_default.md": {
+      "run": "b44327d59e256023",
+      "verify": "514732ffa928c262",
+      "replay": "80860eb1b0e4f4a7",
+      "rerun": "0e699936f5411f1a",
+      "compose": "dba50e5d95bb3af2",
+      "stdin": "6735328683607d81",
+      "fail_on": "b3a4242c4d2f2696",
+      "no_record": "5c3560f539d8bf44",
+      "json": "5ad94aa9284c3914"
+    },
+    "blacklist_ai/03_pr_description_sonnet_default.md|yomiyasu_rewritten/03_pr_description_sonnet_default_bl.md": {
+      "run": "9b5a2422b8dabbe7",
+      "verify": "e2b7929afe38406a",
+      "replay": "a3419a5ad6bb7420",
+      "rerun": "d6e7cc0efd565dbc",
+      "compose": "5edbc9e56a39e580",
+      "stdin": "e87f96029c41147e",
+      "fail_on": "080428938e38841d",
+      "no_record": "c1ffac611551bcbd",
+      "json": "ab0b450612157d73"
+    },
+    "raw_ai/03_pr_description_sonnet_formal.md|yomiyasu_rewritten/03_pr_description_sonnet_formal.md": {
+      "run": "f557bb53f1c62bf7",
+      "verify": "8a18d97d90f5323c",
+      "replay": "0093a672be769893",
+      "rerun": "0f49438b951763c0",
+      "compose": "cab6ba55e283d679",
+      "stdin": "443f2e488d8377e0",
+      "fail_on": "3abea0e8edfced2e",
+      "no_record": "a618b08966048919",
+      "json": "17c8c3cff82ffe01"
+    },
+    "blacklist_ai/03_pr_description_sonnet_formal.md|yomiyasu_rewritten/03_pr_description_sonnet_formal_bl.md": {
+      "run": "6887a6a7bdd38b98",
+      "verify": "e790e182204b8398",
+      "replay": "299bdc21615eb4f6",
+      "rerun": "d6cae55308809c91",
+      "compose": "93c342d2da38450a",
+      "stdin": "38037e0f9ad63d26",
+      "fail_on": "6887a6a7bdd38b98",
+      "no_record": "fff98510b3876470",
+      "json": "a7154b569e827be6"
+    },
+    "raw_ai/04_slack_announce_sonnet_casual.md|yomiyasu_rewritten/04_slack_announce_sonnet_casual.md": {
+      "run": "0bcc33a62450ae52",
+      "verify": "a5e1fa221d4cf81f",
+      "replay": "3a46d323c91eff91",
+      "rerun": "c7be707882f3f4c0",
+      "compose": "7fdad179527e55d8",
+      "stdin": "56400ae3283e634f",
+      "fail_on": "0bcc33a62450ae52",
+      "no_record": "e5776e9b9667b6e1",
+      "json": "34dbc601a26132ec"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_casual.md|yomiyasu_rewritten/04_slack_announce_sonnet_casual_bl.md": {
+      "run": "a181fbf8beeb55aa",
+      "verify": "00805cf8a99cf628",
+      "replay": "d9119f450c0d631b",
+      "rerun": "465422735f289e1b",
+      "compose": "fd3ba821b4213676",
+      "stdin": "797e10351d9642cd",
+      "fail_on": "a181fbf8beeb55aa",
+      "no_record": "5f63be089cd0c4b7",
+      "json": "36182e11f445cca8"
+    },
+    "raw_ai/04_slack_announce_sonnet_default.md|yomiyasu_rewritten/04_slack_announce_sonnet_default.md": {
+      "run": "f7679b05bdea27b5",
+      "verify": "f089cf877004d469",
+      "replay": "d153d70b761f79c2",
+      "rerun": "ea99902384e6a0d4",
+      "compose": "982f95550d014a3b",
+      "stdin": "3d344b83a2291229",
+      "fail_on": "3f121f1a1845ec57",
+      "no_record": "226bff345c03299a",
+      "json": "556f21496ac67482"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_default.md|yomiyasu_rewritten/04_slack_announce_sonnet_default_bl.md": {
+      "run": "9ef041e9b22edf56",
+      "verify": "17f266199c301c63",
+      "replay": "59efc96b16cf6359",
+      "rerun": "7f4b7e54372eeb84",
+      "compose": "db58a2d7532250ad",
+      "stdin": "9dd5ed50279ab5b1",
+      "fail_on": "9ef041e9b22edf56",
+      "no_record": "8fe48c6c694f5548",
+      "json": "820d167d047a07ce"
+    },
+    "raw_ai/04_slack_announce_sonnet_formal.md|yomiyasu_rewritten/04_slack_announce_sonnet_formal.md": {
+      "run": "fe5c09b7cb6f0690",
+      "verify": "9943ee192a758514",
+      "replay": "86d43a31afce4202",
+      "rerun": "976950cfbbeda151",
+      "compose": "a6b690eeda8dd8eb",
+      "stdin": "1e45ef6ab8a714c6",
+      "fail_on": "fe5c09b7cb6f0690",
+      "no_record": "ea0384100f5053cc",
+      "json": "5afeba43b75ee412"
+    },
+    "blacklist_ai/04_slack_announce_sonnet_formal.md|yomiyasu_rewritten/04_slack_announce_sonnet_formal_bl.md": {
+      "run": "a0d448d888a03bfc",
+      "verify": "775d4c8b342a82fb",
+      "replay": "36e3f58577c27bbb",
+      "rerun": "a14fd7bbe40138df",
+      "compose": "179f8f122de827a5",
+      "stdin": "3bb7f5142759f9f0",
+      "fail_on": "a0d448d888a03bfc",
+      "no_record": "a9ae1655e3773878",
+      "json": "633061627baa1a61"
+    },
+    "raw_ai/05_comparison_sonnet_casual.md|yomiyasu_rewritten/05_comparison_sonnet_casual.md": {
+      "run": "6b26106decfc6403",
+      "verify": "30da2b1e6032f14c",
+      "replay": "22634db339f04e77",
+      "rerun": "936dd1e5ca60ca36",
+      "compose": "7b028bbf05ddfcb2",
+      "stdin": "0cf3c9f528a3530a",
+      "fail_on": "6b26106decfc6403",
+      "no_record": "6a227e3aaf32d0e5",
+      "json": "d6b5753f9c2596fc"
+    },
+    "blacklist_ai/05_comparison_sonnet_casual.md|yomiyasu_rewritten/05_comparison_sonnet_casual_bl.md": {
+      "run": "b853b266aa6eca67",
+      "verify": "0bba0afa1c60d5f8",
+      "replay": "52f8cb5f86955e40",
+      "rerun": "e3adbb341ccf5f51",
+      "compose": "179aa72ed6319464",
+      "stdin": "81f7771168751499",
+      "fail_on": "677f8f0fdfd3058a",
+      "no_record": "cc6e49decc7100b4",
+      "json": "c693c1b105c66f4c"
+    },
+    "raw_ai/05_comparison_sonnet_default.md|yomiyasu_rewritten/05_comparison_sonnet_default.md": {
+      "run": "db52ff3a2c449d8b",
+      "verify": "27dd505dfcf1d1e9",
+      "replay": "d74b873f181d7e05",
+      "rerun": "5a18ae11957512f3",
+      "compose": "b14a7cfe90eb77a6",
+      "stdin": "ff0096cea4bccf4a",
+      "fail_on": "db52ff3a2c449d8b",
+      "no_record": "6b67c049a04247c6",
+      "json": "88e2b69e139464b6"
+    },
+    "blacklist_ai/05_comparison_sonnet_default.md|yomiyasu_rewritten/05_comparison_sonnet_default_bl.md": {
+      "run": "953f300abbe2d91a",
+      "verify": "4baa9f90e31c7b09",
+      "replay": "a58950672af6054d",
+      "rerun": "23807ad60174ecad",
+      "compose": "045711c629741398",
+      "stdin": "b25c594629355af9",
+      "fail_on": "953f300abbe2d91a",
+      "no_record": "42e921cac9beb885",
+      "json": "0912bd2b55fc2694"
+    },
+    "raw_ai/05_comparison_sonnet_formal.md|yomiyasu_rewritten/05_comparison_sonnet_formal.md": {
+      "run": "b787b070cf6cf38a",
+      "verify": "29cb5de9c7f00024",
+      "replay": "2da66f6885a8e197",
+      "rerun": "146ef9eabaddd0d1",
+      "compose": "a7be30740ab29da9",
+      "stdin": "f9cbec683fda85d2",
+      "fail_on": "b787b070cf6cf38a",
+      "no_record": "fb9323e27d5e7a81",
+      "json": "1a41c9e9d7e351a3"
+    },
+    "blacklist_ai/05_comparison_sonnet_formal.md|yomiyasu_rewritten/05_comparison_sonnet_formal_bl.md": {
+      "run": "791a91cbea9d6a32",
+      "verify": "c4d73dbe64d68157",
+      "replay": "74dda41d13650b72",
+      "rerun": "34c93ca75e0437b0",
+      "compose": "f11d7089449ae312",
+      "stdin": "8927459153b6bf94",
+      "fail_on": "791a91cbea9d6a32",
+      "no_record": "142412559fb654ce",
+      "json": "8fbf9b6e7dfd197c"
+    },
+    "raw_ai/06_spec_draft_sonnet_casual.md|yomiyasu_rewritten/06_spec_draft_sonnet_casual.md": {
+      "run": "9ca53c63b8c4a255",
+      "verify": "9f3a0a55f1b2faf2",
+      "replay": "4077cd7c053c37fa",
+      "rerun": "bfef818ebecd7955",
+      "compose": "5ae53ebb63031eef",
+      "stdin": "51750982079ba8d5",
+      "fail_on": "2c2f64df613bda3c",
+      "no_record": "e5ce97b752114859",
+      "json": "52c62463575acf7c"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_casual.md|yomiyasu_rewritten/06_spec_draft_sonnet_casual_bl.md": {
+      "run": "c87faa453bda0e19",
+      "verify": "79e577e45a1883b3",
+      "replay": "72cedb5f74be84cf",
+      "rerun": "83d87ccf89a7d97e",
+      "compose": "b95999021d3f2a13",
+      "stdin": "ebb8054f2acd3781",
+      "fail_on": "c87faa453bda0e19",
+      "no_record": "50d41350805622c2",
+      "json": "418d5f2e4d5bcbf3"
+    },
+    "raw_ai/06_spec_draft_sonnet_default.md|yomiyasu_rewritten/06_spec_draft_sonnet_default.md": {
+      "run": "8028fbcd6ca91b5e",
+      "verify": "91560a83d0daf584",
+      "replay": "dc4f4fb9c9d865ac",
+      "rerun": "0f37711f7b2eabf6",
+      "compose": "f515853c0b8116ba",
+      "stdin": "66e693d00d036203",
+      "fail_on": "8028fbcd6ca91b5e",
+      "no_record": "acda4532397b675c",
+      "json": "c3a4d732f98bdd9d"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_default.md|yomiyasu_rewritten/06_spec_draft_sonnet_default_bl.md": {
+      "run": "f41ff11d3a310aaa",
+      "verify": "d2449cae2859a9f9",
+      "replay": "b10c553c735ca636",
+      "rerun": "0abfeb3c75220ebc",
+      "compose": "eb7b3daeacde7a84",
+      "stdin": "c5c795f4ffc60267",
+      "fail_on": "f41ff11d3a310aaa",
+      "no_record": "25d71f470c2fa369",
+      "json": "a0e21dbd9d404b89"
+    },
+    "raw_ai/06_spec_draft_sonnet_formal.md|yomiyasu_rewritten/06_spec_draft_sonnet_formal.md": {
+      "run": "f8aa43cdc70fdcb7",
+      "verify": "b3519c8ec11ee903",
+      "replay": "733b2b8b43d96386",
+      "rerun": "32a5670898a6ca2b",
+      "compose": "c18696658d1ce338",
+      "stdin": "f02c8f253fa7e7de",
+      "fail_on": "f8aa43cdc70fdcb7",
+      "no_record": "b03631feb63b7c3a",
+      "json": "78b6a09583d1ff0a"
+    },
+    "blacklist_ai/06_spec_draft_sonnet_formal.md|yomiyasu_rewritten/06_spec_draft_sonnet_formal_bl.md": {
+      "run": "3ae2cb5a60b21e0e",
+      "verify": "65ff72515efa4b2e",
+      "replay": "1b276317fb04d19d",
+      "rerun": "1b091d2ab32d3285",
+      "compose": "14d8119ffd14ba42",
+      "stdin": "ea3b512fd1315e0f",
+      "fail_on": "3ae2cb5a60b21e0e",
+      "no_record": "1ea6b59c3ad351b1",
+      "json": "2281ad4c77276bd9"
+    },
+    "raw_ai/07_code_review_sonnet_casual.md|yomiyasu_rewritten/07_code_review_sonnet_casual.md": {
+      "run": "e5f3231399037c7a",
+      "verify": "6be554b0237adc7e",
+      "replay": "29991298db6c529f",
+      "rerun": "33bd815cad355019",
+      "compose": "9cfae631aeebd5af",
+      "stdin": "9e3eecf97893edab",
+      "fail_on": "1605bebf7ff7355d",
+      "no_record": "8ddc2a62a3c6191d",
+      "json": "8dd7314c6a5b35e2"
+    },
+    "blacklist_ai/07_code_review_sonnet_casual.md|yomiyasu_rewritten/07_code_review_sonnet_casual_bl.md": {
+      "run": "8144e138abacf283",
+      "verify": "96777b2d50abbe4f",
+      "replay": "48ee7b931845907e",
+      "rerun": "9e10bed7fe8b0244",
+      "compose": "15436eac79487198",
+      "stdin": "7f2b51a3928533ca",
+      "fail_on": "8144e138abacf283",
+      "no_record": "68a09b47a1195b0e",
+      "json": "c1a04098b5e31aa8"
+    },
+    "raw_ai/07_code_review_sonnet_default.md|yomiyasu_rewritten/07_code_review_sonnet_default.md": {
+      "run": "4f9a38f014e4da4b",
+      "verify": "9bffcdc30ad239ae",
+      "replay": "550c889f7ad5f6ad",
+      "rerun": "1055acd7294f3dd4",
+      "compose": "6d214680e492a83a",
+      "stdin": "229d567d4bb0fee3",
+      "fail_on": "5f8664941eddbd18",
+      "no_record": "984b16a966de9c1e",
+      "json": "785beea870bcebff"
+    },
+    "blacklist_ai/07_code_review_sonnet_default.md|yomiyasu_rewritten/07_code_review_sonnet_default_bl.md": {
+      "run": "a097b3edc725da67",
+      "verify": "c7496f254e7106b5",
+      "replay": "0219765a1c008072",
+      "rerun": "559024083d60cff9",
+      "compose": "3a1ba02b6ad486b0",
+      "stdin": "df2ab4a9d43afedb",
+      "fail_on": "dfd4f587ecb95ec8",
+      "no_record": "5df56df8bfc9aae6",
+      "json": "c5b9e041fb802630"
+    },
+    "raw_ai/07_code_review_sonnet_formal.md|yomiyasu_rewritten/07_code_review_sonnet_formal.md": {
+      "run": "b938c6219ba5ae1c",
+      "verify": "4d1f487b9c094142",
+      "replay": "9fabedc36a7da6f4",
+      "rerun": "aabe438835638af6",
+      "compose": "fcdfacae406d1961",
+      "stdin": "01975f2aa3d6b57e",
+      "fail_on": "b938c6219ba5ae1c",
+      "no_record": "0bd75172890ef21b",
+      "json": "e18113382f314203"
+    },
+    "blacklist_ai/07_code_review_sonnet_formal.md|yomiyasu_rewritten/07_code_review_sonnet_formal_bl.md": {
+      "run": "4085034f6a7ea148",
+      "verify": "f37621888a798af7",
+      "replay": "a0a739ca2aafe455",
+      "rerun": "0cee59fc01f76217",
+      "compose": "3199197afa373ed8",
+      "stdin": "154d4e58025767da",
+      "fail_on": "c5a8fceac21c03eb",
+      "no_record": "4d751270563a9df8",
+      "json": "75310de41d981b73"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_casual.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_casual.md": {
+      "run": "7f34c908e8092e4f",
+      "verify": "f7fe6b64e539c9e1",
+      "replay": "d45b1d555f18743f",
+      "rerun": "641eb44888df9705",
+      "compose": "d629986d955cc9c0",
+      "stdin": "5a904a5d6f3c04ee",
+      "fail_on": "7f34c908e8092e4f",
+      "no_record": "5804f9fbe16f67f2",
+      "json": "343c02d12675d218"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_casual.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_casual_bl.md": {
+      "run": "dab9ee1b33485c80",
+      "verify": "f161c8d04915bca8",
+      "replay": "e2f290d5506c5ac7",
+      "rerun": "94ac8267d2c73305",
+      "compose": "aa6dbe04db9d35f0",
+      "stdin": "09215fee08911a58",
+      "fail_on": "dab9ee1b33485c80",
+      "no_record": "ecc3e92f1108ed52",
+      "json": "a4b85a190a12d6a2"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_default.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_default.md": {
+      "run": "3c55d3ce07800048",
+      "verify": "56adbb71b18e865b",
+      "replay": "112a77be669d3eac",
+      "rerun": "cf54be716f05ba19",
+      "compose": "013897fbc49d1f48",
+      "stdin": "df581b6397ca561c",
+      "fail_on": "3c55d3ce07800048",
+      "no_record": "e0dd02c2ecb9a171",
+      "json": "79e991c4c7a5a52e"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_default.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_default_bl.md": {
+      "run": "7468434b0251183f",
+      "verify": "12d1a7631d446030",
+      "replay": "32e79da406713eea",
+      "rerun": "fe68725cfe9276cc",
+      "compose": "9e3639381ecfbb43",
+      "stdin": "71eb0981c96a6d5c",
+      "fail_on": "7468434b0251183f",
+      "no_record": "ad4773aad95efde4",
+      "json": "b23f0d188e6e15c8"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_formal.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_formal.md": {
+      "run": "4443f7c8362b7481",
+      "verify": "9189ca1ba23ebbc9",
+      "replay": "1421bc2a2127ecf1",
+      "rerun": "2c068ff52506316b",
+      "compose": "a66c0bede5cf9b3e",
+      "stdin": "a12cd3b9277b9e83",
+      "fail_on": "4443f7c8362b7481",
+      "no_record": "01a9507678303c9d",
+      "json": "1c5aa5711ababeca"
+    },
+    "blacklist_ai/08_essay_retrospective_sonnet_formal.md|yomiyasu_rewritten/08_essay_retrospective_sonnet_formal_bl.md": {
+      "run": "957505cb42fc166a",
+      "verify": "133a00a3ecd403fb",
+      "replay": "cc0fac90ab9ffce5",
+      "rerun": "3941e3ebeb96ff39",
+      "compose": "1108ee35f484a389",
+      "stdin": "55fb8e72cac95551",
+      "fail_on": "957505cb42fc166a",
+      "no_record": "437a88cdaa942645",
+      "json": "6349ea2903862684"
+    },
+    "edge_cases/edge_kiku_45.md|edge_cases/edge_kiku_46.md": {
+      "run": "215d945ca34f246d",
+      "verify": "3057ebc5c8cf4a49"
+    },
+    "edge_cases/edge_kiku_46.md|edge_cases/edge_kowareru_37.md": {
+      "run": "6be13e1d29c80509",
+      "verify": "bc74d9c74ca412ce"
+    },
+    "edge_cases/edge_kowareru_37.md|edge_cases/edge_kowareru_38.md": {
+      "run": "5a3d28a021e020b0",
+      "verify": "874208fc71648800"
+    },
+    "edge_cases/edge_kowareru_38.md|edge_cases/edge_kowareru_39.md": {
+      "run": "7865efd65fd7a3d5",
+      "verify": "9f0f03b4d45496fc"
+    },
+    "edge_cases/edge_kowareru_39.md|edge_cases/edge_kowareru_40.md": {
+      "run": "1dab898cae1cd843",
+      "verify": "116e75d42e4b9ca6"
+    },
+    "edge_cases/edge_kowareru_40.md|edge_cases/edge_kowareru_41.md": {
+      "run": "e442038fa31ee6b3",
+      "verify": "3824e915737cbcbe"
+    },
+    "edge_cases/edge_kowareru_41.md|edge_cases/edge_kowareru_42.md": {
+      "run": "c991bf1bacdee0f2",
+      "verify": "f189e02b5895b7c6"
+    },
+    "edge_cases/edge_kowareru_42.md|edge_cases/edge_kowareru_43.md": {
+      "run": "c264cd47224101d5",
+      "verify": "f24097828fb0f861"
+    },
+    "edge_cases/edge_kowareru_43.md|edge_cases/edge_kowareru_44.md": {
+      "run": "63b28fa153bfe0cc",
+      "verify": "7a9cee1e8f93694b"
+    },
+    "edge_cases/edge_kowareru_44.md|edge_cases/edge_nigiru_01.md": {
+      "run": "29edceade54b05e3",
+      "verify": "e7eaa77df309d3a5"
+    },
+    "edge_cases/edge_nigiru_01.md|edge_cases/edge_nigiru_02.md": {
+      "run": "e2deac4daabcbbb5",
+      "verify": "4ac22def2e95d6ab"
+    },
+    "edge_cases/edge_nigiru_02.md|edge_cases/edge_nigiru_03.md": {
+      "run": "9437b6461368e56d",
+      "verify": "7fdc898b88a54812"
+    },
+    "edge_cases/edge_nigiru_03.md|edge_cases/edge_nigiru_04.md": {
+      "run": "47d414af9f10a21e",
+      "verify": "ce38bc78c18ce6a3"
+    },
+    "edge_cases/edge_nigiru_04.md|edge_cases/edge_nigiru_05.md": {
+      "run": "0e68cb5a2db771b8",
+      "verify": "a21c0e21cab99d56"
+    },
+    "edge_cases/edge_nigiru_05.md|edge_cases/edge_nigiru_06.md": {
+      "run": "c0863e15fde229f4",
+      "verify": "580a5d2a4dfba59e"
+    },
+    "edge_cases/edge_nigiru_06.md|edge_cases/edge_nigiru_07.md": {
+      "run": "5e3338b7da9d288f",
+      "verify": "5d8f1adab0e7383c"
+    },
+    "edge_cases/edge_nigiru_07.md|edge_cases/edge_nigiru_08.md": {
+      "run": "cf360bca224eda7a",
+      "verify": "0d30ee8e49388352"
+    },
+    "edge_cases/edge_nigiru_08.md|edge_cases/edge_nigiru_09.md": {
+      "run": "61e5cf47be2f2df1",
+      "verify": "8d66cb2898c08242"
+    },
+    "edge_cases/edge_nigiru_09.md|edge_cases/edge_nigiru_10.md": {
+      "run": "4b7062d994016d74",
+      "verify": "52ed0c87fb8e3398"
+    },
+    "edge_cases/edge_nigiru_10.md|edge_cases/edge_taosu_11.md": {
+      "run": "904adea97d43fc55",
+      "verify": "b621f10821b7016f"
+    },
+    "edge_cases/edge_taosu_11.md|edge_cases/edge_taosu_12.md": {
+      "run": "76305ed1e6a79539",
+      "verify": "90dd325d4740a097"
+    },
+    "edge_cases/edge_taosu_12.md|edge_cases/edge_taosu_13.md": {
+      "run": "34e268d026a4bd26",
+      "verify": "56e08110f1d76a0f"
+    },
+    "edge_cases/edge_taosu_13.md|edge_cases/edge_taosu_14.md": {
+      "run": "ef3240c479ebb33c",
+      "verify": "1490520d34a37e4d"
+    },
+    "edge_cases/edge_taosu_14.md|edge_cases/edge_taosu_15.md": {
+      "run": "6446525c92b19dcd",
+      "verify": "9a64fb8aa9b6712a"
+    },
+    "edge_cases/edge_taosu_15.md|edge_cases/edge_taosu_16.md": {
+      "run": "e3b92b7bd64281aa",
+      "verify": "a603ccfa7758aea7"
+    },
+    "edge_cases/edge_taosu_16.md|edge_cases/edge_taosu_17.md": {
+      "run": "019e71fd75aea266",
+      "verify": "ef52bac93b5af613"
+    },
+    "edge_cases/edge_taosu_17.md|edge_cases/edge_taosu_18.md": {
+      "run": "9be456ef53a52ae2",
+      "verify": "01d1309651622adc"
+    },
+    "edge_cases/edge_taosu_18.md|edge_cases/edge_taosu_19.md": {
+      "run": "42f24a06c0f6a327",
+      "verify": "de6d06b5e0fca7f6"
+    },
+    "edge_cases/edge_taosu_19.md|edge_cases/edge_taosu_20.md": {
+      "run": "d3666323b6c4940f",
+      "verify": "731aa8effe5d57bd"
+    },
+    "edge_cases/edge_taosu_20.md|edge_cases/edge_tokasu_21.md": {
+      "run": "d3e1d4d049960733",
+      "verify": "2eb5c0d89e3a2529"
+    },
+    "edge_cases/edge_tokasu_21.md|edge_cases/edge_tokasu_22.md": {
+      "run": "0422c024d96f29f6",
+      "verify": "e7d3c7fd988c68bf"
+    },
+    "edge_cases/edge_tokasu_22.md|edge_cases/edge_tokasu_23.md": {
+      "run": "1e631db0b2c75670",
+      "verify": "3f95767b1d1f048f"
+    },
+    "edge_cases/edge_tokasu_23.md|edge_cases/edge_tokasu_24.md": {
+      "run": "c42b3d0379ded8b4",
+      "verify": "a79b09f6c8148158"
+    },
+    "edge_cases/edge_tokasu_24.md|edge_cases/edge_tokasu_25.md": {
+      "run": "1619c3892e8a89e7",
+      "verify": "78d2eb37458e49f6"
+    },
+    "edge_cases/edge_tokasu_25.md|edge_cases/edge_tokasu_26.md": {
+      "run": "3ced1a699528a65b",
+      "verify": "71975dc1b0f04445"
+    },
+    "edge_cases/edge_tokasu_26.md|edge_cases/edge_tokasu_27.md": {
+      "run": "a2ae26cb518c441a",
+      "verify": "7cc83e1a1e5bfa4e"
+    },
+    "edge_cases/edge_tokasu_27.md|edge_cases/edge_tokasu_28.md": {
+      "run": "1c9607574b45a9f3",
+      "verify": "476f5ffd75c10ce2"
+    },
+    "edge_cases/edge_tokasu_28.md|edge_cases/edge_v111_keep_01.md": {
+      "run": "c7fbc185fb9a32d6",
+      "verify": "04fc68c172b13d09"
+    },
+    "edge_cases/edge_v111_keep_01.md|edge_cases/edge_waru_29.md": {
+      "run": "e37cac58f3f658db",
+      "verify": "6495a52c536e6a41"
+    },
+    "edge_cases/edge_waru_29.md|edge_cases/edge_waru_30.md": {
+      "run": "935b3b21bbba90dc",
+      "verify": "be2e9c0319db77ac"
+    },
+    "edge_cases/edge_waru_30.md|edge_cases/edge_waru_31.md": {
+      "run": "12a67ffe05f7692b",
+      "verify": "92049b9b6c51d492"
+    },
+    "edge_cases/edge_waru_31.md|edge_cases/edge_waru_32.md": {
+      "run": "7d153c255c041617",
+      "verify": "f6beb48f0d586514"
+    },
+    "edge_cases/edge_waru_32.md|edge_cases/edge_waru_33.md": {
+      "run": "94ff54dd93c145e6",
+      "verify": "c245be48060b2553"
+    },
+    "edge_cases/edge_waru_33.md|edge_cases/edge_waru_34.md": {
+      "run": "67ae987b7d36cc26",
+      "verify": "3b446abc2c2af2cf"
+    },
+    "edge_cases/edge_waru_34.md|edge_cases/edge_waru_35.md": {
+      "run": "e2b21060591ef10e",
+      "verify": "f09755c0408ed54e"
+    },
+    "edge_cases/edge_waru_35.md|edge_cases/edge_waru_36.md": {
+      "run": "6746d032563c9c0e",
+      "verify": "c936132f3f05a976"
+    },
+    "edge_cases/edge_waru_36.md|edge_cases/edge_watasu_47.md": {
+      "run": "92bfbf1969056211",
+      "verify": "dde13bd295327421"
+    },
+    "edge_cases/edge_watasu_47.md|edge_cases/edge_watasu_48.md": {
+      "run": "499114c2aa303259",
+      "verify": "559838ff3edf8107"
+    },
+    "human/human_doc_09.md|human/human_doc_10.md": {
+      "run": "b8bde23f30e9c371",
+      "verify": "11a171ce6ca4e4cf"
+    },
+    "human/human_doc_10.md|human/human_doc_11.md": {
+      "run": "cc9eebadbacfb93d",
+      "verify": "baedebb4a4606b93"
+    },
+    "human/human_doc_11.md|human/human_doc_12.md": {
+      "run": "820043dc6cb9efc5",
+      "verify": "967d89d0d6b01274"
+    },
+    "human/human_doc_12.md|human/human_doc_13.md": {
+      "run": "9227641ce8aafbdb",
+      "verify": "97d720196725a6c9"
+    },
+    "human/human_doc_13.md|human/human_doc_14.md": {
+      "run": "e379893e12a30e65",
+      "verify": "be913403e716b4d8"
+    },
+    "human/human_doc_14.md|human/human_doc_15.md": {
+      "run": "60597c892c8c8441",
+      "verify": "a77bf197d710ef0c"
+    },
+    "human/human_doc_15.md|human/human_doc_16.md": {
+      "run": "1bf1e09db45fe9da",
+      "verify": "a1080d7ed1290490"
+    },
+    "human/human_doc_16.md|human/human_oga_01.md": {
+      "run": "2522c3e5581925cd",
+      "verify": "da4a1f0aa8a8bfcb"
+    },
+    "human/human_oga_01.md|human/human_oga_02.md": {
+      "run": "9e6b656908aada78",
+      "verify": "8c4bd4e9d9873612"
+    },
+    "human/human_oga_02.md|human/human_oga_03.md": {
+      "run": "e116f03a43279acd",
+      "verify": "bdd1eef73e763041"
+    },
+    "human/human_oga_03.md|human/human_oga_04.md": {
+      "run": "9fe15aaf964a5500",
+      "verify": "46a72ca90bd2ecc3"
+    },
+    "human/human_oga_04.md|human/human_oga_05.md": {
+      "run": "eee723e68adfd05f",
+      "verify": "258fc3a9cd2e4e08"
+    },
+    "human/human_oga_05.md|human/human_oga_06.md": {
+      "run": "4acfe29f6e37e475",
+      "verify": "2c6ff4ba3009096b"
+    },
+    "human/human_oga_06.md|human/human_oga_07.md": {
+      "run": "5368533b2315f638",
+      "verify": "686c0083496a5718"
+    },
+    "human/human_oga_07.md|human/human_oga_08.md": {
+      "run": "31245781e99a813f",
+      "verify": "9a0505afe5eee6b8"
+    },
+    "raw_ai/01_tech_arch_sonnet_casual.md|raw_ai/01_tech_arch_sonnet_default.md": {
+      "run": "1d229d0dab9c8e11",
+      "verify": "6c06e8d8ab046366"
+    },
+    "raw_ai/01_tech_arch_sonnet_default.md|raw_ai/01_tech_arch_sonnet_formal.md": {
+      "run": "bfc8c5730d9c5b1a",
+      "verify": "9a296f618e470730"
+    },
+    "raw_ai/01_tech_arch_sonnet_formal.md|raw_ai/02_incident_report_sonnet_casual.md": {
+      "run": "adf41ac589b3634f",
+      "verify": "b1de0824c58ff114"
+    },
+    "raw_ai/02_incident_report_sonnet_casual.md|raw_ai/02_incident_report_sonnet_default.md": {
+      "run": "351b9cad3f2c8e79",
+      "verify": "93e1e9347b93854e"
+    },
+    "raw_ai/02_incident_report_sonnet_default.md|raw_ai/02_incident_report_sonnet_formal.md": {
+      "run": "684424df8fa968cd",
+      "verify": "aaa95e5e8558b458"
+    },
+    "raw_ai/02_incident_report_sonnet_formal.md|raw_ai/03_pr_description_sonnet_casual.md": {
+      "run": "a4cd9921438fbe3d",
+      "verify": "57c2bf0e41f0b14e"
+    },
+    "raw_ai/03_pr_description_sonnet_casual.md|raw_ai/03_pr_description_sonnet_default.md": {
+      "run": "94dc37355a6affe2",
+      "verify": "889334d9062d81c6"
+    },
+    "raw_ai/03_pr_description_sonnet_default.md|raw_ai/03_pr_description_sonnet_formal.md": {
+      "run": "1428aec3d6a2e60f",
+      "verify": "df0454a3d87a367e"
+    },
+    "raw_ai/03_pr_description_sonnet_formal.md|raw_ai/04_slack_announce_sonnet_casual.md": {
+      "run": "9fe173b86c4450f9",
+      "verify": "7b509f1b129c38da"
+    },
+    "raw_ai/04_slack_announce_sonnet_casual.md|raw_ai/04_slack_announce_sonnet_default.md": {
+      "run": "83db819a735eb682",
+      "verify": "325700e6e000dadb"
+    },
+    "raw_ai/04_slack_announce_sonnet_default.md|raw_ai/04_slack_announce_sonnet_formal.md": {
+      "run": "d16eb01a05d4c49b",
+      "verify": "ee056f7b278e9377"
+    },
+    "raw_ai/04_slack_announce_sonnet_formal.md|raw_ai/05_comparison_sonnet_casual.md": {
+      "run": "781dd6faaf6fa75a",
+      "verify": "593e25bbfaed23d5"
+    },
+    "raw_ai/05_comparison_sonnet_casual.md|raw_ai/05_comparison_sonnet_default.md": {
+      "run": "00ffc3e0c9484e40",
+      "verify": "61760de9ce3ac41a"
+    },
+    "raw_ai/05_comparison_sonnet_default.md|raw_ai/05_comparison_sonnet_formal.md": {
+      "run": "b55f0852e53aef3f",
+      "verify": "90d748fcf3721a5b"
+    },
+    "raw_ai/05_comparison_sonnet_formal.md|raw_ai/06_spec_draft_sonnet_casual.md": {
+      "run": "bc213f5d6922bf09",
+      "verify": "79554696bc165ce6"
+    },
+    "raw_ai/06_spec_draft_sonnet_casual.md|raw_ai/06_spec_draft_sonnet_default.md": {
+      "run": "4384057f6c5cb9ea",
+      "verify": "8ebaab395934846c"
+    },
+    "raw_ai/06_spec_draft_sonnet_default.md|raw_ai/06_spec_draft_sonnet_formal.md": {
+      "run": "82baa537bb605526",
+      "verify": "0718df6b6f2c0fb8"
+    },
+    "raw_ai/06_spec_draft_sonnet_formal.md|raw_ai/07_code_review_sonnet_casual.md": {
+      "run": "599f8fdc243a6c3f",
+      "verify": "1c6968b63fa17e40"
+    },
+    "raw_ai/07_code_review_sonnet_casual.md|raw_ai/07_code_review_sonnet_default.md": {
+      "run": "af434af14eae7772",
+      "verify": "37b1f061d32d044f"
+    },
+    "raw_ai/07_code_review_sonnet_default.md|raw_ai/07_code_review_sonnet_formal.md": {
+      "run": "e257782becf62aba",
+      "verify": "94ed4c39ee72dd31"
+    },
+    "raw_ai/07_code_review_sonnet_formal.md|raw_ai/08_essay_retrospective_sonnet_casual.md": {
+      "run": "f87c11018f9640c8",
+      "verify": "935e0b0a04e450ed"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_casual.md|raw_ai/08_essay_retrospective_sonnet_default.md": {
+      "run": "2746d34c9b938786",
+      "verify": "6248045a0ffdf368"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_default.md|raw_ai/08_essay_retrospective_sonnet_formal.md": {
+      "run": "0a1a67ab67882551",
+      "verify": "92235c5b459a3fe1"
+    },
+    "raw_ai/08_essay_retrospective_sonnet_formal.md|raw_ai/09_listicle_patterns.md": {
+      "run": "f2301ed47bc8e1d4",
+      "verify": "84df8c0101b5277c"
+    },
+    "raw_ai/09_listicle_patterns.md|raw_ai/10_essay_fragments.md": {
+      "run": "0c6993475a735398",
+      "verify": "5499e4f8c774de82"
+    }
+  },
+  "updates": [
+    "2026-10-13 check の固めの反証の直し: check の compose の行（run --material 原文 --final 推敲）を作り直した（46組）。反証で見つけた例で、資料を原文とみなしたときの照合を推敲と同じ扱いにし、照合の節の行と件数をわざと変えたため。ほかの行は種類と読者のオプションを入れる前の値のまま。",
+    "2026-10-13 diff の詰め: diff の JSON の最後に stiffness と tone を足した（136組の json の行がすべて変わる）。check の run の出力の5行目のあとに「硬化の検査」「勢いの検査」の2行を足し、記録の diff の summary に件数を足した（diff を実行する check の行がすべて変わる）。人が読む diff の出力は136組のうち57組で変わった。推敲の48組では意味が変わる恐れの3組だけ（否定の句点の前の規則を絞って否定の誤検知1件が消えた、漢数字の助数詞の「一つ」を数えた、「1」が「1つ」になった）で、硬化・勢い・逆転・気持ちの候補は0件。別の文書を並べた88組では、硬化（34組）・勢い（14組）・気持ちの語（4件）の節と、数値の判定の詰め（漢数字の助数詞、英字の単位、文の組の作り方など）による変化。lint の行は変えていない（作り直さず、今の出力と1字も違わないことを確かめた）。",
+    "2026-10-14 diff の詰めの直し（数値の判定、否定対比の逆転と気持ちの語、文体の硬化と勢い、check の表示と一覧のハッシュ）: diff と check の行を、直しのあとの作業ツリーの出力で作り直した。lint の行は作り直さず、今の出力と1字も違わないことを確かめた（種類と読者のオプションを入れる前の値のまま）。38d6556 の fixture（種類と読者のオプションを入れる前の値）と比べると、diff の136組のうち、人が読む出力は96組が1字も同じ、19組が新しい節（文体の硬化、勢い）と状態の行の末尾の添え書き（文体の硬化と勢いの見直し候補 N件は下の節）だけの違い、21組で意味が変わる恐れの判定が変わった（推敲の48組では2組。正しい推敲への否定の誤検知1件が消えた。「1」が「1つ」になった）。別の文書を並べた組の19組の変化は、気持ちの語（3組4件）、漢数字の助数詞（一つ、三つ、三項、一か所）と英字の単位（5xx、2xx）を数値として取ったこと、文の組の作り方。--json は136組すべてで feeling、stiffness、tone のキーが足された。check は136組のうち114組が追加（硬化の検査と勢いの検査の2行と節、JSON のキー）だけ、22組で判定が変わった。--fail-on を付けないときの終了コードは、lint、diff、check のどの使い方でも変わらない。--fail-on meaning-risk で終了コードが変わったのは diff と check（meaning-risk,warn も）で2組: blacklist_ai/01_tech_arch_sonnet_formal → yomiyasu_rewritten/01_tech_arch_sonnet_formal_bl が 1 → 0（否定の誤検知「二重処理を防ぐ → 処理しない」が消えた）、raw_ai/01_tech_arch_sonnet_casual → raw_ai/01_tech_arch_sonnet_default が 0 → 1（別の文書の組で、元の「一つ」「三つ」「二つ」が後の文書にない）。新規作成の照合（run --material 元 --final 後 --fail-on meaning-risk）では3組: 上の formal_bl が 1 → 0、raw_ai/07_code_review_sonnet_casual → default が 1 → 0（最終稿の「3つ」と資料の「三つ」が同じ数になった）、raw_ai/07_code_review_sonnet_default → formal が 0 → 1（最終稿の「一か所」を資料にない数値とした）。1つ前の作り直し（直す前）と比べると、--fail-on で 1 → 0 に戻ったのは「一つのサービスの障害が」「一つの画面群で」の2組（数量を主張しない「一つ」を単独では数えない直し）。",
+    "2026-10-14 diff の詰めの直しの1回目の反証の直し: diff と check の行を作り直した。lint の行は作り直さず、今の出力と1字も違わないことを確かめた。直す前と比べて変わったのは次の3つだけで、--fail-on を付けたときと付けないときのどちらも、終了コードが変わった組はない（diff、check、新規作成の --fail-on。136組）。(1) diff の人が読む出力の最後の状態の行の添え書きを「（文体の硬化と勢いの見直し候補 N件は下の節）」から「（…は上の節）」にした（反証で見つけた例。節は最後の状態の行より上にあるため。2行目は「下の節」のまま）。添え書きの付く30組の、指定なし・--stance・--fail-on・標準入力の4通りで変わった。(2) 勢いの検査の見出しの字数に絵文字を数えないようにした（--doc-type minutes の見出しを見直し候補のままにした直しで、短い見出しの絵文字を外しただけの推敲が見出しの候補にならないようにするため）。raw_ai/09_listicle_patterns → raw_ai/10_essay_fragments の見出しの候補の字数が「20字から0字」から「19字から0字」になり（候補は残る）、--json の tone.counts の heading_chars が2組（08_essay_retrospective_sonnet_formal → 09_listicle_patterns と、上の組）で変わった。check の run の行はこの1組が変わった。(3) check の新規作成（run --material）の3行目の「資料にない数値・名前N件」を、出力に示した候補と同じ条件で数えるようにした（反証で見つけた例。数量を主張しない「一つ」だけの値は候補に出ないので数えない）。fixture の新規作成の行では blacklist_ai/01_tech_arch_sonnet_default → yomiyasu_rewritten/01_tech_arch_sonnet_default_bl が「1件」から「0件」になった（コーパスの136組では5組が変わり、どれも状態の行の meaning_risk と同じ数になった）。数値、否定対比の逆転、気持ちの語のほかの直しは、コーパス136組の diff と check の出力を変えなかった。",
+    "2026-10-14 3回目の直し（数量を主張しない「一つ」の扱い、算用数字の「1つ」を数として数えること、見出しと「は使わず」「はせず」から取った否定対比の名詞の重みの語、直前が漢字の漢数字、平仮名の入る名詞の取り出し）: diff と check の行を、直しのあとの作業ツリーの出力で作り直した。lint の行は作り直さず、今の出力と1字も違わないことを確かめた（種類と読者のオプションを入れる前の値のまま）。1つ前の作り直しと比べて変わったのは、別の文書を並べた2組だけ（raw_ai/06_spec_draft_sonnet_formal → raw_ai/07_code_review_sonnet_casual、raw_ai/07_code_review_sonnet_default → raw_ai/07_code_review_sonnet_formal）。算用数字の「1つ」を数として数えるようにしたため、意味が変わる恐れに数値の候補が1件ずつ足された（前の組は後の文書の「1つのメソッドに同居」の元にない数値、後の組は「1つのメソッドに混在 → 同一のメソッド内に記述」の消えた数値）。diff の人が読む出力（指定なし、--stance、--fail-on、標準入力）は、状態の行の件数、意味が変わる恐れの節の件数と足された候補の行、--fail-on の終了コードの行の件数が変わり、--json は meaning_risks と candidate_count、meaning_risk_count、fail_on_meaning_risk_count が変わった。check は run と verify の状態の行の meaning_risk と、run の2行目の件数と節が変わった。推敲の48組、人の文どうし（human_oga）、AI の例文どうし（human_doc）、edge_cases の組は、どの使い方でも1字も変わらない。2組とも前から --fail-on meaning-risk で終了コード1で、--fail-on を付けたときも付けないときも、終了コードが変わった組はない（diff、check、新規作成の --fail-on。136組）。fixture にない使い方では、同じ2組の新規作成の照合（run --material）も変わった。前の組は「資料にない数値（後1行目）: 1つ」の候補が足され、3行目の「資料にない数値・名前」の件数、「■ 意味が変わる恐れ」の件数、状態の行（2か所）の meaning_risk が1つずつ増えた。後の組は「参考: 資料にあって最終稿にない数値: 1つ」が1行足された。2回目の反証の直しではコーパスの出力が1字も変わらなかったので作り直していなかった。今回、source_sha256 の diff と check を今のスクリプトと一覧の値にし、description、generated_by、source_commit とこれまでの updates から手元の記録と道具の名前を消した（行の値と、これまでの updates の中身は変えていない）。",
+    "2026-10-14 3回目の直しのあとの反証の直し（「一つの」「一つずつ」の相手の文の語を形ごとに分け、書き方の違いをそろえ、まとめた・分けた隣の文も見る。期間の語のあとの漢数字の「一日」「一年」と「日一日と」、算用数字の「1日」「1年」を数にしない。「十時十分」の「十分」、直前が「人」「名」「回」「件」「個」「枚」の漢数字、「午前」と元号のあとの漢数字を数として取る。見出しと「は使わず」「はせず」の主題の句の重みの語。逆転の候補で示す語の送り仮名。「Aは減らす」を下げた形にする）: diff と check の行は、直したあとの出力でも136組と使い方のすべてで1字も変わらなかったので作り直していない（source_sha256 は前の作り直しの値のまま）。1つ前の updates の、新規作成の照合の変化の書き方が足りなかったので直した（行の値は変えていない）。",
+    "2026-10-14 3回目の直しのあとの2回目の反証の直し（期間の語のあとの算用数字の「1日」「1年」をいつも数として取るように戻し、漢数字の「今日一日」「日一日と」と、1日しかない日（当日、前日、翌日、初日、元日、日曜日など）のあとの「一日」を数量を主張しない値として取る。前に漢数字のない「一時」のあとの「十分」は取らず、「時間」と、漢数字に続いた「人」「名」「回」「件」「個」「枚」のあとの「十分」は、時間の量に続く字が続くときだけ取る。「一つの」「一つずつ」の相手の文の語で、打ち消した語を数えず（「上限」は打ち消したときだけ数える）、複数といくつ、すべてと語の頭の「各」をそろえ、語の中の「全部」を数えず、「一つずつ」に複数・一斉・一気に・いっぺんに、「一つの」に別々を足し、「一つの」の名詞と「一つずつ」の動詞のすぐ前の語を見る。分けた推敲で隣の文をつなぐときを絞る。否定対比の逆転で、「は減ら」を A のすぐあとに限り、同じ節のあとに重みの語があれば下げた形にしない。漢字1字の形容詞と名詞（高い品質）の名詞も否定された語として見る。逆転の候補で示す語の送り仮名の決まりを直す）: diff と check の行は、直したあとの出力でも136組と使い方のすべてで1字も変わらなかったので作り直していない（source_sha256 は前の作り直しの値のまま）。1つ前の updates に、算用数字の「1日」「1年」も数にしなかったことを書き足した（行の値は変えていない）。",
+    "2026-10-14 3回目の直しのあとの3回目の反証の直し（「一つの」「一つずつ」の相手の文の数を言う語の打ち消しを、語がかかる述語の終わりまでで見て、「ではなく」「ことなく」を打ち消しに足し、義務や条件の言い方（なければならない、しかない など）と平仮名の動詞の「な」（おこなう）は打ち消しにしない。「上限」は上限そのものを打ち消したときだけ数える。相手の文が1つの文なら、「一つの」の名詞か「一つずつ」の動詞のある節の語だけを数え、「すべて」と語の頭の「各」は名詞のすぐ前だけで見る（1つ前の updates の、すべてと「各」をそろえたことは改めた）。名詞のすぐ前の「〜ごとの」を数の変化に足し、名詞・動詞のすぐ前の語は変わった形を先に見る。「いくつ」は「いくつか」「いくつも」「いくつでも」だけにした。否定対比の逆転で、「Aの数・回数などは減ら」も下げた形にし、重みの語で下げた形にしないのは「減らすこと」「減らすのが」のときだけにした。送り仮名の「い」「た」「め」のあとの2字以上の漢字の名詞も否定された語として見る。「一日十分」「毎日十分」と「で」が続く「十分」、時刻に続く字が続く「一時十分」の「十分」、時刻を言う語のあとの「時」を数として取る）: diff と check の行は、直したあとの出力でも136組と使い方のすべてで1字も変わらなかったので作り直していない（source_sha256 は前の作り直しの値のまま）。",
+    "2026-10-14 4回目の直し（算用数字の「1つの」「1つずつ」「もう1つ」を漢数字の「一つ」と同じく数量を主張しない値にし、平仮名の数（ひとつ〜ここのつ、ひとり、ふたり）も数量を主張しない値として取る。「一つずつ」の相手の文の一斉・同時・並列などを「まとめて」とそろえ、複数・いくつでも・別々は名詞や動詞のすぐ前だけで見る。否定対比の逆転で、A を下げたまま言い換えた語（その次、二番手、脇に置く など）を下げた形にし、見出しと「は使わず」「はせず」では、A の節のすぐ前の重みの語だけの句（まず、何よりも など）を A の節の重みとして見る。lint で、組になった <details> の中の箇条書きを箇条書きの比率に数えない。コメントの掃除）: diff と check の行を、直したあとの作業ツリーの出力で作り直した。lint の行は作り直さず、今の出力と1字も違わないことを確かめた（コーパスに <details> を含む文書はないので、lint の直しはコーパスの出力を変えない）。1つ前の作り直しと比べて変わったのは、3回目の直しで変わった別の文書の2組だけ（raw_ai/06_spec_draft_sonnet_formal → raw_ai/07_code_review_sonnet_casual、raw_ai/07_code_review_sonnet_default → raw_ai/07_code_review_sonnet_formal）。算用数字の「1つの」を数量を主張しない値に戻したため、3回目の直しで足された数値の候補（前の組の「元にない数値: 1つ」、後の組の「消えた数値: 1つ」）が消え、2組の diff の行（指定なし、--stance、--fail-on、--json、標準入力）と check の行（run と verify）は、3回目の直しの前の作り直しの値と同じになった。推敲の48組、人の文どうし（human_oga）、AI の例文どうし（human_doc）、edge_cases の組は、どの使い方でも1字も変わらない。2組とも --fail-on meaning-risk の終了コードは1のままで、--fail-on を付けたときも付けないときも、終了コードが変わった組はない（diff、check、新規作成の --fail-on。136組）。fixture にない使い方では、同じ2組の新規作成の照合（run --material）も3回目の直しの前の形に戻った（前の組は「資料にない数値: 1つ」の候補が消えて件数と状態の行の meaning_risk が1つずつ減り、後の組は「参考: 資料にあって最終稿にない数値: 1つ」の行が消えた）。あわせて、description、generated_by とこれまでの updates から、手元の文書の目標と節の番号を消し、「種類と読者のオプションを入れる前」のように書き直した（行の値と、これまでの updates の中身は変えていない）。source_sha256 の diff と check は今のスクリプトと一覧の値にした。",
+    "2026-10-14 4回目の直しのあとの反証の直し（1回目: 数値の並びを同じ単位の数どうしで比べる。「Aを B に置き換える・切り替える・移す・移行する・乗り換える」「Aを B で置き換える」を否定対比の A を下げた形にする。下げる語の前に別の名詞があれば、下げたのは A でないとみなす。「一つずつ」の動詞のすぐ前の「複数でも」と「一つの」の名詞のすぐあとの「を・は・が・も別々」を数の変化にし、動詞・名詞が取れないときは複数・いくつ・別々を相手の文のどこに出ても数え、相手が1つの文なら動詞・名詞のある節の「複数」「別々に」も数える。「に」「で」のすぐあとの「いつつ」と「ひとり言」を数にしない。2回目: 数値の並びで、同じ語句に付く値が2つ以上の語句で変わった組も候補にする。置き換えの形に「Aは」「Aも」と、置換する・入れ替える・差し替える・変更する・改める・転換する を足し、置き換え先が A を前に出す先のときと、「を」のあとが A を使う句のときは下げた形にしない。下げる語の前の別の名詞を、で・て・にし・し のあとの名詞と、に・が・けど・から・ので のあとの名詞にし、ほか・それ・あと・これ も名詞にする。「一つずつ」の相手の文で新しく出た数を言う語を、語ごとの数の差で見る）: diff と check の行は、1回目と2回目のどちらの直しのあとの出力でも136組と使い方のすべてで1字も変わらなかったので作り直していない（source_sha256 は行を作ったときのスクリプトの値のまま。今の diff.py の値とは違う）。1つ前の updates の「複数・いくつでも・別々は名詞や動詞のすぐ前だけで見る」は、1回目の直しで、動詞・名詞が取れないときと相手が1つの文のときに数える形を戻した（行の値は変えていない）。",
+    "2026-10-14 4回目の直しのあとの直し（数値の並びで、単位ごとの並びや語句が一致しなくても、数量を言う値と数の直前の2字の組が入れ替わった組を候補にする（直前が文頭か読点の数は組に入れない）。「一つずつ」の動詞・「一つの」の名詞を言い換えた1つの文では、複数・いくつ・別々も文のどこに出ても数える（数の主張が同じ語があるときと、「一つずつ」の「複数の〜」の〜が元の文にない名詞のときは数えない。前から数えていた語は今までどおり）。見出しと「は使わず」「はせず」で、重みの語だけの句から A の節に重みを取ったときは、原文で肯定した側の語が同じ節の A より後ろに肯定で出れば逆転にしない。lint の箇条書きの比率の分母から、<details> の中の箇条書きの行を引く）: lint、diff、check の行は、直したあとの出力でも、lint の163本と diff・check の136組の使い方のすべてで1字も変わらなかったので作り直していない（source_sha256 は行を作ったときのスクリプトの値のまま）。",
+    "mail/paper: hedges・immutable・politeness のJSONとcheck件数を追加。human_oga_02→03 と03→04の引用[1]の追加・削除が各1件増えた。136組の既存9キー・lint結果は不変。--fail-on指定なしの終了コードは不変。",
+    "mail/paper の反証の直し: 値の検査の節（immutable）に meaning_risk_count を足し、check の「値の検査」の行で意味が変わる恐れに入れた引用の印と数値の補いの候補も数えるようにした。diff の JSON の行（136組）と check の JSON の行（48組）は、このキーが増えた分だけ変わった。check の run の行は human_oga_02→03 と 03→04 の2組で「値の検査: 候補なし」が「値の検査: 意味が変わる恐れ 1件」になった。diff の人が読む出力、check のほかの使い方、終了コード、lint の行は1字も変わらなかった。",
+    "2026-10-15 確度・かぎかっこ・文体の切り替え: meaning_risks に certainty、certainty_review、quote を既存候補の後ろに追加し、JSON の最後に register を追加。check は文体の候補があるときだけ行と節を出す。確度の強まりと hedges は同じ文で重ねない。差分の状態・件数と check の記録も追加候補を反映する。コーパス136組では --fail-on の有無によらず終了コードの変化は0組。lint の値は更新せず照合した。",
+    "2026-10-15 確度・かぎかっこ・文体の切り替えの反証の直し: 予定・見込みは述語のときだけ数え、表にない慎重な言い方（そう、よう、らしい、みたい、かねない、予測、推定している、期待している、考えております、公算、可能性が高い ほか）を足し、予定の言い切り（予定 → 断定）を数えない見直し候補にした。かぎかっこは行の単位で対応を追い、推敲後の対応する文の近くだけと照らし、長音を書き方の違いとしない。文体の切り替えは「下さい」を「ください」と同じに読み、「」『』だけの行を会話として除き、合わせた文も数える。diff と check の行を作り直した（diff 7 組、check 7 組の値が変わった）。変わった組はどれも新しい種類（確度・かぎかっこ・文体の切り替え）の候補が変わった組で、既存の9キーと既存の候補、--fail-on の有無による終了コードは変わらない。source_sha256 の diff と check は今のスクリプトと一覧の値にした。",
+    "2026-10-15 状態の語の消え（state）、約束・保証・再発防止の誓い（promise）、因果・評価・一般化の足し（claim）を追加し、diff と check の要約を更新。diff は136組のうち48組（5通りで240件）、check は48組（124件）の出力が変わった。正しい推敲48組の変化は評価の候補を足した5組で、新しく fail_on となる組は0。既存候補と既存9キーは保持し、状態と重なる certainty_review だけを state の detail に統合。候補行・件数・状態行と、それに伴う終了コード以外の変化は0。diff の --fail-on で0から1になるのは edge_cases/edge_nigiru_04.md → edge_nigiru_05.md、edge_cases/edge_tokasu_23.md → edge_tokasu_24.md、edge_cases/edge_tokasu_26.md → edge_tokasu_27.md の3組（約束の足し）。付けないときの終了コードの変化は0。lint の要約は更新せず、現在の出力と一致することを確認。",
+    "2026-10-15 状態の語の消えと書き足しの検出の反証の直し: 「〜中です → 〜しています」「おりません」「お待ちしております」を同じ状態の言い換えとして残ったとみなし、状態そのものを打ち消す言い方と人を見送る「見送り」を状態の語から外し、別の項目の状態の語や済んだと言い切った文の否定では残ったとみなさないようにした。約束は、書き手の印（謙譲の形、未来の印、書き手の主語）のない普通の「〜します」を数えない候補（promise_review）に分け、再発防止の名詞にはこれからの述語を求め、「お客様に」を主語の印から外し、隣の文の述語で打ち消すのは同じ行為を言えるときだけにした。因果は「〜時に」を原因の言い方にした形を足し、「調べた結果」を外した。diff と check の行を作り直した（diff 20 組、check 20 組の値が変わった）。変わった組はどれも新しい種類（state、promise、promise_review、claim）の候補が変わった組で、既存の9キーと既存の候補、--fail-on を付けないときの終了コードは変わらない。edge_cases の3組（nigiru_04→05、tokasu_23→24、tokasu_26→27）の説明の「〜します」は数えない候補になり、--fail-on の終了コードは直す前（この検出を足す前）の値に戻った。source_sha256 の diff と check は今のスクリプトの値にした。",
+    "2026-10-15 因果のほかの claim（評価の足し evaluation と、一般化・勧めの足し general）の検出を外した（語の表では目安に届かなかったため）。state、promise、promise_review、claim/causal の作りは変えていない。diff と check の行を作り直した（diff 26 組、check 26 組の値が変わった。どれも評価か一般化・勧めの候補が消えた組で、推敲の48組のうち3組を含む）。この検出を足す前の出力と比べて値が違う組は diff、check とも 35 組（raw_ai 14、edge_cases 11、human 10）で、推敲の48組は0組になった。--fail-on を付けないとき、付けたときとも、終了コードはこの検出を足す前と同じ。source_sha256 の diff と check は今のスクリプトの値にした。",
+    "2026-10-16 check の出力に見直し候補の行と直した箇所の節、run の JSON に candidate_counts と changed_places、verify に4行目と final_candidate_count・changed_place_count を追加した。unchanged_check() で check の行だけを作り直した。lint と diff の行は保持した。全組で追加部分を除いた出力と標準エラーが変更前と一致し、終了コードが変わった組は0組。",
+    "2026-10-16 replace の前後表示は、片側でも60字を超えたら両側を同じ開始位置から切るようにした。unchanged_check() で check の行だけを作り直した（4組、24件）。変化は直した箇所の節だけで、終了コードが変わった組は0組。lint と diff の行は保持し、現在の出力と一致することを確認した。",
+    "2026-10-16 見直し候補の行の添え書きを、増えても減っても読みやすさの良し悪しを示さないと言う字句に改めた。直した箇所の節で、片側が相手の頭そのものの組（段落の最後の文を足した・消した）は短い側の最後の文から見せ、つないだ形が同じになる組は元と後を並べず全文差分へ案内し、元と後で行の数が違う組があれば案内の1行にその注意を足し、切り方の説明を「変わり始めの少し前からおよそ60字」に改めた。unchanged_check() で check の行だけを作り直した（136組、376件）。lint と diff の行は保持した。終了コードが変わった組は0組。",
+    {
+      "reason": "rule_penalty_score の式を変えた",
+      "regenerated": "unchanged_lint() と unchanged_check() で lint と check の json だけを作り直した。ほかの値は同じことを確かめ、作り直していない。",
+      "counts": {
+        "lint": {
+          "regenerated": 163,
+          "changed": 19,
+          "untouched_equal": 815
+        },
+        "check": {
+          "regenerated": 48,
+          "changed": 9,
+          "untouched_equal": 560
+        }
+      }
+    },
+    "事実の復元の道具: check の資料つき新規作成48組を変更前と比較し、照合の節の外の出力・終了コードは不変。照合の該当行と確度の注意を追加した組だけ compose の要約を更新した。JSON は追加キー fact_gaps を除いて比較する。lint、diff、資料なしの出力の要約は更新していない。",
+    "2026-10-16 事実の復元の道具を、見直し候補の行と直した箇所の節のあとに入れたときの作り直し: unchanged_diff() と unchanged_check() で diff の136組と check の136組を作り直して比べ、値が変わったのは check の compose の2組だけ（raw_ai/04 と blacklist_ai/07。照合の節に「資料にあった確度の語が最終稿にない」の行が1行足された）。diff の行、check のほかの使い方、終了コード、lint の行は1字も変わらなかった。source_sha256 の diff と check は今のスクリプトの値にした。",
+    "2026-10-16 run --stdin の1行目の {仕上げ} を、ファイルのときと同じく返す直前の verify（最終稿だけを verify --final - に渡す）の案内にしたときの作り直し: unchanged_diff() と unchanged_check() で diff の136組と check の136組を作り直して比べ、値が変わったのは check の stdin の48組だけ（推敲の48組のすべて。1行目の「本文はこのままで返答し、完了報告を付けるときは、この出力の2行目を写してください。」が「提出の直前に、本文を変えずに、最終稿だけを標準入力から verify --state-dir … --final - に渡して1回実行してください。」になった）。diff の行、check のほかの使い方、終了コード、lint の行は1字も変わらなかった。source_sha256 の diff の yomiyasu_check.py と check は今のスクリプトの値にした。",
+    "2026-10-16 diff で、推量の印が同じ強さの慎重な言い方に替わっただけの文（かもしれません → 恐れがあります など）を、意味が変わる恐れの候補（文の種類の印）と --fail-on から外したときの確かめ: unchanged_diff() と unchanged_check() で diff の136組と check の136組を作り直して比べ、lint、diff、check の行、終了コードは1字も変わらなかった（この組には当たる文がない）。値は作り直さず、source_sha256 の diff の yomiyasu_diff.py だけを今のスクリプトの値にした。"
+  ]
+}
