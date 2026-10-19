@@ -1,7 +1,7 @@
 name: yomiyasu 上流の同期
 
 # 毎日 nanaism/yomiyasu を確認し、更新があれば取り込んで yomiyasu/plugin/ を組み立て直した PR を出す。
-# 手作業の要る変更(スキルの増減、マニフェストの version 以外の変更)がなければ、検査が通りしだい自動で merge する。
+# 手作業の要る変更(マニフェストの version 以外の変更)がなければ、検査が通りしだい自動で merge する。
 # 取り込みか組み立てが失敗したら(上流のファイル構成が変わったなど)、PR ではなく issue を立てる。
 on:
   schedule:
@@ -129,8 +129,8 @@ jobs:
             echo '```'
             # build.sh は skills/yomiyasu だけを写す。上流にスキルが増えたら気づけるようにする
             others="$(find vendor/yomiyasu/skills -mindepth 1 -maxdepth 1 -type d ! -name yomiyasu -printf '%f\n')"
+            # スキルが増えても配布物は変わらないので、自動 merge は止めない
             if [ -n "$others" ]; then
-              manual=true
               echo
               echo '## 上流に yomiyasu 以外のスキルがある'
               echo "\`yomiyasu/build.sh\` は \`skills/yomiyasu\` だけを写すので、次のスキルは配布されていない。入れるなら \`build.sh\` を直すこと。"

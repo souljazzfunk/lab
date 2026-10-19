@@ -1,6 +1,7 @@
 name: simple-english 上流の同期
 
 # 毎日 AminBlg/SimpleEnglish を確認し、更新があれば取り込んで simple-english/plugin/ を組み立て直した PR を出す。
+# 手作業の要る変更(マニフェストの version 以外の変更)がなければ、検査が通りしだい自動で merge する。
 # 取り込みか組み立てが失敗したら(上流のファイル構成が変わったなど)、PR ではなく issue を立てる。
 on:
   schedule:
@@ -24,6 +25,9 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.pr.outputs.sha }}
+      auto: ${{ steps.pr.outputs.auto }}
     steps:
       - uses: actions/checkout@v7
 
@@ -48,6 +52,14 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # 手で取り込むなどして main が上流に追いついたら、古くなった自動の PR を閉じる
+      - name: 古くなった自動の PR を閉じる
+        if: steps.check.outputs.old == steps.check.outputs.new
+        run: |
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
+            gh pr close "$BRANCH" --delete-branch --comment "main が上流 \`${{ steps.check.outputs.new }}\` に追いついたので閉じます。"
           fi
 
       # sync-upstream.sh は最後に build.sh まで走らせる
@@ -90,6 +102,7 @@ jobs:
           exit 1
 
       - name: PR を出す(既にあれば更新する)
+        id: pr
         if: steps.check.outputs.changed == 'true' && steps.sync.outputs.ok == 'true'
         env:
           OLD: ${{ steps.check.outputs.old }}
@@ -103,6 +116,8 @@ jobs:
           title="simple-english: 上流 ${NEW:0:7}(v$version)に追従"
           git commit -q -m "$title" -m "AminBlg/SimpleEnglish ${OLD:0:7} → ${NEW:0:7} を取り込み、simple-english/plugin/ を組み立て直した"
           git push --force origin "$BRANCH"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          manual=false
 
           body="$RUNNER_TEMP/pr.md"
           {
@@ -114,16 +129,26 @@ jobs:
             echo '```'
             # build.sh は skills/simple-english だけを写す。上流にスキルが増えたら気づけるようにする
             others="$(find vendor/simple-english/skills -mindepth 1 -maxdepth 1 -type d ! -name simple-english -printf '%f\n')"
+            # スキルが増えても配布物は変わらないので、自動 merge は止めない
             if [ -n "$others" ]; then
               echo
               echo '## 上流に simple-english 以外のスキルがある'
               echo "\`simple-english/build.sh\` は \`skills/simple-english\` だけを写すので、次のスキルは配布されていない。入れるなら \`build.sh\` を直すこと。"
               for s in $others; do echo "- \`$s\`"; done
             fi
-            if ! git diff --quiet HEAD~1 -- vendor/simple-english/.claude-plugin; then
+            # version の上げ下げは毎回起きるので、それ以外が変わったときだけ手作業にする
+            manifest=vendor/simple-english/.claude-plugin/plugin.json
+            if [ "$(git show "HEAD~1:$manifest" | jq -S 'del(.version)')" != "$(jq -S 'del(.version)' "$manifest")" ]; then
+              manual=true
               echo
               echo '## 上流のマニフェストが変わった'
-              echo "\`vendor/simple-english/.claude-plugin/\` が変わった。\`.claude-plugin/marketplace.json\` の simple-english の説明と食い違っていないか見ること。"
+              echo "\`$manifest\` の version 以外が変わった。\`.claude-plugin/marketplace.json\` の simple-english の説明と食い違っていないか見ること。"
+            fi
+            echo
+            if [ "$manual" = true ]; then
+              echo '上の手作業があるので自動では merge しない。'
+            else
+              echo '手作業は要らないので、検査が通りしだい自動で merge する。'
             fi
           } > "$body"
 
@@ -134,5 +159,27 @@ jobs:
               --title "$title" --body-file "$body"
           fi
 
-          # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
-          gh workflow run simple-english.yml --ref "$BRANCH"
+          if [ "$manual" = true ]; then
+            echo "auto=false" >> "$GITHUB_OUTPUT"
+            # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
+            gh workflow run simple-english.yml --ref "$BRANCH"
+          else
+            echo "auto=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # 手作業の要らない更新は、検査が通ったらそのまま merge する
+  check:
+    needs: sync
+    if: needs.sync.outputs.auto == 'true'
+    uses: ./.github/workflows/simple-english.yml
+    with:
+      ref: ${{ needs.sync.outputs.sha }}
+
+  merge:
+    needs: [sync, check]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: merge する
+        env:
+          SHA: ${{ needs.sync.outputs.sha }}
+        run: gh pr merge "$BRANCH" --repo "$GITHUB_REPOSITORY" --squash --delete-branch --match-head-commit "$SHA"
