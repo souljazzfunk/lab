@@ -137,7 +137,7 @@ jobs:
               if [ -n "$removed" ]; then
                 echo "スキルが消えたので自動では merge しない。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数を手で直すこと。"
               else
-                echo "スキルが増えただけなので自動で merge する。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数は後で直せばよい。"
+                echo "スキルの追加だけなら自動 merge は止めない。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数は後で直せばよい。"
               fi
             fi
             touched=""
