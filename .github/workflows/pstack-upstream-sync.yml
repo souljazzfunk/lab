@@ -1,7 +1,7 @@
 name: pstack 上流の同期
 
 # 毎日 cursor/plugins の pstack を確認し、更新があれば取り込んで build し直した PR を出す。
-# 手作業の要る変更(スキルの増減、overrides の上流版の変更)がなければ、検査が通りしだい自動で merge する。
+# 手作業の要る変更(スキルの削除、overrides の上流版の変更)がなければ、検査が通りしだい自動で merge する。
 # build が通らない(置き換えルールが上流の新しい文章に当たらない)ときは PR ではなく issue を立てる。
 on:
   schedule:
@@ -134,7 +134,11 @@ jobs:
               for s in $added; do echo "- 追加: \`$s\`"; done
               for s in $removed; do echo "- 削除: \`$s\`"; done
               echo
-              echo "\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数を手で直すこと。"
+              if [ -n "$removed" ]; then
+                echo "スキルが消えたので自動では merge しない。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数を手で直すこと。"
+              else
+                echo "スキルの追加だけなら自動 merge は止めない。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数は後で直せばよい。"
+              fi
             fi
             touched=""
             for f in $(cd pstack-cc/overrides && find . -type f | sed 's|^\./||'); do
@@ -147,7 +151,7 @@ jobs:
               for f in $touched; do echo "- \`vendor/pstack/$f\`"; done
             fi
             echo
-            if [ -n "$added$removed$touched" ]; then
+            if [ -n "$removed$touched" ]; then
               echo '## merge する前に'
               echo "- 上の手作業を済ませる(自動では merge しない)"
               echo "- poteto-mode などの方針の変更が \`pstack-cc/claude-code.md\` の対応表と食い違っていないか見る"
@@ -163,7 +167,7 @@ jobs:
               --title "$title" --body-file "$body"
           fi
 
-          if [ -n "$added$removed$touched" ]; then
+          if [ -n "$removed$touched" ]; then
             echo "auto=false" >> "$GITHUB_OUTPUT"
             # GITHUB_TOKEN で作った PR では pull_request のワークフローが動かないので、検査を明示的に起動する
             gh workflow run pstack-cc.yml --ref "$BRANCH"
