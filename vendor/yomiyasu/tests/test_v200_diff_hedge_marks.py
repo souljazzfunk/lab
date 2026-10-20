@@ -312,7 +312,7 @@ RULES_BASELINE = '■ 規則の見直し候補（4件）\n■ 元の文にない
 
 RESTORED_BASELINE = {'format': 'yomiyasu-diff',
  'format_version': 2,
- 'tool_version': '2.0.2',
+ 'tool_version': '2.1.0',
  'status': 'has_candidates',
  'changed': True,
  'candidate_count': 6,
@@ -576,7 +576,9 @@ class HedgeMarks(unittest.TestCase):
                                  capture_output=True, text=True)
         self.assertEqual(process.returncode, 0, process.stderr)
         self.assertIn('推量の印が同じ強さの慎重な言い方に替わっただけの文', process.stdout)
-        self.assertIn('かもしれません → 恐れがあります、と思われます → 見込みです', ' '.join(process.stdout.split()))
+        # ヘルプは端末の幅で折り返し、日本語の語の途中でも改行が入るので、空白をすべて除いて比べる
+        # （v2.1.0 で --fail-on の説明の文が変わり、折り返しの位置がこの語句の中に来た）
+        self.assertIn('かもしれません→恐れがあります、と思われます→見込みです', ''.join(process.stdout.split()))
         self.assertIn('かもしれない → 見込み', process.stdout)
 
     def test_P4_classification(self):
