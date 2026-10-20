@@ -76,7 +76,8 @@ SKIP_RULES = {
     "proposal": (),
     "minutes": ("bold_label_list", "excess_list", "sentence_end_repetition"),
     "manual": ("excess_list",),
-    "slides": ("bold_label_list", "count_declaration", "excess_list", "short_summary_heading"),
+    # スライドの箇条で強調として選ぶ「〜のは、A、B、C。」（cleft_list_ending）も外す
+    "slides": ("bold_label_list", "cleft_list_ending", "count_declaration", "excess_list", "short_summary_heading"),
     "essay": (),
     "formal": (),
     # D-5: promo では書き手の絵文字を残す（勢いの検査は絵文字が減ると候補にするので、lint の絵文字の候補と食い違わせない）。
@@ -113,7 +114,7 @@ LINT_HELP_LIST = "\n".join([
     "  proposal  なし",
     "  minutes   bold_label_list、excess_list、sentence_end_repetition",
     "  manual    excess_list",
-    "  slides    bold_label_list、count_declaration、excess_list、short_summary_heading",
+    "  slides    bold_label_list、cleft_list_ending、count_declaration、excess_list、short_summary_heading",
     "  essay     なし",
     "  formal    なし",
     "  promo     emoji_prohibited、fragment_run",
@@ -133,19 +134,31 @@ _DETECTOR_HELP = ("文体の硬化の検査は incident、formal、paper のと�
                   "勢いの検査の見出しに数えます。")
 # 2回目の反証の直し（反証で見つけた例）: 種類で硬化と勢いの level と promo の見出しの数え方が
 # 変わるので、冒頭の「残すだけで」を「残し、」にした
-DIFF_DOC_TYPE_HELP = ("文書の種類（値は yomiyasu_lint.py と同じ）。表示と JSON に残し、差分、意味が変わる恐れ、規則の見直し候補、"
-                      "--fail-on は変わりません（意味の検査はどの種類でも同じに行います）。" + _DETECTOR_HELP + "mail だけ敬語の度合いを検査します。値: " + DOC_TYPE_CHOICES + "。")
+# v2.1.0: 事実や仕様を述べる種類では、確度の2つの強まりを --fail-on に数えるようにしたので、
+# 「--fail-on は変わりません（意味の検査はどの種類でも同じに行います）」を、変わる所を書く文にした
+# （能力の言い方の消えは、実際の推敲で誤検知が多かったので、どの種類でも数えない候補にとどめた）
+_COUNTED_HELP = ("pr、article、incident、proposal、manual、formal、paper（事実や仕様を述べる種類）では、"
+                 "「場合がある」「ことがある」を消した言い切りと、断定に「必ず」などを足した書き換えを --fail-on に数えます"
+                 "（意味の検査で種類によって変わるのはこの2つだけです）。")
+DIFF_DOC_TYPE_HELP = ("文書の種類（値は yomiyasu_lint.py と同じ）。表示と JSON に残します。差分、意味が変わる恐れ、規則の見直し候補の"
+                      "見つけ方は、どの種類でも同じです。" + _COUNTED_HELP + _DETECTOR_HELP + "mail だけ敬語の度合いを検査します。値: "
+                      + DOC_TYPE_CHOICES + "。")
 DIFF_READER_HELP = "想定する読者の知識（値は yomiyasu_lint.py と同じ）。表示と JSON に残すだけで、判定は変わりません。"
 # diff の詰めの直し（反証で見つけた例）: diff と同じ、硬化と勢いを参考にする種類の文を足した
 CHECK_DOC_TYPE_HELP = ("文書の種類。lint と diff に渡し、記録と状態の行に残します。lint は、その種類で普通な書き方を候補にする規則を"
-                       "外します（yomiyasu_lint.py -h の一覧）。差分（意味が変わる恐れと規則の見直し候補）と資料との照合の判定は"
-                       "変わりません。" + _DETECTOR_HELP + "mail だけ敬語の度合いを検査します。値: " + DOC_TYPE_CHOICES + "。")
+                       "外します（yomiyasu_lint.py -h の一覧）。差分（意味が変わる恐れと規則の見直し候補）の見つけ方と、資料との照合の"
+                       "判定は変わりません。" + _COUNTED_HELP + _DETECTOR_HELP + "mail だけ敬語の度合いを検査します。値: "
+                       + DOC_TYPE_CHOICES + "。")
 CHECK_READER_HELP = "想定する読者の知識。lint と diff に渡し、記録と状態の行に残します。判定は変わりません。"
 
 # 9.3 と 9.4 の1行
 LINT_NO_SKIP = "この種類で外す規則はありません。"
 LINT_READER_NOTE = "読者では候補を変えていません。"
-DIFF_CONTEXT_TAIL = "差分と意味が変わる恐れは、種類と読者によらず同じ規則で出しています。"
+# v2.1.0: 事実や仕様を述べる種類では数える候補が変わるので、「同じ規則で出しています」を、候補の見つけ方が同じという文にした
+DIFF_CONTEXT_TAIL = "候補の見つけ方は種類と読者によらず同じです。"
+# v2.1.0: 事実や仕様を述べる種類を指定したときだけ、その後ろに足す文
+DIFF_COUNTED_TAIL = ("この種類では、「場合がある」「ことがある」を消した言い切りと、断定に「必ず」などを足した書き換えも"
+                     " --fail-on に数えます。")
 LINT_HEADER = [
     "表現・書式の検査を実行しました。",
     "見直し候補: {}件",
@@ -164,9 +177,11 @@ SUMMARY_HEADING_ONLY = "# 報告\n\n作業は終わりました。\n\n## まと�
 BOLD_ERROR_ONLY = "これは**「重要」**です。\n"
 EMOJI_ONLY = "新作のケーキが並びました\U0001F370\n"
 FRAGMENT_RUN_ONLY = "安い。うまい。早い。\n"
+CLEFT_LIST_ONLY = "書き換えの中で変動したのは、画面、帳票、通知。\n"
 RULE_SAMPLES = {
     "emoji_prohibited": EMOJI_ONLY,
     "fragment_run": FRAGMENT_RUN_ONLY,
+    "cleft_list_ending": CLEFT_LIST_ONLY,
     "excess_list": EXCESS_LIST_ONLY,
     "sentence_end_repetition": SENTENCE_END_ONLY,
     "bold_label_list": BOLD_LABEL_ONLY,
@@ -177,7 +192,7 @@ RULE_SAMPLES = {
 SLIDES_SAMPLE = ("# 新しい検索の仕組み\n\n- **対象**: 社内の文書\n- **期間**: 10月から\n- **担当**: 検索チーム\n\n"
                  "## まとめ\n\n検索が速くなります\U0001F600\n")
 SLIDES_LINE = ("文書の種類: スライド（slides）、読者: 指定なし。種類に合わせて外した候補 2件（bold_label_list 1件、"
-               "count_declaration 0件、excess_list 0件、short_summary_heading 1件）。")
+               "cleft_list_ending 0件、count_declaration 0件、excess_list 0件、short_summary_heading 1件）。")
 
 # 指示書2.2の3組（合成の文）
 PAIRS_22 = (("田中が佐藤を承認した。\n", "佐藤が田中を承認した。\n"),
@@ -623,7 +638,8 @@ class LintSkipTest(DocTypeCase):
             self.assertIsNone(parameters[name].default)
         self.assertEqual(yomiyasu_lint.lint_text(SLIDES_SAMPLE, doc_type=" ＳＬＩＤＥＳ ", reader="General")["context"],
                          {"doc_type": "slides", "reader": "general",
-                          "skipped_by_doc_type": {"bold_label_list": 1, "count_declaration": 0, "excess_list": 0,
+                          "skipped_by_doc_type": {"bold_label_list": 1, "cleft_list_ending": 0, "count_declaration": 0,
+                                                  "excess_list": 0,
                                                   "short_summary_heading": 1}})
         with self.assertRaises(ValueError):
             yomiyasu_lint.lint_text(SLIDES_SAMPLE, doc_type="tech")
@@ -804,7 +820,10 @@ class OptionTest(DocTypeCase):
         参考 info）が変わる（追加文書 2.4、勢いの文書 3.3）。候補と値は同じなので、level を除いて比べ、level は表のとおりか見る。
         diff の詰めの直しで、硬化の参考に incident を足し、promo 以外の種類では勢いの
         絵文字と見出しを参考にした（候補ごとの level）。promo では、番号つき項目の行と太字だけの行も勢いの見出しの字数に数える
-        （反証で見つけた例）ので、promo だけは見出しの字数と見出しの候補を除いて比べ、違いがそこだけであることを見る。"""
+        （反証で見つけた例）ので、promo だけは見出しの字数と見出しの候補を除いて比べ、違いがそこだけであることを見る。
+        v2.1.0 で、事実や仕様を述べる種類（COUNTED_TYPES。ここでは pr、formal、incident）では、確度の2つの段
+        （"counted_by": "doc_type"）を --fail-on に数えるようにした。候補の位置と中身は同じなので、その段を種類なしの形に
+        戻してから比べ、違いがそこだけであることを見る（能力の言い方の消えは、どの種類でも数えない modality_review のまま）。"""
         pairs = list(PAIRS_22) + [((CORPUS / a).read_text(encoding="utf-8"), (CORPUS / b).read_text(encoding="utf-8"))
                                   for a, b in corpus_pairs()[:48]]
         options = ({"doc_type": "slides", "reader": "general"}, {"doc_type": "essay", "reader": "expert"},
@@ -832,12 +851,30 @@ class OptionTest(DocTypeCase):
                                              for side, counts in section["counts"].items())
                 result[key] = section
             return result
+
+        def without_counting(result, doc_type):
+            """種類で数える側に入れた候補を、種類なしの形に戻す（数える種類でなければ何も変えない）。"""
+            if doc_type not in yomiyasu_diff.COUNTED_TYPES:
+                return result
+            risks = []
+            for risk in result["meaning_risks"]:
+                risk = copy.deepcopy(risk)
+                if risk["kind"] in ("certainty", "certainty_review"):
+                    for step in risk["detail"]["steps"]:
+                        if step.pop("counted_by", None) == "doc_type":
+                            step["counted"] = False
+                    risk["kind"] = "certainty" if any(step["counted"] for step in risk["detail"]["steps"]) else "certainty_review"
+                risks.append(risk)
+            result["meaning_risks"] = risks
+            result["fail_on_meaning_risk_count"] = yomiyasu_diff.fail_on_count(risks)
+            return result
         for old, new in pairs:
             plain = yomiyasu_diff.diff(old, new)
             plain.pop("context")
             for given in options:
                 result = yomiyasu_diff.diff(old, new, **given)
                 self.assertEqual(result.pop("context"), given)
+                result = without_counting(result, given["doc_type"])
                 for key in reference:
                     for item in result[key]["candidates"]:
                         self.assertEqual(item["level"], expected_level(key, given["doc_type"], item["subkind"]), (key, given))
@@ -866,10 +903,12 @@ class OptionTest(DocTypeCase):
         self.assertEqual((code, err), (0, ""))
         lines, plain_lines = out.split("\n"), plain.split("\n")
         self.assertEqual(lines[:3], plain_lines[:3])
-        self.assertEqual(lines[3], "文書の種類: 障害報告（incident）、読者: 指定なし。" + DIFF_CONTEXT_TAIL)
+        self.assertEqual(lines[3], "文書の種類: 障害報告（incident）、読者: 指定なし。" + DIFF_CONTEXT_TAIL + DIFF_COUNTED_TAIL)
         self.assertEqual(lines[4:], plain_lines[3:])
         _, out, _ = self.diff("--reader", "general", a, b)
         self.assertEqual(out.split("\n")[3], "文書の種類: 指定なし、読者: 専門知識のない人（general）。" + DIFF_CONTEXT_TAIL)
+        _, out, _ = self.diff("--doc-type", "essay", a, b)
+        self.assertEqual(out.split("\n")[3], "文書の種類: エッセイ・小説（essay）、読者: 指定なし。" + DIFF_CONTEXT_TAIL)
         parameters = inspect.signature(yomiyasu_diff.diff).parameters
         self.assertEqual(list(parameters)[:3], ["orig_raw", "rw_raw", "stance"])
         for name in ("encoding_notes", "doc_type", "reader"):
@@ -887,7 +926,8 @@ class OptionTest(DocTypeCase):
         lint = json.loads((folder / "attempt-1.lint.json").read_text(encoding="utf-8"))
         diff = json.loads((folder / "attempt-1.diff.json").read_text(encoding="utf-8"))
         self.assertEqual(lint["context"], {"doc_type": "slides", "reader": "general",
-                                           "skipped_by_doc_type": {"bold_label_list": 1, "count_declaration": 0,
+                                           "skipped_by_doc_type": {"bold_label_list": 1, "cleft_list_ending": 0,
+                                                                   "count_declaration": 0,
                                                                    "excess_list": 0, "short_summary_heading": 1}})
         self.assertEqual(diff["context"], {"doc_type": "slides", "reader": "general"})
         # 子の .lint.txt には lint の4行目が入る
@@ -1029,10 +1069,10 @@ class OptionTest(DocTypeCase):
 
     def test_d8_versions_do_not_change(self):
         """D8: --version と形式の版は変えない（9.7）。"""
-        self.assertEqual(call(yomiyasu_lint.main, ["--version"])[1], "yomiyasu_lint.py 2.0.2 (JSON format 2)\n")
-        self.assertEqual(call(yomiyasu_diff.main, ["--version"])[1], "yomiyasu_diff.py 2.0.2 (JSON format 2)\n")
+        self.assertEqual(call(yomiyasu_lint.main, ["--version"])[1], "yomiyasu_lint.py 2.1.0 (JSON format 2)\n")
+        self.assertEqual(call(yomiyasu_diff.main, ["--version"])[1], "yomiyasu_diff.py 2.1.0 (JSON format 2)\n")
         self.assertEqual(call(yomiyasu_check.main, ["--version"])[1],
-                         "yomiyasu_check.py 2.0.2 (record format 1, result format 1, materials format 1)\n")
+                         "yomiyasu_check.py 2.1.0 (record format 1, result format 1, materials format 1)\n")
 
 
 # ---- E. 速さ ----
