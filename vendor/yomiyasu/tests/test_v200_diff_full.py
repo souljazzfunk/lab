@@ -38,6 +38,8 @@ TOP_KEYS = (["format", "format_version", "tool_version", "status", "changed", "c
              "fail_on_meaning_risk_count", "not_judged", "context", "meaning_risks"] + NINE_KEYS
             + ["full_diff", "stiffness", "tone", "feeling", "hedges", "immutable", "politeness", "register"])
 FIRST_LINE = "差分の検査を実行しました。"
+# v2.1.1: v1.1.2 の合成20組のうち、見出しを変えた組で structure の後ろに足す見出しの変化の文
+HEADING_ADDED = {"heading_and_code": ["見出しの段を変えた（元1行目 段2「## 手順」→ 後1行目 段3「### 手順」）"]}
 DISCLAIMER = ("全文差分は変わった箇所を示すだけで、意味が同じだという証明ではありません。"
               "この検査では、意味の保持と読者にとっての分かりやすさは判定していません。")
 NO_CANDIDATE_STATUS = "状態: 変更はあるが、専用の規則に当たる見直し候補はない（変更"
@@ -1128,7 +1130,8 @@ class TestExistingKeys(DiffCase):
     """6.3 既存の9キー: v1.1.2 で作った合成20組（BOM なし）の9キーと同じ（v1.1.2 でも通る後戻り防止）。"""
 
     def test_nine_keys_match_v112_fixture(self):
-        """合成20組の9キーが v1.1.2 の fixture と同じ（v1.1.2 でも通る後戻り防止）。"""
+        """合成20組の9キーが v1.1.2 の fixture と同じ（v1.1.2 でも通る後戻り防止）。v2.1.1 で structure の後ろに足した
+        見出しの変化の文は除いて比べ、足した文は HEADING_ADDED と照らす。"""
         data = json.loads(FIXTURE.read_text(encoding="utf-8"))
         self.assertEqual(data["keys"], NINE_KEYS)
         self.assertEqual(len(data["cases"]), 20)
@@ -1138,7 +1141,11 @@ class TestExistingKeys(DiffCase):
                 result = yomiyasu_diff.diff(case["orig"], case["rewrite"], case["stance"])
                 self.assertEqual([key for key in result if key in NINE_KEYS], NINE_KEYS, "9キーの間の順を保つ（2.8）")
                 actual = json.loads(json.dumps({key: result[key] for key in NINE_KEYS}, ensure_ascii=False))
+                # v2.1.1 で structure の後ろに見出しの変化の文を足した。v1.1.2 の文は前にそのまま並び、足した文は見出しの文だけ
+                added = actual["structure"][len(case["expected"]["structure"]):]
+                actual["structure"] = actual["structure"][:len(case["expected"]["structure"])]
                 self.assertEqual(actual, case["expected"])
+                self.assertEqual(added, HEADING_ADDED.get(case["id"], []))
 
 
 class TestArguments(DiffCase):
@@ -1409,6 +1416,8 @@ DIFF_HELP_DESCRIPTION = ("元の文と書き直した文を比べ、変わった
 # diff の詰めの直し（反証で見つけた例）: 否定対比の主張の逆転と気持ちの語も数えないことを足した
 # v2.1.0: 許可の言い方の変化と、事実や仕様を述べる種類で数える2つ（「場合がある」の言い切り、「必ず」などの足し）を足した。
 # 能力の言い方の消えは、どの種類でも数えないことを書いた
+# v2.1.1: 関連・相関の文に因果の言い方を足した書き換えと、選ぶ範囲（どれか一つ ↔ 全部）が入れ替わった書き換え、数に付いた概数や範囲の印の
+# 消えと足しを数えることを足した
 DIFF_HELP_FAIL_ON = ("意味が変わる恐れのうち、数値、否定、主語と目的語の入れ替え、文の種類（問いと平叙、文の種類の印）、引用の印の変化、"
                      "確度を強めた書き換え（かもしれない → 見込み、見込み → 予定、と思われる → 断定など）、"
                      "原文の状態の語（未定、未確認、調査中など）が消えた書き換え、原文にない書き手の約束・保証・再発防止の誓いの足しが"
@@ -1422,6 +1431,9 @@ DIFF_HELP_FAIL_ON = ("意味が変わる恐れのうち、数値、否定、主�
                      "推量の印が同じ強さの慎重な言い方に替わっただけの文（かもしれません → 恐れがあります、と思われます → 見込みです）も数えません。"
                      "原文にない因果のつながりの足しと、書き手の行為と読む印（いたします、今後・改めて、"
                      "弊社などの主語）のない「〜します」の足し（説明や手順の文かもしれないもの）も数えません。"
+                     "ただし、関連・相関を述べた原文の文に因果の言い方（因果、原因、引き起こす など）を足した書き換えと、"
+                     "選ぶ範囲が入れ替わった書き換え（または・どちらか → 両方・すべて、またはその逆）、"
+                     "同じ数に付いた概数や範囲の印（約、ほど、以上、未満 など）が消えたか増えた書き換えは数えます。"
                      "候補は確かめる場所で、意味が変わったという判定ではありません。"
                      "条件に当たらなくても、意味が同じだという証明にはなりません。")
 UNKNOWN_FAIL_ON = "--fail-on に使えない値です: {}。diff で使えるのは meaning-risk です。"
@@ -1748,7 +1760,7 @@ class TestCliContract(DiffCase):
         """2.1: main(argv=None) は終了コードを返す（CLI は sys.exit(main()) の形）。"""
         self.assertTrue(callable(getattr(yomiyasu_diff, "main", None)), "main がない")
         self.assertIn("argv", inspect.signature(yomiyasu_diff.main).parameters)
-        self.assertEqual(self.call_main(["--version"]), (0, "yomiyasu_diff.py 2.1.0 (JSON format 2)\n", ""))
+        self.assertEqual(self.call_main(["--version"]), (0, "yomiyasu_diff.py 2.1.1 (JSON format 2)\n", ""))
         self.assertEqual(self.call_main([str(self.a_old), str(self.a_new)]), (0, EXAMPLE_A + "\n", ""))
         self.assertEqual(self.call_main(["--fail-on=meaning-risk", str(self.a_old), str(self.a_new)]),
                          (1, EXAMPLE_A + "\n\n" + FAIL_LINE_A + "\n", ""))
