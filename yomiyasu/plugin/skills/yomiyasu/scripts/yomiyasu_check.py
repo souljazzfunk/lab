@@ -12,7 +12,7 @@ mail（メール・チャット）と paper（論文・研究レポート）も�
 同じ権限で原稿と記録の両方を書き換えられる環境では、記録は実行漏れを見つけるためのもので、
 改ざんの防止や人の承認の証明にはならない。
 """
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 import sys
 
@@ -23,7 +23,9 @@ sys.dont_write_bytecode = True
 import os  # noqa: E402
 import re  # noqa: E402
 import json  # noqa: E402
+import errno  # noqa: E402
 import stat  # noqa: E402
+import shutil  # noqa: E402
 import time  # noqa: E402
 import signal  # noqa: E402
 import hashlib  # noqa: E402
@@ -134,6 +136,7 @@ _REPORT_KEYS = {
 _LINK_SECONDS = 6 * 60 * 60     # 前の記録につなぐのは6時間以内
 _STDERR_LIMIT = 2000            # 記録に残す子の標準エラーの字数
 _REPLACE_TRIES = 6              # os.replace を PermissionError のあと50ミリ秒待って5回まで書き直す
+_TEMPORARY_TRIES = 100         # 一時ファイルと一時フォルダの名前を決めるのは100回まで
 _REPLACE_WAIT = 0.05
 _ATTEMPT_TRIES = 100            # 回の番号を確保するのは100回まで
 _NOT_JUDGED = ["meaning_preservation", "reader_comprehension"]
@@ -437,9 +440,77 @@ def _replace(source, target):
             time.sleep(_REPLACE_WAIT)
 
 
+def _temporary_name_taken(path):
+    """一時の名前を作るときに PermissionError が出たのは、同じ名前のフォルダがあるためか。Windows では、同じ名前の
+    フォルダがあっても PermissionError になる。フォルダ自体に書き込めないときも同じ例外なので、名前が本当にフォルダの
+    ときだけ次の名前を試す（tempfile は os.access で確かめるが、Windows の os.access は読み取り専用の属性しか見ず、
+    ACL で書き込みを拒まれたフォルダでも真になる。そのため Python 3.12 までの tempfile は、約21億回まで名前を試し続ける）。"""
+    return os.name == "nt" and os.path.isdir(path)
+
+
+def _mkstemp(folder):
+    """folder に一時ファイル（.tmp-<16進>）を作って開く。(ファイル記述子, 絶対パス) を返す。フラグとモードは tempfile.mkstemp
+    と同じ（O_EXCL、0o600、O_NOFOLLOW、Windows では O_BINARY。O_NOINHERIT は Windows の os.open も足すものを明示しただけ）。
+    名前を試すのは _TEMPORARY_TRIES 回まで（tempfile は TMP_MAX 回で、Python 3.12 までの Windows では約21億回）。"""
+    folder = os.path.abspath(folder)
+    flags = (os.O_RDWR | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOINHERIT", 0) | getattr(os, "O_BINARY", 0)
+             | getattr(os, "O_NOFOLLOW", 0))
+    for _ in range(_TEMPORARY_TRIES):
+        path = os.path.join(folder, ".tmp-" + os.urandom(8).hex())
+        try:
+            return os.open(path, flags, 0o600), path
+        except FileExistsError:
+            continue
+        except PermissionError:
+            if _temporary_name_taken(path):
+                continue
+            raise
+    raise FileExistsError(errno.EEXIST, "一時ファイルの名前を{}回試して決められません".format(_TEMPORARY_TRIES), folder)
+
+
+def _mkdtemp(prefix):
+    """システムの一時フォルダに、自分だけが使うフォルダ（<prefix><16進>、0o700。tempfile.mkdtemp と同じ）を作り、絶対パスを
+    返す。名前を試すのは _TEMPORARY_TRIES 回まで（tempfile は TMP_MAX 回）。"""
+    parent = os.path.abspath(tempfile.gettempdir())
+    for _ in range(_TEMPORARY_TRIES):
+        path = os.path.join(parent, prefix + os.urandom(8).hex())
+        try:
+            os.mkdir(path, 0o700)
+            return path
+        except FileExistsError:
+            continue
+        except PermissionError:
+            if _temporary_name_taken(path):
+                continue
+            raise
+    raise FileExistsError(errno.EEXIST, "一時フォルダの名前を{}回試して決められません".format(_TEMPORARY_TRIES), parent)
+
+
+def _remove_temporary(path):
+    """_mkdtemp で作った一時フォルダを消す。tempfile.TemporaryDirectory の後片付けと同じく、消せないものは権限（と BSD の
+    フラグ）を戻して消し直す。それでも消せなければ、原稿の写しが残っていることを標準エラーに1行で知らせる（結果の出力と
+    終了コードは変えない）。"""
+    def again(function, target, *_):
+        for item in (os.path.dirname(target), target):
+            try:
+                if hasattr(os, "chflags"):
+                    os.chflags(item, 0)
+                os.chmod(item, 0o700)
+            except OSError:
+                pass
+        function(target)
+    try:
+        if sys.version_info >= (3, 12):
+            shutil.rmtree(path, onexc=again)
+        else:
+            shutil.rmtree(path, onerror=again)
+    except OSError:
+        _error("yomiyasu_check.py: 一時フォルダ {} を消せませんでした。原稿の写しが残っているので、消してください。".format(path))
+
+
 def _write_atomic(path, data):
     """同じフォルダの一時ファイルに書いてから入れ替える（読む側が書きかけを見ない）。"""
-    handle, temporary = tempfile.mkstemp(prefix=".tmp-", dir=os.path.dirname(path))
+    handle, temporary = _mkstemp(os.path.dirname(path))
     try:
         with os.fdopen(handle, "wb") as stream:
             stream.write(data)
@@ -490,7 +561,7 @@ def _place_new_file(path, data):
     （上書きしない）。同じフォルダの一時ファイルに書いてから os.link で置くので、読む側は書きかけを見ない。
     ハードリンクを作れないファイルシステムでは、O_EXCL で作ってから書く。書けなかったときは、ここで作ったファイル
     だけを消して例外を出す（ほかのプロセスが同じ名前に置き直したファイルは消さない）。"""
-    handle, temporary = tempfile.mkstemp(prefix=".tmp-", dir=os.path.dirname(path))
+    handle, temporary = _mkstemp(os.path.dirname(path))
     try:
         with os.fdopen(handle, "wb") as stream:
             stream.write(data)
@@ -1742,8 +1813,10 @@ def _treated_note(ctx):
     return _TREATED_INHERITED_PENDING_NOTE if inherited else _TREATED_PENDING_NOTE
 
 
-def _decide(ctx, recorded, problem=None, attempt=None, run_id=None, fix_count=0, same_as_previous=False):
-    """状態、1行目、next、状態の行を決める（1行目の表を上から当てはめる）。"""
+def _decide(ctx, recorded, problem=None, attempt=None, run_id=None, fix_count=0, same_as_previous=False,
+            denied=False):
+    """状態、1行目、next、状態の行を決める（1行目の表を上から当てはめる）。denied は、記録を書けなかった理由が
+    書き込みの拒否（PermissionError）のときに真で、1行目に状態フォルダを分ける案内を足す。"""
     finalize = _finalize_text(ctx)
     failed = ctx.failed
     if ctx.final_changed:
@@ -1765,8 +1838,13 @@ def _decide(ctx, recorded, problem=None, attempt=None, run_id=None, fix_count=0,
             "、".join(clauses), "、".join(items)) + _PARTIAL_TAIL)
         following = "report_partial"
     elif not recorded and not ctx.no_record:
-        line = ("検査を実行しましたが、記録を書けませんでした（{0}）。--state-dir に書ける場所を指定してもう一度実行するか、"
-                "完了報告の「実行しなかった検査」に「記録（{0}）」と書いてください。".format(problem))
+        if denied:
+            line = ("検査を実行しましたが、記録を書けませんでした（{0}）。" + _DENIED_STATE_NOTE + "--state-dir か "
+                    "YOMIYASU_STATE_DIR で自分が書ける場所を指定してもう一度実行するか、完了報告の「実行しなかった検査」に"
+                    "「記録（{0}）」と書いてください。").format(problem)
+        else:
+            line = ("検査を実行しましたが、記録を書けませんでした（{0}）。--state-dir に書ける場所を指定してもう一度実行するか、"
+                    "完了報告の「実行しなかった検査」に「記録（{0}）」と書いてください。".format(problem))
         following = "report_unrecorded"
     else:
         if ctx.text_unchanged() or (ctx.source is not None and ctx.diff_result is not None
@@ -2343,9 +2421,18 @@ def _put_snapshots(folder, inputs):
     return paths
 
 
+# 状態フォルダへの書き込みを拒まれたときに、1行目と start の案内に足す文。状態フォルダは作った OS ユーザーだけが
+# 書けるフォルダにする（POSIX の 0o700。Windows も Python の版によって作ったユーザーと管理者だけになる）ので、同じ
+# リポジトリをほかの OS ユーザーと使うときは、ユーザーごとに別の状態フォルダを指定してもらう
+_DENIED_STATE_NOTE = ("ほかの OS ユーザー（Codex のサンドボックスなど）が先に作った状態フォルダは、作ったユーザーしか"
+                      "書けないことがあります。")
+
+
 def _write_problem(state, error):
     """記録を書けなかった理由の文（1行目と5行目に入れる）。"""
     where = getattr(error, "filename", None) or state
+    if isinstance(where, str) and os.path.basename(where).startswith(".tmp-"):
+        where = os.path.dirname(where)  # 一時ファイルの名前ではなく、書けなかったフォルダを示す
     reason = getattr(error, "strerror", None) or str(error) or type(error).__name__
     return "{} に書けません: {}".format(where, reason)
 
@@ -2617,7 +2704,7 @@ def _run_impl(args, parser):
     # 3. 入力の写しを置き、検査はこの写しに対して行う。記録を書かないとき（--no-record、書けない）は、
     #    消す前提の一時フォルダに写しを置き、終わったら消す。ほかの場所に記録を逃がさない
     recording = state is not None
-    write_problem = None
+    write_problem, write_denied = None, False
     inputs = ([ctx.source] if ctx.source is not None else []) + list(ctx.materials) + [ctx.final]
     temporary = None
     try:
@@ -2628,13 +2715,14 @@ def _run_impl(args, parser):
                 snapshots = _put_snapshots(_ensure_dir(state, "inputs"), inputs)
             except OSError as error:
                 recording, write_problem = False, _write_problem(state, error)
+                write_denied = isinstance(error, PermissionError)
         if snapshots is None:
-            temporary = tempfile.TemporaryDirectory(prefix="yomiyasu-check-")
-            snapshots = _put_snapshots(temporary.name, inputs)
+            temporary = _mkdtemp("yomiyasu-check-")
+            snapshots = _put_snapshots(temporary, inputs)
         _run_checks(ctx, snapshots, stance, timeout)
     finally:
         if temporary is not None:
-            temporary.cleanup()
+            _remove_temporary(temporary)
 
     # 4. 最終稿のファイルを読み直し、検査の途中で変わっていないかを確かめる（標準入力なら省く）
     if ctx.final.via == "file":
@@ -2654,8 +2742,9 @@ def _run_impl(args, parser):
                                                               path_key, lint_module, diff_module)
         except OSError as error:
             recording, write_problem = False, _write_problem(state, error)
+            write_denied = isinstance(error, PermissionError)
     if not recording:
-        decision = _decide(ctx, False, problem=write_problem)
+        decision = _decide(ctx, False, problem=write_problem, denied=write_denied)
     status, line, following, token = decision
 
     # 6. 出力する。意味が変わる恐れを出す検査が最後まで動かなかったときは、件数を null にする（反証で見つけた例）
@@ -4406,7 +4495,7 @@ def _management(command, args, parser):
     state = _state_dir(args.state_dir)
     if command == "start":
         limits = {key: getattr(args, key) for key in _DEFAULT_LIMITS}
-        # 読む失敗は入力の誤り。書く失敗は main の内部エラー（3）。
+        # 読む失敗は入力の誤り。書く失敗は終了コード3（状態フォルダに書けないときは、トレースバックでなく案内を出す）。
         try:
             _managed_input(args.source)
         except (OSError, ValueError) as error:
@@ -4418,6 +4507,14 @@ def _management(command, args, parser):
                               default_place=not _state_dir_given(args.state_dir))
         except ValueError as error:
             parser.error(str(error))
+        except OSError as error:
+            if isinstance(error, TimeoutError):
+                raise  # 同じ原稿の登録のロックを待ちきれなかった（書けないのではない）。今までどおり内部エラーにする
+            # 状態フォルダに書けない。終了コードは今までどおり3（内部エラーと同じ）にし、トレースバックの代わりに案内を出す
+            _error("yomiyasu_check.py start: 原稿を登録できませんでした（{}）。{}--state-dir か YOMIYASU_STATE_DIR で"
+                   "自分が書ける場所を指定してもう一度実行してください。".format(
+                       _write_problem(state, error), _DENIED_STATE_NOTE if isinstance(error, PermissionError) else ""))
+            return 3
         run_id = entry["run_id"]
         message = ("原稿を登録しました（上限: 続けさせる{max_stop_blocks}回、run {max_runs}回、{deadline_min}分）。"
                    "この原稿で run と verify を実行すると、記録がこの登録につながります。").format(**limits)
