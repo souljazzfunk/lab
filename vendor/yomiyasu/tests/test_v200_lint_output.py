@@ -26,6 +26,8 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 import markdown_visibility  # noqa: E402
 import yomiyasu_lint  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from portable import run_text  # noqa: E402
 
 
 # 1.1 の例1（候補なし）
@@ -243,7 +245,7 @@ class LintCase(unittest.TestCase):
 
     def write(self, name, text):
         path = self.root / name
-        path.write_text(text, encoding="utf-8")
+        path.write_bytes(text.encode("utf-8"))
         return path
 
     def write_bytes(self, name, data):
@@ -706,7 +708,7 @@ class TestErrors(LintCase):
         partial = self.root / "partial"
         partial.mkdir()
         (partial / "yomiyasu_lint.py").write_bytes(LINT.read_bytes())
-        (partial / "markdown_visibility.py").write_text(OLD_VISIBILITY_STUB, encoding="utf-8")
+        (partial / "markdown_visibility.py").write_bytes(OLD_VISIBILITY_STUB.encode("utf-8"))
         sample = self.write("warn.md", WARN_ONLY)
         with self.subTest(case="script"):
             process = subprocess.run(
@@ -721,7 +723,7 @@ class TestErrors(LintCase):
             self.assertIn("decode_source", first_line)
             self.assertIn("Traceback", process.stderr)
         with self.subTest(case="module"):
-            process = subprocess.run(
+            process = run_text(
                 [sys.executable, "-B", "-c", LOAD_LINT_WORKER, str(partial / "yomiyasu_lint.py")],
                 input=WARN_ONLY, capture_output=True, encoding="utf-8", errors="replace", timeout=30,
                 cwd=str(self.root), env=dict(os.environ, PYTHONIOENCODING="utf-8"),
@@ -733,8 +735,8 @@ class TestErrors(LintCase):
         ファイルの隣の markdown_visibility.py を使う（7.2 の読み込みの型。名前が足りない ImportError でも隣に戻る）。"""
         old = self.root / "old"
         old.mkdir()
-        (old / "markdown_visibility.py").write_text(OLD_VISIBILITY_STUB, encoding="utf-8")
-        process = subprocess.run(
+        (old / "markdown_visibility.py").write_bytes(OLD_VISIBILITY_STUB.encode("utf-8"))
+        process = run_text(
             [sys.executable, "-B", "-c", LOAD_LINT_WORKER, str(LINT), str(old)],
             input=EXAMPLE2_INPUT, capture_output=True, encoding="utf-8", errors="replace", timeout=30,
             cwd=str(self.root), env=dict(os.environ, PYTHONIOENCODING="utf-8"),
@@ -765,7 +767,7 @@ class TestMainFunction(LintCase):
 
     def test_main_returns_exit_codes(self):
         path = self.write("warn.md", WARN_ONLY)
-        self.assertEqual(self.call_main(["--version"]), (0, "yomiyasu_lint.py 2.1.2 (JSON format 2)\n", ""))
+        self.assertEqual(self.call_main(["--version"]), (0, "yomiyasu_lint.py 2.1.3 (JSON format 2)\n", ""))
         code, out, err = self.call_main([str(path)])
         self.assertEqual((code, err), (0, ""))
         self.assertEqual(out.split("\n")[0], "表現・書式の検査を実行しました。")
@@ -913,10 +915,10 @@ class TestHelpAndVersion(LintCase):
             self.assertRegex(line, r"^  {}  \S".format(code))
 
     def test_version_line(self):
-        """--version は `yomiyasu_lint.py 2.1.2 (JSON format 2)`、終了コード0。"""
+        """--version は `yomiyasu_lint.py 2.1.3 (JSON format 2)`、終了コード0。"""
         process = run_lint(["--version"])
         self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
-        self.assertEqual(process.stdout.strip("\n"), "yomiyasu_lint.py 2.1.2 (JSON format 2)")
+        self.assertEqual(process.stdout.strip("\n"), "yomiyasu_lint.py 2.1.3 (JSON format 2)")
         self.assertEqual(process.stderr, "")
 
 
@@ -970,7 +972,7 @@ class TestMainDecisions(LintCase):
             folder.mkdir()
             (folder / "yomiyasu_lint.py").write_bytes(LINT.read_bytes())
             if content is not None:
-                (folder / "markdown_visibility.py").write_text(content, encoding="utf-8")
+                (folder / "markdown_visibility.py").write_bytes(content.encode("utf-8"))
             with self.subTest(case=case, run="script"):
                 process = subprocess.run(
                     [sys.executable, "-B", str(folder / "yomiyasu_lint.py"), "--fail-on=warn", str(sample)],
@@ -982,7 +984,7 @@ class TestMainDecisions(LintCase):
                 self.assertTrue(first_line.startswith("yomiyasu_lint.py: 内部エラー: ImportError: "), process.stderr)
                 self.assertIn("markdown_visibility.py", first_line)
             with self.subTest(case=case, run="module"):
-                process = subprocess.run(
+                process = run_text(
                     [sys.executable, "-B", "-c", LOAD_LINT_WORKER, str(folder / "yomiyasu_lint.py")],
                     input=WARN_ONLY, capture_output=True, encoding="utf-8", errors="replace", timeout=30,
                     cwd=str(self.root), env=dict(os.environ, PYTHONIOENCODING="utf-8"))
@@ -998,6 +1000,7 @@ class TestMainDecisions(LintCase):
                     [sys.executable, "-B", str(LINT)],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 process.stdout.close()
+                process.stdout = None
                 _, err = process.communicate(text.encode("utf-8"), timeout=30)
                 self.assertEqual(process.returncode, 3, err.decode("utf-8", "replace"))
                 message = err.decode("utf-8")

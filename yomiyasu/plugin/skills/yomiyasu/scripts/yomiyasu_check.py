@@ -12,7 +12,7 @@ mail（メール・チャット）と paper（論文・研究レポート）も�
 同じ権限で原稿と記録の両方を書き換えられる環境では、記録は実行漏れを見つけるためのもので、
 改ざんの防止や人の承認の証明にはならない。
 """
-__version__ = "2.1.2"
+__version__ = "2.1.3"
 
 import sys
 
@@ -427,6 +427,52 @@ def _chmod(path, mode):
         os.chmod(path, mode)
 
 
+def _busy_on_windows():
+    """PermissionError を、ほかのプロセスがファイルを入れ替えているか消している途中のためとみなせるか（Windows だけ真）。
+    Windows では、os.replace や os.unlink の途中のファイルを開く、作る、stat すると PermissionError になることがある。"""
+    return os.name == "nt"
+
+
+# Windows で、入れ替えの途中とみなして読み直すときに待つ時間の、1つのプロセスでの合計の上限（秒）。ほかの OS ユーザーが
+# 作った記録のように、ずっと読めないファイルが並んでも、フックや一覧が長く止まらないようにする
+_SETTLE_BUDGET = [1.0]
+
+
+def _settle_wait(path, attempt, opening=False):
+    """読み直す前に待つ。待たずに例外を出すべきとき（POSIX、最後の回、開こうとした名前がフォルダ、待つ時間の合計を
+    使い切った）は False。Windows ではフォルダを開いても PermissionError になるので、opening のときは名前がフォルダかを見る。"""
+    if not _busy_on_windows() or attempt == _REPLACE_TRIES - 1 or (opening and os.path.isdir(path)):
+        return False
+    if _SETTLE_BUDGET[0] < _REPLACE_WAIT:
+        return False
+    _SETTLE_BUDGET[0] -= _REPLACE_WAIT
+    time.sleep(_REPLACE_WAIT)
+    return True
+
+
+def _read_bytes(path):
+    """ファイルの中身を読む。Windows で PermissionError になったときは、ほかのプロセスが入れ替えている途中とみなして、
+    50ミリ秒待って5回まで読み直す（POSIX では読み直さない。待つ時間の合計は _SETTLE_BUDGET まで）。"""
+    for attempt in range(_REPLACE_TRIES):
+        try:
+            with open(path, "rb") as handle:
+                return handle.read()
+        except PermissionError:
+            if not _settle_wait(path, attempt, opening=True):
+                raise
+
+
+def _stat_settled(path):
+    """os.stat。Windows で PermissionError になったときは、50ミリ秒待って5回まで確かめ直す（POSIX では確かめ直さない。
+    待つ時間の合計は _SETTLE_BUDGET まで）。"""
+    for attempt in range(_REPLACE_TRIES):
+        try:
+            return os.stat(path)
+        except PermissionError:
+            if not _settle_wait(path, attempt):
+                raise
+
+
 def _replace(source, target):
     """os.replace。ほかのプロセスがファイルを開いているときの PermissionError は、50ミリ秒待って5回まで書き直す
     （Windows を考えたもの。OS によらず書き直す）。"""
@@ -532,6 +578,18 @@ def _touch(folder, name):
     _chmod(path, 0o600)
 
 
+def _raise_if_hidden(path, error):
+    """os.mkdir が FileExistsError を出したのに path がフォルダと確かめられないとき、確かめられない理由が PermissionError
+    なら、それを出す。Windows では、一覧や属性の読み取りを拒まれた名前で os.path.isdir が False になる。書き込みの拒否と
+    同じく、状態フォルダをユーザーごとに分ける案内につなげるため。"""
+    try:
+        os.lstat(path)
+    except PermissionError as denied:
+        raise denied from error
+    except OSError:
+        pass
+
+
 def _ensure_dir(base, *parts):
     """base の下にフォルダを1段ずつ作る（作ったフォルダだけ 0o700 にする）。作ったフォルダのパスを返す。"""
     path = base
@@ -539,8 +597,9 @@ def _ensure_dir(base, *parts):
         path = os.path.join(path, part)
         try:
             os.mkdir(path, 0o700)
-        except FileExistsError:
+        except FileExistsError as error:
             if not os.path.isdir(path):
+                _raise_if_hidden(path, error)
                 raise
             continue
         _chmod(path, 0o700)
@@ -647,12 +706,13 @@ def _ensure_state(state, default_place=False):
         os.makedirs(parent, exist_ok=True)
     try:
         os.mkdir(state, 0o700)
-    except FileExistsError:
+    except FileExistsError as error:
         if os.path.isdir(state):
             # 並列の run が作ったばかりのフォルダ。その run が .gitignore を置く前に写しを書かないよう、
             # すでにあるフォルダと同じ決まりで、自分でも2つを置きにいく（先に置かれていれば何もしない）
             _add_state_files(state, default_place)
             return
+        _raise_if_hidden(state, error)
         raise
     try:
         _chmod(state, 0o700)
@@ -758,8 +818,7 @@ def _read_record_status(path):
     data = b""
     for attempt in range(2):
         try:
-            with open(path, "rb") as handle:
-                data = handle.read()
+            data = _read_bytes(path)
         except FileNotFoundError:
             return "missing", None
         except OSError:
@@ -4177,6 +4236,7 @@ class _ArmedLock(object):
         self.identity = None
 
     def __enter__(self):
+        denied = refused = 0
         while time.monotonic() < self.deadline:
             try:
                 fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
@@ -4197,13 +4257,38 @@ class _ArmedLock(object):
                     raise
                 return self
             except FileExistsError:
+                denied = 0  # ほかのプロセスがロックを持っている（拒まれ続けているのではない）
                 try:
                     if time.time() - os.stat(self.path).st_mtime > _ARMED_STALE:
                         os.unlink(self.path)
                         continue
+                    refused = 0  # まだ新しいロック（使用中）。古いロックで続けて拒まれた数はここで切る
                 except FileNotFoundError:
                     continue
-                time.sleep(min(0.02, max(0, self.deadline - time.monotonic())))
+                except PermissionError:
+                    # Windows では、ほかのプロセスが先に消している途中の古いロックに stat や unlink をすると
+                    # PermissionError になる。使用中とみなして待ち直す。続けて _REPLACE_TRIES 回拒まれるときは、消せない
+                    # ロック（ほかの OS ユーザーの状態フォルダに残ったものなど）なので、締切まで待たずに出す。POSIX では
+                    # そのまま出す
+                    if not _busy_on_windows():
+                        raise
+                    refused += 1
+                    if refused >= _REPLACE_TRIES:
+                        raise
+            except PermissionError:
+                # Windows では、ほかのプロセスが消している途中（削除の保留中）のロックの名前には、O_EXCL で作れず
+                # PermissionError になる。使用中とみなして、同じ締切まで待ち直す。名前がないのに続けて拒まれるときは、
+                # フォルダに書けないので出す（消し終わった直後の分として、_REPLACE_TRIES 回までは待ち直す。ロックの名前が
+                # フォルダのときも同じ）。POSIX ではそのまま出す
+                if not _busy_on_windows():
+                    raise
+                if not os.path.lexists(self.path) or os.path.isdir(self.path):
+                    denied += 1
+                    if denied >= _REPLACE_TRIES:
+                        raise
+                else:
+                    denied = 0  # 名前がある（消している途中のロック）。続けて拒まれた数はここで切る
+            time.sleep(min(0.02, max(0, self.deadline - time.monotonic())))
         raise TimeoutError("armed_lock")
 
     def __exit__(self, *unused):
@@ -4384,7 +4469,13 @@ def _managed_run_count(run_dir):
     now = time.time()
     for number in _attempt_numbers(run_dir):
         try:
-            info = os.stat(os.path.join(run_dir, "attempt-{}.json".format(number)))
+            info = _stat_settled(os.path.join(run_dir, "attempt-{}.json".format(number)))
+        except PermissionError:
+            # Windows で、ほかの run が記録に入れ替えている途中で確かめられない。回数を使ったものとして数え、
+            # 上限を超えて run を動かさない（POSIX では待ち直さずにここに来て、今までどおり数えない）
+            if _busy_on_windows():
+                count += 1
+            continue
         except OSError:
             continue
         if info.st_size > 0 or now - info.st_mtime < _RESERVATION_SECONDS:
@@ -4820,8 +4911,9 @@ def _version_line():
 
 
 def _use_utf8(stream, **options):
+    # 改行は OS によらず "\n" で書く（Windows の既定では "\r\n" になり、記録や CLI の出力が OS で変わる）
     if stream is not None and hasattr(stream, "reconfigure"):
-        stream.reconfigure(encoding="utf-8", **options)
+        stream.reconfigure(encoding="utf-8", newline="\n", **options)
 
 
 def _error(message):
@@ -4867,6 +4959,13 @@ def _run_cli(argv):
     if sys.stdout is not None:
         sys.stdout.flush()
     return code
+
+
+def _closed_output_on_windows(error):
+    """Windows で、読む側が閉じたパイプに書いたときの例外か。Windows では BrokenPipeError ではなく、errno が EINVAL の
+    OSError になる。ファイル名のある OSError（Windows で名前に使えない字を含むパスなど）と、POSIX では、ほかの誤りとして扱う。"""
+    return (os.name == "nt" and type(error) is OSError and error.errno == errno.EINVAL
+            and error.filename is None and error.filename2 is None)
 
 
 def _silence_stdout():
@@ -4950,6 +5049,11 @@ def main(argv=None):
         _error("yomiyasu_check.py: 出力先が閉じられたため、結果を最後まで書けませんでした。")
         return 3
     except Exception as error:
+        if _closed_output_on_windows(error):
+            # Windows で出力先が閉じられた。上の BrokenPipeError と同じく扱う
+            _silence_stdout()
+            _error("yomiyasu_check.py: 出力先が閉じられたため、結果を最後まで書けませんでした。")
+            return 3
         _error("yomiyasu_check.py: 内部エラー: {}: {}".format(type(error).__name__, error))
         _error(traceback.format_exc().rstrip("\n"))
         return 3
