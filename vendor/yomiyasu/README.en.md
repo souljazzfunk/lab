@@ -17,9 +17,11 @@ yomiyasu (よみやす, "easy to read") is an agent skill that rewrites AI-gener
 
 It keeps the meaning: numbers, negations, conditions, who does what, and how strongly a claim is made. It does not add facts that are not in the original or in the material you provide. Where the meaning cannot be decided from the text, it keeps the original wording and asks the writer instead of guessing.
 
-It is designed mainly for practical writing such as technical articles, design documents and specifications, pull request descriptions and internal reports. It also knows twelve document types, including mail, minutes, slides, papers and essays or fiction, and leaves the usual style of each type alone.
+It is designed mainly for practical writing such as technical articles, design documents and specifications, pull request descriptions and internal reports. It also knows thirteen document types, including mail, minutes, slides, papers, essays or fiction and scripts, and leaves the usual style of each type alone.
 
 Since 2.0.0, yomiyasu runs the bundled checks on its final draft before returning it, so that changed numbers, negations or swapped subjects and objects show up as items to review.
+
+If your environment cannot load the full skill, two shorter versions built from it are published in separate repositories. [yomiyasu-mini](https://github.com/nanaism/yomiyasu-mini) is a skill whose SKILL.md stays within 18,000 characters, for hosts with size limits such as Microsoft 365 Copilot declarative agents; it includes the meaning-change check with the same results as the full diff. [yomiyasu-pocket](https://github.com/nanaism/yomiyasu-pocket) is a 400 to 500 character instruction to paste into an AI's instructions field, such as an email app's AI or a chat app's custom instructions; it has no bundled checks. Use the full skill when your environment can load it.
 
 ## Install
 
@@ -82,7 +84,7 @@ Since 2.0.2, agents use yomiyasu only when you ask for it: when the request name
 
 The skill comes with four Python scripts. They need only the Python standard library and are tested on Python 3.9 and 3.14. Their messages are in Japanese.
 
-- `scripts/yomiyasu_lint.py` lists expressions and Markdown formatting worth reviewing in one document, line by line, such as metaphorical verbs, stock phrases, heavy bold or lists, emoji, and bold that will not render.
+- `scripts/yomiyasu_lint.py` lists expressions and Markdown formatting worth reviewing in one document, line by line, such as metaphorical verbs, stock phrases, heavy bold or lists, emoji, and bold that will not render. Since 2.2.0 it also marks calques, metaphor-only headings, 「〜と言えるでしょう」, empty evaluations, vague katakana words, catchphrase commas and bare verb chains. Since 2.3.0 it also marks a transitive verb's bare stem used as a noun after 「の」 (「結果の確かめ」, 「二つの案の比べ」), which Japanese grammar research describes as hard to use; the skill rewrites it as a verb with its object or a settled Sino-Japanese noun. These marks are info only: the skill rereads the context and rewrites who does what, instead of swapping one word for another. A project word list in `.yomiyasu-words/` (`allow.txt`, `flag.txt`) removes wrong marks and adds project-specific words.
 - `scripts/yomiyasu_diff.py` compares the text before and after rewriting. It shows every change and puts changes that may alter the meaning first: numbers, negation, swapped subjects and objects, and sentence types such as hearsay, guesses and requests.
 - `scripts/yomiyasu_check.py` runs lint on the final draft and diff on the original and the final draft, and keeps a record in `.yomiyasu/` at the top of the git repository (or in the working folder outside git). `verify` checks right before submitting that the final draft is the one that was checked.
 - `scripts/yomiyasu_hook.py` is an optional hook for Claude Code and Codex. It runs only if you add it to your own settings.
