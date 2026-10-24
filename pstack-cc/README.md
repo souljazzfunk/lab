@@ -66,7 +66,7 @@ build が失敗したら、表示されたルール(`build.py` の `RULES`)を�
 - 上流に更新があり build が通れば、`automation/pstack-upstream-sync` ブランチで PR を出し(開いていれば更新し)、`pstack-cc.yml` の検査を起動する。PR 本文には、スキルの増減と、`overrides/` の上流版が変わったかどうかが書かれる。
 - build が通らなければ、PR ではなく「pstack 上流の同期: build が失敗しました」という issue にログを残し、実行を失敗させる。
 - 同じ上流コミットについては、PR も issue も一度しか作らない。
-- 止まったとき(build 失敗の issue か、手作業待ちの PR が開いたまま)は、毎朝 9:21 JST の Claude Code の定期タスクが `/pstack-sync-fix`(`.claude/skills/pstack-sync-fix/SKILL.md`)の手順で直し、検査が通れば main まで merge して issue と PR を閉じる。
+- 止まったとき(build 失敗の issue か、手作業待ちの PR が開いたまま、またはワークフロー自体の失敗)は、毎朝 9:31 JST の Claude Code の定期タスクが `/upstream-sync-fix`(`.claude/skills/upstream-sync-fix/SKILL.md`)の手順で直し、検査が通れば main まで merge して issue と PR を閉じる。
 
 PR を作れるように、リポジトリの Settings → Actions → General → Workflow permissions で「Allow GitHub Actions to create and approve pull requests」をオンにしておく。
 

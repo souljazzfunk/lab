@@ -38,3 +38,4 @@ git add vendor/simple-english simple-english && git commit
 - 更新があれば上の手順で取り込み、`automation/simple-english-upstream-sync` ブランチで PR を出し(開いていれば更新し)、`simple-english.yml` の検査を起動する。上流に simple-english 以外のスキルが増えたときや、上流のマニフェストが変わったときは、PR 本文にそう書かれる。
 - 取り込みか組み立てが失敗したら、PR ではなく「simple-english 上流の同期: 取り込みが失敗しました」という issue にログを残し、実行を失敗させる。
 - 同じ上流コミットについては、PR も issue も一度しか作らない。
+- 止まったとき(取り込み失敗の issue か、手作業待ちの PR が開いたまま、またはワークフロー自体の失敗)は、毎朝 9:31 JST の Claude Code の定期タスクが `/upstream-sync-fix`(`.claude/skills/upstream-sync-fix/SKILL.md`)の手順で直し、検査が通れば main まで merge して issue と PR を閉じる。
