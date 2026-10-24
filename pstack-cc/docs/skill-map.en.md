@@ -2,7 +2,7 @@
 
 [日本語](skill-map.ja.md)
 
-Diagrams of how the 56 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
+Diagrams of how the 58 skills and 2 agents in `pstack-cc/plugin/` (the Claude Code build of the Cursor plugin pstack) relate to each other, and how each skill drives its subagents.
 
 ## 1. Overview
 
@@ -93,7 +93,7 @@ flowchart TB
   PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-poteto-help routes questions to almost every skill, so the diagram draws only its arrows to poteto-mode and setup-pstack. Only poteto-help refers to bro, make-bot-ui, correct, ketchup, sharpen, and in-your-own-words.
+poteto-help routes questions to almost every skill, so the diagram draws only its arrows to poteto-mode and setup-pstack. Only poteto-help refers to bro, make-bot-ui, correct, ketchup, ketchup-video, sharpen, and in-your-own-words.
 
 ## 3. Agent flow in each workflow
 

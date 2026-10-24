@@ -80,3 +80,5 @@ Cursor にしかない機能(クラウドエージェント、automations、Cust
 ## ライセンス
 
 pstack は MIT(`vendor/pstack/LICENSE`)。生成物にも同じ LICENSE を同梱している。
+
+毎日の自動同期(`.github/workflows/pstack-upstream-sync.yml`)が build 失敗や手作業待ちで止まったときは、毎朝 9:21 JST の Claude Code の定期タスクが `/pstack-sync-fix`(`.claude/skills/pstack-sync-fix/SKILL.md`)の手順で直し、検査が通れば main まで merge する。

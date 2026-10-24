@@ -2,7 +2,7 @@
 
 [English](skill-map.en.md)
 
-Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 56 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
+Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`pstack-cc/plugin/`)にある、スキル 58 個・エージェント 2 個の関係と、各スキルがサブエージェントをどう動かすかの図。
 
 ## 1. 全体像
 
@@ -93,7 +93,7 @@ flowchart TB
   PEN[principle-explain-the-number]:::etc --> BC
 ```
 
-poteto-help は質問に応じてほぼ全スキルを案内するので、図では poteto-mode と setup-pstack への矢印だけ描いた。bro、make-bot-ui、correct、ketchup、sharpen、in-your-own-words を参照しているのは poteto-help だけ。
+poteto-help は質問に応じてほぼ全スキルを案内するので、図では poteto-mode と setup-pstack への矢印だけ描いた。bro、make-bot-ui、correct、ketchup、ketchup-video、sharpen、in-your-own-words を参照しているのは poteto-help だけ。
 
 ## 3. 各ワークフローのエージェントの流れ
 

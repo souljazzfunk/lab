@@ -91,10 +91,10 @@ RULES = [
     ),
     Rule(
         'Spawn all N workers in one message with `subagent_type: generalPurpose`, `environment: "cloud"`, '
-        "`run_in_background: true`, and the step 4 model, left unset for `auto` or `inherit-parent`. "
+        "`run_in_background: true`, and the step 3 model, left unset for `auto` or `inherit-parent`. "
         'Use `environment: "local"` only when the worker needs access to something on the user\'s computer.',
         "Spawn all N workers in one message with `subagent_type: general-purpose`, `isolation: \"worktree\"`, "
-        "`run_in_background: true`, and the step 4 model, left unset for `auto` or `inherit-parent`. "
+        "`run_in_background: true`, and the step 3 model, left unset for `auto` or `inherit-parent`. "
         "Omit `isolation` only when the worker must see the parent's working tree. Workers run on this machine "
         "(Claude Code has no Cursor cloud), so start at most about 5 at once and queue the rest.",
         only="skills/swarm/SKILL.md",
