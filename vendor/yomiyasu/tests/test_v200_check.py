@@ -135,7 +135,8 @@ RUN_JSON_KEYS = ("format", "format_version", "tool_version", "command", "status"
                  "materials")
 VERIFY_JSON_KEYS = ("format", "format_version", "tool_version", "command", "status", "status_line", "message",
                     "run_id", "attempt", "record_path", "final", "record_final_sha256", "mode", "context", "required_checks",
-                    "checks", "meaning_risk_count", "replay", "problems", "final_candidate_count", "changed_place_count")
+                    "checks", "meaning_risk_count", "replay", "problems", "final_candidate_count", "changed_place_count",
+                    "kept_marks")
 FILE_NAME = re.compile(r"^[A-Za-z0-9._-]+$")
 
 # 指示書2.2の3組（合成の文）
@@ -463,10 +464,17 @@ class CheckCase(unittest.TestCase):
         if code in (0, 1):
             self.assertEqual(process.stderr, "")
         lines = split_lines(process.stdout)
-        self.assertEqual(len(lines), 4 if state == "executed" else 3, lines)
         if state == "executed":
             record = json.loads(Path(lines[2][len("記録: "):]).read_text(encoding="utf-8"))
             summaries = {entry["name"]: entry["summary"] for entry in record["checks"]}
+            # 2.2.1: 記録に残した印の語があれば、5行目にその行が出る
+            kept = summaries["lint"].get("kept_marks")
+            self.assertEqual(len(lines), 5 if kept else 4, lines)
+            if kept:
+                self.assertTrue(lines[4].startswith("残した印の語: "), lines)
+        else:
+            self.assertEqual(len(lines), 3, lines)
+        if state == "executed":
             expected = "記録の中身: 見直し候補 最終稿 {}件".format(summaries["lint"]["candidate_count"])
             if "diff" in record["required_checks"]:
                 expected += "、直した箇所 {}か所（原文の件数と元と後は run の出力にあります）".format(summaries["diff"]["hunk_count"])
@@ -556,12 +564,13 @@ class TestK1RecordAndOutput(CheckCase):
         self.assertEqual((record["skill"]["dir"], record["skill"]["skill_md_sha256"], record["skill"]["version"]),
                          (None, None, None))
         # diff の詰めの直し（反証で見つけた例）: scripts の隣の
-        # references/lists/ にある一覧のファイルの SHA-256 も tools に入れる（ルートの scripts の隣には3つともある）
+        # references/lists/ にある一覧のファイルの SHA-256 も tools に入れる（ルートの scripts の隣には一覧がみなある）
         lists = ROOT / "references" / "lists"
-        list_keys = ["references/lists/{}.txt".format(name) for name in ("nominalization", "intensifiers", "feelings", "hedges")]
+        list_keys = ["references/lists/{}.txt".format(name) for name in ("nominalization", "intensifiers", "feelings", "hedges",
+                                                                       "katakana-terms", "thin-evaluation", "renyo-nouns")]
         self.assertEqual(set(record["tools"]), set(TOOL_NAMES) | set(list_keys))
         for name in TOOL_NAMES:
-            self.assertEqual(record["tools"][name], {"version": "2.1.3", "sha256": sha256_file(SCRIPTS / name)})
+            self.assertEqual(record["tools"][name], {"version": "2.3.0", "sha256": sha256_file(SCRIPTS / name)})
         for key in list_keys:
             self.assertEqual(record["tools"][key], {"version": None, "sha256": sha256_file(ROOT / key)})
         # unicode_version は check の固め（反証レビュー compat 4）で足した。似かたを求めた Unicode の版
@@ -668,7 +677,7 @@ class TestK1RecordAndOutput(CheckCase):
             self.assertIn(key, result)
         self.assertEqual(list(result)[:3], ["format", "format_version", "tool_version"])
         self.assertEqual((result["format"], result["format_version"], result["tool_version"], result["command"]),
-                         ("yomiyasu-check-result", 1, "2.1.3", "run"))
+                         ("yomiyasu-check-result", 1, "2.3.0", "run"))
         self.assertEqual(result["status"], "executed")
         self.assertRegex(result["status_line"], K1_STATUS)
         self.assertEqual(result["message"], RUN_REWRITE_FIRST + self.finalize_file())
@@ -732,7 +741,7 @@ class TestRunThenVerify(CheckCase):
             self.assertIn(key, result)
         self.assertEqual(list(result)[:3], ["format", "format_version", "tool_version"])
         self.assertEqual((result["format"], result["format_version"], result["tool_version"], result["command"]),
-                         ("yomiyasu-check-result", 1, "2.1.3", "verify"))
+                         ("yomiyasu-check-result", 1, "2.3.0", "verify"))
         self.assertEqual(result["status"], "executed")
         self.assertEqual(self.status(result["status_line"])[0], "executed")
         self.assertEqual(result["message"], VERIFY_LINE1["executed"].format(checks="lint、diff"))
@@ -2484,7 +2493,7 @@ class TestReviewFixes(CheckCase):
         diff の形式の版（MATERIALS_FORMAT_VERSION）はファイルの行から読む。diff が壊れていても版の行を出す（spec F5）。"""
         scripts = self.copy_scripts("skill-version")
         script = scripts / "yomiyasu_check.py"
-        expected = "yomiyasu_check.py 2.1.3 (record format 1, result format 1, materials format 1)\n"
+        expected = "yomiyasu_check.py 2.3.0 (record format 1, result format 1, materials format 1)\n"
         process = subprocess.run([sys.executable, "-B", "-c", LOAD_WORKER, str(scripts), str(script), "--version"],
                                  cwd=str(self.root), env=self.env(), capture_output=True, encoding="utf-8", timeout=30)
         self.assertEqual(process.returncode, 0, process.stderr)
