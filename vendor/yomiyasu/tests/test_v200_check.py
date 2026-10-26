@@ -94,7 +94,7 @@ FAIL_ON_HEAD = "--fail-on={} の条件に当たりました（終了コード1�
 MATERIALS_DISCLAIMER = ("照らしたのは数値、名前、語、確度の語だけです。主張、条件、担当が資料どおりかは判定していません。"
                         "資料と読み比べてください。")
 SAME_FILE_ERROR = ("原文と最終稿が同じファイルです。書き直す前の原文を別のファイルに残し、最終稿を別のファイルに保存してから"
-                   "実行してください。原文を上書きしてしまったときは、git などで元の版を取り出して --source に渡してください。")
+                   "実行してください。原文を上書きしてしまったときは、git などで元の原稿を取り出して --source に渡してください。")
 GITIGNORE_LINES = ["# yomiyasu の検査記録。git に入れない。", "*"]
 
 # 3.9 verify の出力の1行目
@@ -471,7 +471,7 @@ class CheckCase(unittest.TestCase):
             kept = summaries["lint"].get("kept_marks")
             self.assertEqual(len(lines), 5 if kept else 4, lines)
             if kept:
-                self.assertTrue(lines[4].startswith("残した印の語: "), lines)
+                self.assertTrue(lines[4].startswith("残した指摘の語: "), lines)
         else:
             self.assertEqual(len(lines), 3, lines)
         if state == "executed":
@@ -570,7 +570,7 @@ class TestK1RecordAndOutput(CheckCase):
                                                                        "katakana-terms", "thin-evaluation", "renyo-nouns")]
         self.assertEqual(set(record["tools"]), set(TOOL_NAMES) | set(list_keys))
         for name in TOOL_NAMES:
-            self.assertEqual(record["tools"][name], {"version": "2.3.0", "sha256": sha256_file(SCRIPTS / name)})
+            self.assertEqual(record["tools"][name], {"version": "2.4.0", "sha256": sha256_file(SCRIPTS / name)})
         for key in list_keys:
             self.assertEqual(record["tools"][key], {"version": None, "sha256": sha256_file(ROOT / key)})
         # unicode_version は check の固め（反証レビュー compat 4）で足した。似かたを求めた Unicode の版
@@ -677,7 +677,7 @@ class TestK1RecordAndOutput(CheckCase):
             self.assertIn(key, result)
         self.assertEqual(list(result)[:3], ["format", "format_version", "tool_version"])
         self.assertEqual((result["format"], result["format_version"], result["tool_version"], result["command"]),
-                         ("yomiyasu-check-result", 1, "2.3.0", "run"))
+                         ("yomiyasu-check-result", 1, "2.4.0", "run"))
         self.assertEqual(result["status"], "executed")
         self.assertRegex(result["status_line"], K1_STATUS)
         self.assertEqual(result["message"], RUN_REWRITE_FIRST + self.finalize_file())
@@ -741,7 +741,7 @@ class TestRunThenVerify(CheckCase):
             self.assertIn(key, result)
         self.assertEqual(list(result)[:3], ["format", "format_version", "tool_version"])
         self.assertEqual((result["format"], result["format_version"], result["tool_version"], result["command"]),
-                         ("yomiyasu-check-result", 1, "2.3.0", "verify"))
+                         ("yomiyasu-check-result", 1, "2.4.0", "verify"))
         self.assertEqual(result["status"], "executed")
         self.assertEqual(self.status(result["status_line"])[0], "executed")
         self.assertEqual(result["message"], VERIFY_LINE1["executed"].format(checks="lint、diff"))
@@ -2493,7 +2493,7 @@ class TestReviewFixes(CheckCase):
         diff の形式の版（MATERIALS_FORMAT_VERSION）はファイルの行から読む。diff が壊れていても版の行を出す（spec F5）。"""
         scripts = self.copy_scripts("skill-version")
         script = scripts / "yomiyasu_check.py"
-        expected = "yomiyasu_check.py 2.3.0 (record format 1, result format 1, materials format 1)\n"
+        expected = "yomiyasu_check.py 2.4.0 (record format 1, result format 1, materials format 1)\n"
         process = subprocess.run([sys.executable, "-B", "-c", LOAD_WORKER, str(scripts), str(script), "--version"],
                                  cwd=str(self.root), env=self.env(), capture_output=True, encoding="utf-8", timeout=30)
         self.assertEqual(process.returncode, 0, process.stderr)
