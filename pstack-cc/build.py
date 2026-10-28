@@ -121,12 +121,6 @@ RULES = [
         "re-reads this playbook with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md`",
         only="skills/poteto-mode/playbooks/autopilot-full.md",
     ),
-    Rule(
-        "re-reads both playbooks from trunk",
-        "re-reads both playbooks with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md` "
-        "and `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-stack.md`",
-        only="skills/poteto-mode/playbooks/autopilot-stack.md",
-    ),
     # 計画に「trunk から読み直す」手順があるかの検査。pstack のファイルは trunk から読まなくなったので、
     # 同じ手順の文言「Re-read them at every tick」を目印にする
     Rule('"git show origin/main:",', '"Re-read them at every tick",',
