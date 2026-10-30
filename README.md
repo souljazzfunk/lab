@@ -5,3 +5,4 @@
 - [`yomiyasu/`](yomiyasu/): AI っぽい日本語を書き直すスキル yomiyasu(nanaism 作)を取り込んだもの。`/plugin install yomiyasu@lab` で入る
 - [`simple-english/`](simple-english/): 平易で誤解のない英語を書くスキル Simple English(AminBlg 作)を取り込んだもの。`/plugin install simple-english@lab` で入る
 - [`prime-filter-extension/`](prime-filter-extension/): Prime Video のウォッチリストをプライム見放題だけに絞り込む Chrome 拡張機能
+- [`comet-tail/`](comet-tail/): three.js で作ったトンネル飛行ゲーム。光の粒で尾を伸ばして倍率を上げ、ゲートをくぐる。`index.html` をブラウザで開けば遊べる

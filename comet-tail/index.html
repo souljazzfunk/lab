@@ -1,0 +1,724 @@
+<meta charset="utf-8">
+<title>Comet Tail</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+  /* Layout: full-bleed WebGL tunnel, HUD pinned to the four corners, one centered overlay card */
+  :root {
+    --void: #07041a;
+    --ink: #eef1ff;
+    --dim: #8f93c4;
+    --comet: #7ff6ff;
+    --gold: #ffd36b;
+    --hazard: #ff4fa3;
+    --font-display: "Chakra Petch", "Zen Kaku Gothic New", system-ui, sans-serif;
+    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; overflow: hidden; background: var(--void); color: var(--ink);
+    font-family: var(--font-body); -webkit-user-select: none; user-select: none;
+  }
+  canvas { display: block; position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  .hud {
+    position: fixed; inset: 0; pointer-events: none;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    display: grid; grid-template-rows: auto 1fr auto;
+  }
+  .row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); font-family: var(--font-display); }
+  .num { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  #score { font-size: clamp(28px, 6vw, 44px); }
+  #best { font-size: 18px; text-align: right; }
+  .right { text-align: right; }
+  .tail-box { display: grid; gap: 6px; min-width: 0; }
+  #tailCount { font-size: 26px; color: var(--comet); }
+  #mult { font-size: 18px; color: var(--gold); margin-left: 10px; }
+  .meter { width: min(220px, 46vw); height: 6px; border-radius: 3px; background: rgba(143,147,196,.22); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--comet), var(--gold)); transition: width .15s; }
+  .meter.ready i { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+  #novaBtn {
+    pointer-events: auto; font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: .12em;
+    color: var(--void); background: var(--gold); border: 0; border-radius: 999px; padding: 14px 22px; cursor: pointer;
+    box-shadow: 0 0 24px rgba(255,211,107,.6);
+  }
+  #novaBtn:focus-visible, .card button:focus-visible, #muteBtn:focus-visible { outline: 2px solid var(--comet); outline-offset: 3px; }
+  #muteBtn {
+    pointer-events: auto; background: none; border: 1px solid rgba(143,147,196,.4); color: var(--dim);
+    font-family: var(--font-display); font-size: 11px; letter-spacing: .14em; border-radius: 999px; padding: 4px 10px; cursor: pointer; margin-top: 8px;
+  }
+  #pops { position: fixed; left: 50%; top: 38%; transform: translateX(-50%); pointer-events: none; display: grid; justify-items: center; gap: 4px; }
+  .pop { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: .06em; animation: rise 1s ease-out forwards; text-shadow: 0 0 14px currentColor; white-space: nowrap; }
+  @keyframes rise { from { opacity: 1; transform: translateY(0) scale(1.15); } to { opacity: 0; transform: translateY(-46px) scale(1); } }
+  .overlay {
+    position: fixed; inset: 0; display: grid; place-items: center;
+    padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+    background: radial-gradient(ellipse at center, rgba(7,4,26,.35), rgba(7,4,26,.85));
+  }
+  .card { max-width: 30rem; display: grid; gap: 18px; text-align: left; }
+  .card h1 {
+    margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(44px, 12vw, 84px); line-height: .9; letter-spacing: -.01em;
+    background: linear-gradient(100deg, var(--ink) 30%, var(--comet) 60%, var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-wrap: balance;
+  }
+  .card p { margin: 0; line-height: 1.75; color: var(--ink); font-size: 15px; }
+  .rules { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; color: var(--dim); line-height: 1.6; }
+  .rules b { color: var(--ink); font-weight: 700; }
+  .rules .c { color: var(--comet); } .rules .g { color: var(--gold); } .rules .h { color: var(--hazard); }
+  .card button {
+    justify-self: start; font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: .14em;
+    color: var(--void); background: var(--comet); border: 0; border-radius: 999px; padding: 14px 30px; cursor: pointer;
+    box-shadow: 0 0 30px rgba(127,246,255,.45);
+  }
+  .result { display: flex; gap: 32px; flex-wrap: wrap; }
+  .result .num { font-size: 40px; }
+  .keys { font-size: 12px; color: var(--dim); font-family: var(--font-display); letter-spacing: .08em; }
+  #loadErr { color: var(--hazard); font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) { .pop { animation-duration: .01s; } }
+</style>
+
+<div class="hud" id="hud">
+  <div class="row">
+    <div><div class="label">Score</div><div class="num" id="score">0</div></div>
+    <div class="right"><div class="label">Best</div><div class="num" id="best">0</div><button id="muteBtn" type="button">SOUND ON</button></div>
+  </div>
+  <div></div>
+  <div class="row">
+    <div class="tail-box">
+      <div class="label">Tail · 尾の長さ</div>
+      <div><span class="num" id="tailCount">0</span><span class="num" id="mult">×1</span></div>
+      <div class="meter" id="meter"><i id="meterFill"></i></div>
+    </div>
+    <button id="novaBtn" type="button" hidden>NOVA</button>
+  </div>
+</div>
+<div id="pops"></div>
+
+<div class="overlay" id="startScreen">
+  <div class="card">
+    <h1>COMET<br>TAIL</h1>
+    <p>あなたは小さな彗星。光の粒を拾うほど尾が伸び、得点倍率が上がります。尾 5 でスタート。ゲートにぶつかると尾が半分ちぎれ、尾が 0 の状態でぶつかったら終わりです。</p>
+    <ul class="rules">
+      <li><b class="g">◆ 光の粒</b>　尾が 1 伸びる。5 本ごとに倍率 +1</li>
+      <li><b class="h">▲ ゲート</b>　隙間をくぐる。かすめて抜けると「ギリギリ」ボーナス</li>
+      <li><b class="c">● NOVA</b>　尾が 25 以上で発動。尾を 20 使い、3 秒間ゲートを砕きながら加速</li>
+    </ul>
+    <div class="keys">マウス / ドラッグ / WASD・矢印キーで移動　·　Space で NOVA</div>
+    <button id="startBtn" type="button">LAUNCH</button>
+    <div id="loadErr" hidden>three.js を読み込めませんでした。ネットワークを確認して再読み込みしてください。</div>
+  </div>
+</div>
+
+<div class="overlay" id="overScreen" hidden>
+  <div class="card">
+    <h1 style="font-size:clamp(36px,9vw,60px)">尾が<br>尽きた</h1>
+    <div class="result">
+      <div><div class="label">Score</div><div class="num" id="finalScore">0</div></div>
+      <div><div class="label">Best</div><div class="num" id="finalBest">0</div></div>
+      <div><div class="label">Max tail</div><div class="num" id="finalTail">0</div></div>
+    </div>
+    <p id="overNote"></p>
+    <button id="retryBtn" type="button">RETRY</button>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script>
+  // Shown only if the module below never boots (CDN blocked, etc.)
+  window.__cometBooted = false;
+  setTimeout(() => { if (!window.__cometBooted) document.getElementById('loadErr').hidden = false; }, 8000);
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+window.__cometBooted = true;
+
+// ---------- constants ----------
+const R = 5;              // tunnel radius
+const PR = 0.32;          // player radius
+const PLAY_R = R - PR - 0.3;
+const SPAWN_Z = -230;
+const NOVA_COST = 20, NOVA_MIN = 25, NOVA_TIME = 3;
+const TAU = Math.PI * 2;
+const C = { comet: 0x7ff6ff, gold: 0xffd36b, hazard: 0xff4fa3, violet: 0x8a5cff, orange: 0xff8a3d, void: 0x07041a };
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(C.void);
+scene.fog = new THREE.Fog(C.void, 50, 215);
+const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 400);
+camera.position.set(0, 0.8, 8.5);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.1, 0.55, 0.12);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.fov = camera.aspect < 0.8 ? 88 : 70; // portrait phones see more of the tunnel
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+dispatchEvent(new Event('resize'));
+
+// ---------- tunnel ----------
+const ringGeo = new THREE.BufferGeometry().setFromPoints(
+  Array.from({ length: 65 }, (_, i) => new THREE.Vector3(Math.cos(i / 64 * TAU) * (R + 0.4), Math.sin(i / 64 * TAU) * (R + 0.4), 0)));
+const RING_GAP = 6, RING_N = 40;
+const rings = [];
+for (let i = 0; i < RING_N; i++) {
+  const m = new THREE.Line(ringGeo, new THREE.LineBasicMaterial({ color: C.violet, transparent: true, opacity: 0.55 }));
+  m.position.z = 12 - i * RING_GAP;
+  scene.add(m); rings.push(m);
+}
+{
+  const pts = [];
+  for (let i = 0; i < 16; i++) {
+    const a = i / 16 * TAU, x = Math.cos(a) * (R + 0.4), y = Math.sin(a) * (R + 0.4);
+    pts.push(new THREE.Vector3(x, y, 14), new THREE.Vector3(x, y, -260));
+  }
+  scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({ color: 0x3b2a8a, transparent: true, opacity: 0.6 })));
+}
+// drifting dust for a sense of speed
+const DUST_N = 500;
+const dustPos = new Float32Array(DUST_N * 3);
+for (let i = 0; i < DUST_N; i++) {
+  const a = Math.random() * TAU, r = Math.sqrt(Math.random()) * (R + 0.2);
+  dustPos.set([Math.cos(a) * r, Math.sin(a) * r, 12 - Math.random() * 250], i * 3);
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xb9b6ff, size: 0.06, transparent: true, opacity: 0.7 })));
+
+// ---------- player ----------
+const player = new THREE.Group();
+const core = new THREE.Mesh(new THREE.IcosahedronGeometry(PR, 2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(PR * 1.6, 1),
+  new THREE.MeshBasicMaterial({ color: C.comet, wireframe: true, transparent: true, opacity: 0.7 }));
+player.add(core, shell);
+scene.add(player);
+
+const TAIL_MAX = 90;
+const tailMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 10, 8),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false }), TAIL_MAX);
+tailMesh.frustumCulled = false;
+scene.add(tailMesh);
+const tailCol = new THREE.Color(), tmpM = new THREE.Matrix4(), tmpQ = new THREE.Quaternion(), tmpV = new THREE.Vector3(), tmpS = new THREE.Vector3();
+for (let i = 0; i < TAIL_MAX; i++) {
+  tailCol.setHSL(0.5 - (i / TAIL_MAX) * 0.38, 1, 0.62);
+  tailMesh.setColorAt(i, tailCol);
+}
+
+// nova shockwave
+const nova = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2),
+  new THREE.MeshBasicMaterial({ color: C.gold, wireframe: true, transparent: true, opacity: 0 }));
+scene.add(nova);
+
+// ---------- particles ----------
+const P_N = 900;
+const pPos = new Float32Array(P_N * 3), pCol = new Float32Array(P_N * 3), pVel = new Float32Array(P_N * 3), pLife = new Float32Array(P_N);
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })));
+let pHead = 0;
+function burst(x, y, z, color, n, speed) {
+  const col = new THREE.Color(color);
+  for (let k = 0; k < n; k++) {
+    const i = pHead; pHead = (pHead + 1) % P_N;
+    const u = Math.random() * 2 - 1, a = Math.random() * TAU, s = Math.sqrt(1 - u * u), sp = speed * (0.4 + Math.random());
+    pPos.set([x, y, z], i * 3);
+    pVel.set([Math.cos(a) * s * sp, Math.sin(a) * s * sp, u * sp], i * 3);
+    pCol.set([col.r, col.g, col.b], i * 3);
+    pLife[i] = 0.6 + Math.random() * 0.6;
+  }
+}
+function updateParticles(dt, v) {
+  for (let i = 0; i < P_N; i++) {
+    if (pLife[i] <= 0) continue;
+    pLife[i] -= dt;
+    const f = pLife[i] > 0 ? 1 - dt * 1.8 : 0;
+    pVel[i * 3] *= f; pVel[i * 3 + 1] *= f; pVel[i * 3 + 2] *= f;
+    pPos[i * 3] += pVel[i * 3] * dt;
+    pPos[i * 3 + 1] += pVel[i * 3 + 1] * dt;
+    pPos[i * 3 + 2] += (pVel[i * 3 + 2] + v * 0.6) * dt;
+    if (pLife[i] <= 0) pPos[i * 3 + 2] = 999;
+  }
+  pGeo.attributes.position.needsUpdate = true;
+  pGeo.attributes.color.needsUpdate = true;
+}
+
+// ---------- audio ----------
+let actx = null, muted = store.get('comet.muted', false);
+const muteBtn = $('muteBtn');
+const syncMute = () => { muteBtn.textContent = muted ? 'SOUND OFF' : 'SOUND ON'; };
+syncMute();
+muteBtn.addEventListener('click', e => { e.stopPropagation(); muted = !muted; store.set('comet.muted', muted); syncMute(); });
+function ensureAudio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch { actx = null; } }
+  if (actx && actx.state === 'suspended') actx.resume();
+}
+function tone(freq, dur, { type = 'sine', vol = 0.12, to = null, delay = 0 } = {}) {
+  if (!actx || muted) return;
+  const t = actx.currentTime + delay;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+const sfx = {
+  star(chain) { const n = SCALE[Math.min(chain, SCALE.length - 1)]; tone(660 * 2 ** (n / 12), 0.18, { type: 'triangle', vol: 0.1 }); },
+  hit() { tone(180, 0.45, { type: 'sawtooth', vol: 0.18, to: 40 }); tone(90, 0.5, { type: 'square', vol: 0.08, to: 30 }); },
+  graze() { tone(1200, 0.08, { type: 'square', vol: 0.05 }); tone(1600, 0.1, { type: 'square', vol: 0.05, delay: 0.06 }); },
+  nova() { tone(220, 0.9, { type: 'sawtooth', vol: 0.12, to: 880 }); tone(330, 0.9, { type: 'triangle', vol: 0.1, to: 1320 }); },
+  smash() { tone(500, 0.2, { type: 'square', vol: 0.06, to: 120 }); },
+  over() { [523, 392, 330, 196].forEach((f, i) => tone(f, 0.35, { type: 'triangle', vol: 0.12, delay: i * 0.16 })); },
+};
+
+// ---------- gates ----------
+const angDiff = (a, b) => { let d = (a - b) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; };
+const gateMat = {
+  fan: new THREE.MeshBasicMaterial({ color: C.hazard }),
+  bar: new THREE.MeshBasicMaterial({ color: C.orange }),
+  iris: new THREE.MeshBasicMaterial({ color: C.violet, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false }),
+  irisRim: new THREE.MeshBasicMaterial({ color: C.hazard }),
+};
+const bladeGeo = new THREE.BoxGeometry(R + 0.4, 0.9, 0.35).translate((R + 0.4) / 2, 0, 0);
+const hubGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.4, 24).rotateX(Math.PI / 2);
+
+function makeFan(level) {
+  const group = new THREE.Group();
+  const blades = 2 + Math.floor(Math.random() * Math.min(4, 1.5 + level / 2));
+  const angles = [];
+  for (let i = 0; i < blades; i++) {
+    const m = new THREE.Mesh(bladeGeo, gateMat.fan);
+    m.rotation.z = angles[i] = i / blades * TAU;
+    group.add(m);
+  }
+  group.add(new THREE.Mesh(hubGeo, gateMat.fan));
+  group.rotation.z = Math.random() * TAU;
+  const spin = (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.6 + level * 0.06);
+  return {
+    group, color: C.hazard, owned: [],
+    update(dt) { group.rotation.z += spin * dt; },
+    margin(px, py) {
+      const r = Math.hypot(px, py);
+      let m = r - (0.75 + PR);
+      const a = Math.atan2(py, px) - group.rotation.z;
+      for (const b of angles) {
+        const d = angDiff(a, b);
+        if (Math.abs(d) < Math.PI / 2) m = Math.min(m, r * Math.abs(Math.sin(d)) - (0.45 + PR));
+      }
+      return m;
+    },
+  };
+}
+
+function makeBars(level) {
+  const group = new THREE.Group();
+  const n = 1 + Math.floor(Math.random() * Math.min(3, 1 + level / 2));
+  const gap = Math.max(1.9, 2.7 - level * 0.05);
+  const shift = (Math.random() * 2 - 1) * 0.9;
+  const offs = [], owned = [];
+  for (let j = 0; j < n; j++) {
+    const c = (j - (n - 1) / 2) * gap + shift;
+    if (Math.abs(c) > R - 0.6) continue;
+    const len = 2 * Math.sqrt((R + 0.4) ** 2 - c * c);
+    const g = new THREE.BoxGeometry(len, 0.8, 0.35);
+    owned.push(g);
+    const m = new THREE.Mesh(g, gateMat.bar);
+    m.position.y = c;
+    group.add(m); offs.push(c);
+  }
+  group.rotation.z = Math.random() * TAU;
+  const spin = (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.5 + level * 0.04);
+  return {
+    group, color: C.orange, owned,
+    update(dt) { group.rotation.z += spin * dt; },
+    margin(px, py) {
+      const t = group.rotation.z, ly = -px * Math.sin(t) + py * Math.cos(t);
+      let m = Infinity;
+      for (const c of offs) m = Math.min(m, Math.abs(ly - c) - (0.4 + PR));
+      return m;
+    },
+  };
+}
+
+function irisGeo(hx, hy, hr) {
+  const s = new THREE.Shape(); s.absarc(0, 0, R + 0.6, 0, TAU, false);
+  const h = new THREE.Path(); h.absarc(hx, hy, hr, 0, TAU, true); s.holes.push(h);
+  return new THREE.ShapeGeometry(s, 48);
+}
+function makeIris(level) {
+  const group = new THREE.Group();
+  const hr = Math.max(1.05, 1.6 - level * 0.05);
+  const orbitR = Math.random() * (PLAY_R - hr * 0.5);
+  let ang = Math.random() * TAU;
+  const spin = level >= 2 ? (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.5) : 0;
+  const disc = new THREE.Mesh(irisGeo(0, 0, hr), gateMat.iris);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(hr, 0.08, 8, 48), gateMat.irisRim);
+  group.add(disc, rim);
+  const self = {
+    group, color: C.violet, owned: [rim.geometry],
+    hx: 0, hy: 0,
+    place() {
+      self.hx = Math.cos(ang) * orbitR; self.hy = Math.sin(ang) * orbitR;
+      disc.geometry.dispose(); disc.geometry = irisGeo(self.hx, self.hy, hr);
+      rim.position.set(self.hx, self.hy, 0);
+    },
+    update(dt) { if (spin) { ang += spin * dt; self.place(); } },
+    margin(px, py) { return hr - PR - Math.hypot(px - self.hx, py - self.hy); },
+    dispose() { disc.geometry.dispose(); },
+  };
+  self.place();
+  return self;
+}
+
+// ---------- stars ----------
+const starGeo = new THREE.OctahedronGeometry(0.26);
+const starMat = new THREE.MeshBasicMaterial({ color: C.gold });
+const starPool = [];
+function getStar() {
+  const s = starPool.pop() || new THREE.Mesh(starGeo, starMat);
+  s.visible = true; scene.add(s); return s;
+}
+function spawnStars(z0, span) {
+  const kind = Math.random();
+  const out = [];
+  if (kind < 0.4) { // straight line drifting across the tunnel
+    const a = Math.random() * TAU, b = a + Math.PI * (0.5 + Math.random());
+    const ra = Math.random() * PLAY_R * 0.9, rb = Math.random() * PLAY_R * 0.9;
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      out.push([Math.cos(a) * ra * (1 - t) + Math.cos(b) * rb * t, Math.sin(a) * ra * (1 - t) + Math.sin(b) * rb * t, z0 - t * span]);
+    }
+  } else if (kind < 0.75) { // helix along the wall
+    const r = 2.4 + Math.random() * 1.6, a0 = Math.random() * TAU, dir = Math.random() < 0.5 ? -1 : 1, n = 12;
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1), a = a0 + dir * t * Math.PI * 1.3;
+      out.push([Math.cos(a) * r, Math.sin(a) * r, z0 - t * span]);
+    }
+  } else { // tight cluster: a cheap bunch of points
+    const a = Math.random() * TAU, r = Math.random() * PLAY_R * 0.8, cx = Math.cos(a) * r, cy = Math.sin(a) * r;
+    for (let i = 0; i < 7; i++) out.push([cx + (Math.random() - 0.5) * 0.9, cy + (Math.random() - 0.5) * 0.9, z0 - span * 0.4 - i * 1.4]);
+  }
+  for (const [x, y, z] of out) {
+    const s = getStar(); s.position.set(x, y, z); s.rotation.set(Math.random(), Math.random(), 0);
+    stars.push(s);
+  }
+}
+
+// ---------- state ----------
+let state = 'title';
+let best = store.get('comet.best', 0);
+const S = {};
+let gates = [], stars = [];
+function reset() {
+  for (const g of gates) removeGate(g);
+  for (const s of stars) { scene.remove(s); starPool.push(s); }
+  gates = []; stars = [];
+  Object.assign(S, {
+    t: 0, dist: 0, score: 0, tail: 5, maxTail: 5, px: 0, py: 0, tx: 0, ty: 0,
+    sinceGate: 30, invuln: 0, nova: 0, shake: 0, chain: 0, chainT: 0, grazes: 0, smashed: 0,
+  });
+  history.length = 0;
+}
+function removeGate(g) {
+  scene.remove(g.group);
+  for (const geo of g.owned) geo.dispose();
+  g.dispose?.();
+}
+const history = [];
+const level = () => Math.floor(S.dist / 450);
+const speed = () => Math.min(30 + S.t * 0.45, 72) * (S.nova > 0 ? 1.6 : 1);
+const mult = () => 1 + Math.floor(S.tail / 5);
+
+function spawnGate() {
+  const L = level();
+  const roll = Math.random();
+  const g = roll < 0.4 ? makeFan(L) : roll < 0.72 ? makeBars(L) : makeIris(L);
+  g.group.position.z = SPAWN_Z;
+  g.z = SPAWN_Z;
+  scene.add(g.group);
+  gates.push(g);
+}
+
+// ---------- HUD ----------
+const ui = { score: $('score'), best: $('best'), tail: $('tailCount'), mult: $('mult'), meter: $('meter'), fill: $('meterFill'), nova: $('novaBtn'), pops: $('pops') };
+ui.best.textContent = best.toLocaleString();
+function pop(text, color) {
+  const el = document.createElement('div');
+  el.className = 'pop'; el.textContent = text; el.style.color = color;
+  ui.pops.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+  while (ui.pops.children.length > 4) ui.pops.firstChild.remove();
+}
+function drawHud() {
+  ui.score.textContent = Math.floor(S.score).toLocaleString();
+  ui.tail.textContent = S.tail;
+  ui.mult.textContent = '×' + mult();
+  ui.fill.style.width = Math.min(100, S.tail / NOVA_MIN * 100) + '%';
+  const ready = S.tail >= NOVA_MIN && S.nova <= 0 && state === 'play';
+  ui.meter.classList.toggle('ready', ready);
+  ui.nova.hidden = !ready;
+}
+
+// ---------- input ----------
+const keys = new Set();
+addEventListener('keydown', e => {
+  keys.add(e.key.toLowerCase());
+  if (e.code === 'Space') { e.preventDefault(); if (state === 'play') fireNova(); else if (state !== 'play') start(); }
+  if (e.key.toLowerCase() === 'm') muteBtn.click();
+});
+addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+let drag = null;
+const cv = renderer.domElement;
+function clampTarget() {
+  const r = Math.hypot(S.tx, S.ty);
+  if (r > PLAY_R) { S.tx *= PLAY_R / r; S.ty *= PLAY_R / r; }
+}
+cv.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'mouse') { drag = { x: e.clientX, y: e.clientY, tx: S.tx, ty: S.ty }; cv.setPointerCapture(e.pointerId); }
+});
+cv.addEventListener('pointermove', e => {
+  if (state !== 'play') return;
+  if (e.pointerType === 'mouse') {
+    const k = Math.min(innerWidth, innerHeight) * 0.42;
+    S.tx = (e.clientX - innerWidth / 2) / k * PLAY_R;
+    S.ty = -(e.clientY - innerHeight / 2) / k * PLAY_R;
+  } else if (drag) {
+    const k = Math.min(innerWidth, innerHeight) * 0.32;
+    S.tx = drag.tx + (e.clientX - drag.x) / k * PLAY_R;
+    S.ty = drag.ty - (e.clientY - drag.y) / k * PLAY_R;
+    if (Math.hypot(S.tx, S.ty) > PLAY_R) { clampTarget(); drag = { x: e.clientX, y: e.clientY, tx: S.tx, ty: S.ty }; }
+  }
+  clampTarget();
+});
+const endDrag = () => { drag = null; };
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+ui.nova.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); fireNova(); });
+
+function fireNova() {
+  if (state !== 'play' || S.tail < NOVA_MIN || S.nova > 0) return;
+  S.tail -= NOVA_COST;
+  S.nova = NOVA_TIME;
+  S.shake = 0.3;
+  sfx.nova();
+  pop('NOVA!', '#ffd36b');
+  burst(S.px, S.py, 0, C.gold, 120, 14);
+}
+
+// ---------- game flow ----------
+function start() {
+  ensureAudio();
+  reset();
+  state = 'play';
+  $('startScreen').hidden = true;
+  $('overScreen').hidden = true;
+  last = performance.now();
+}
+function gameOver() {
+  state = 'over';
+  sfx.over();
+  burst(S.px, S.py, 0, C.comet, 200, 16);
+  burst(S.px, S.py, 0, C.hazard, 120, 10);
+  player.visible = false;
+  const sc = Math.floor(S.score);
+  const isBest = sc > best;
+  if (isBest) { best = sc; store.set('comet.best', best); ui.best.textContent = best.toLocaleString(); }
+  $('finalScore').textContent = sc.toLocaleString();
+  $('finalBest').textContent = best.toLocaleString();
+  $('finalTail').textContent = S.maxTail;
+  $('overNote').textContent = (isBest ? '自己ベスト更新。' : '') +
+    `飛行距離 ${Math.floor(S.dist).toLocaleString()} m、ギリギリ通過 ${S.grazes} 回、NOVA で砕いたゲート ${S.smashed} 枚。`;
+  setTimeout(() => { $('overScreen').hidden = false; $('retryBtn').focus(); }, 900);
+}
+$('startBtn').addEventListener('click', start);
+$('retryBtn').addEventListener('click', start);
+
+function onGatePass(g) {
+  const m = g.margin(S.px, S.py);
+  if (S.nova > 0) {
+    S.smashed++;
+    S.score += 150 * mult();
+    burst(0, 0, 0, g.color, 90, 18);
+    sfx.smash();
+    removeGate(g); g.dead = true;
+    return;
+  }
+  if (m < 0 && S.invuln <= 0) {
+    if (S.tail === 0) { gameOver(); return; }
+    const lost = Math.max(3, Math.ceil(S.tail * 0.5));
+    S.tail = Math.max(0, S.tail - lost);
+    S.invuln = 1.4; S.shake = 0.45; S.chain = 0;
+    sfx.hit();
+    burst(S.px, S.py, 0.5, C.comet, 30 + lost * 3, 9);
+    pop(`尾 −${lost}`, '#ff4fa3');
+  } else if (m >= 0 && m < 0.45) {
+    S.grazes++;
+    const bonus = 50 * mult();
+    S.score += bonus;
+    sfx.graze();
+    pop(`ギリギリ +${bonus}`, '#7ff6ff');
+  }
+}
+
+// ---------- main loop ----------
+let last = performance.now();
+let hot = window.claude?.hot;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min((now - last) / 1000, 1 / 20);
+  last = now;
+  const playing = state === 'play';
+  const v = playing ? speed() : 14;
+
+  // world scroll
+  for (const r of rings) {
+    r.position.z += v * dt;
+    if (r.position.z > 14) r.position.z -= RING_N * RING_GAP;
+  }
+  const hue = (S.dist || 0) * 0.0006 + 0.72;
+  for (const r of rings) r.material.color.setHSL((hue + r.position.z * 0.0015) % 1, 0.8, S.nova > 0 ? 0.7 : 0.55);
+  for (let i = 0; i < DUST_N; i++) {
+    dustPos[i * 3 + 2] += v * dt * 1.3;
+    if (dustPos[i * 3 + 2] > 12) dustPos[i * 3 + 2] -= 250;
+  }
+  dustGeo.attributes.position.needsUpdate = true;
+
+  if (playing) {
+    S.t += dt;
+    S.dist += v * dt;
+    S.score += v * dt * 0.2 * mult();
+    S.invuln = Math.max(0, S.invuln - dt);
+    S.nova = Math.max(0, S.nova - dt);
+    S.chainT -= dt; if (S.chainT <= 0) S.chain = 0;
+
+    // keyboard steering
+    const kx = (keys.has('arrowright') || keys.has('d')) - (keys.has('arrowleft') || keys.has('a'));
+    const ky = (keys.has('arrowup') || keys.has('w')) - (keys.has('arrowdown') || keys.has('s'));
+    if (kx || ky) { S.tx += kx * 8 * dt; S.ty += ky * 8 * dt; clampTarget(); }
+    const f = 1 - Math.exp(-12 * dt);
+    S.px += (S.tx - S.px) * f; S.py += (S.ty - S.py) * f;
+
+    // spawning
+    S.sinceGate += v * dt;
+    const spacing = Math.max(30, 48 - level() * 2);
+    if (S.sinceGate >= spacing) {
+      S.sinceGate = 0;
+      spawnGate();
+      spawnStars(SPAWN_Z + spacing * 0.75, spacing * 0.5);
+    }
+
+    // gates
+    for (const g of gates) {
+      const prev = g.z;
+      g.z += v * dt; g.group.position.z = g.z;
+      g.update(dt);
+      if (prev < 0 && g.z >= 0) { onGatePass(g); if (state !== 'play') break; }
+    }
+    gates = gates.filter(g => { if (g.dead) return false; if (g.z > 14) { removeGate(g); return false; } return true; });
+
+    // stars
+    for (const s of stars) {
+      const prev = s.position.z;
+      s.position.z += v * dt;
+      s.rotation.y += dt * 3;
+      if (prev < 0 && s.position.z >= 0 && Math.hypot(s.position.x - S.px, s.position.y - S.py) < 0.95) {
+        s.visible = false; s.taken = true;
+        S.tail++; S.maxTail = Math.max(S.maxTail, S.tail);
+        S.chain++; S.chainT = 0.7;
+        S.score += 10 * mult();
+        sfx.star(S.chain);
+        burst(s.position.x, s.position.y, 0, C.gold, 10, 4);
+        if (S.tail === NOVA_MIN) pop('NOVA 準備完了', '#ffd36b');
+      }
+    }
+    stars = stars.filter(s => {
+      if (s.taken || s.position.z > 12) { s.taken = false; scene.remove(s); starPool.push(s); return false; }
+      return true;
+    });
+    drawHud();
+  } else {
+    for (const g of gates) g.update(dt);
+  }
+
+  // player + tail
+  player.position.set(S.px || 0, S.py || 0, 0);
+  shell.rotation.x += dt * 2.1; shell.rotation.y += dt * 1.3;
+  if (playing) player.visible = S.invuln > 0 ? Math.floor(S.invuln * 14) % 2 === 0 : true;
+  shell.material.color.set(S.nova > 0 ? C.gold : C.comet);
+  history.unshift(S.px || 0, S.py || 0);
+  if (history.length > 400) history.length = 400;
+  const n = state === 'over' ? 0 : Math.min(S.tail || 0, TAIL_MAX);
+  const spacingZ = n ? Math.min(0.2, 6 / n) : 0;
+  for (let i = 0; i < n; i++) {
+    const h = Math.min((i + 1) * 2, history.length / 2 - 1) * 2;
+    const k = 1 - i / (n + 4);
+    tmpV.set(history[h] ?? 0, history[h + 1] ?? 0, (i + 1) * spacingZ);
+    tmpS.setScalar(0.25 + k * 0.85);
+    tmpM.compose(tmpV, tmpQ, tmpS);
+    tailMesh.setMatrixAt(i, tmpM);
+  }
+  tailMesh.count = n;
+  tailMesh.instanceMatrix.needsUpdate = true;
+
+  // nova shockwave visual
+  if (S.nova > 0) {
+    const p = 1 - S.nova / NOVA_TIME;
+    nova.position.set(S.px, S.py, 0);
+    nova.scale.setScalar(1.2 + Math.sin(p * Math.PI * 6) * 0.15 + 0.6);
+    nova.rotation.z += dt * 3;
+    nova.material.opacity = 0.55 * (1 - p * 0.6);
+    bloom.strength = 1.6;
+  } else { nova.material.opacity = 0; bloom.strength = 1.1; }
+
+  updateParticles(dt, v);
+
+  // camera
+  const cx = (S.px || 0) * 0.35, cy = (S.py || 0) * 0.35 + 0.8;
+  S.shake = Math.max(0, (S.shake || 0) - dt);
+  const sh = S.shake * 0.6;
+  camera.position.set(cx + (Math.random() - 0.5) * sh, cy + (Math.random() - 0.5) * sh, 8.5);
+  camera.lookAt((S.px || 0) * 0.15, (S.py || 0) * 0.15, -20);
+  camera.rotation.z += (S.px || 0) * -0.015;
+
+  composer.render();
+}
+
+document.addEventListener('visibilitychange', () => { last = performance.now(); });
+hot?.snapshot?.(() => ({ best }));
+const boot = data => { if (data?.best > best) { best = data.best; ui.best.textContent = best.toLocaleString(); } reset(); requestAnimationFrame(frame); };
+hot?.ready ? hot.ready(boot) : boot(hot?.data ?? {});
+</script>
