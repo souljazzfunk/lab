@@ -1,0 +1,7 @@
+{
+  "name": "bilingual-slides",
+  "description": "プロフェッショナルなスライドを、日英バイリンガル（JA / EN / Both）とライト / ダーク切り替えつきの HTML アーティファクト 1 枚で作る。全スライド × 3 言語 × 2 テーマを検査するスクリプトつき。",
+  "version": "0.1.0",
+  "author": {"name": "souljazzfunk"},
+  "keywords": ["slides", "presentation", "bilingual", "artifact", "dark-mode"]
+}
