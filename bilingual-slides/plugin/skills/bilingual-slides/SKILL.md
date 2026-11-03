@@ -1,6 +1,6 @@
 ---
 name: bilingual-slides
-description: プロフェッショナルなスライドを、日英バイリンガル（JA / EN / Both 切り替え）とライト / ダーク切り替えつきの HTML アーティファクト 1 枚で作る。キーボード・スワイプで送れて、PDF にも印刷できる。/bilingual-slides [テーマや素材] と打たれたとき、または「スライドを作って」「プレゼン資料を HTML で」「バイリンガルのデッキ」と頼まれたときに使う。
+description: プロフェッショナルなスライドを、日英バイリンガル（JA / EN / Both 切り替え）とライト / ダーク切り替えつきの HTML アーティファクト 1 枚で作る。スタイルは Standard と Organic & Tech（ニュー・ナチュラル）から選べる。キーボード・スワイプで送れて、PDF にも印刷できる。/bilingual-slides [テーマや素材] と打たれたとき、または「スライドを作って」「プレゼン資料を HTML で」「バイリンガルのデッキ」と頼まれたときに使う。
 ---
 
 # bilingual-slides
@@ -75,9 +75,49 @@ description: プロフェッショナルなスライドを、日英バイリン�
 - ラベルの入る箱は、長いほうの行（EN は 0.55em/字、JA は 1em/字）＋左右 16px より広くする。Both では 2 行になるので、箱の高さは 120px 以上にする
 - グラフを描くときは `dataviz` スキルを先に読む。系列の色は `--accent` `--s2` `--s3` の順に使う
 
-## 4. 配色とブランド
+## 4. スタイルを選ぶ
 
-色はすべて `:root`（ライト）と `:root[data-theme="dark"]`（ダーク）、`@media (prefers-color-scheme: dark)` のトークンで持つ。スライドの中で色を直に書かない。
+見た目の系統は `<html data-style="...">` で切り替える。ライト / ダークはどのスタイルにもある。
+
+| `data-style` | 名前 | 見た目 | 向く話題 |
+|---|---|---|---|
+| `standard`（既定） | Standard | 白地と青、Inter + Noto Sans JP、角丸 16px、太い罫 | 社内提案、報告、技術、数字中心の話 |
+| `organic` | Organic & Tech（ニュー・ナチュラル） | アースカラー（生成りの地、セージグリーン、テラコッタ、ウォームグレー）に、Space Grotesk の鋭い見出しと Zen Kaku Gothic New。角丸 28px、細い罫、有機的な円の飾り | サステナビリティ、ウェルビーイング、人や地域、ブランド、デザイン、人を中心に置くテクノロジー |
+
+選び方（ユーザーには聞かない）:
+
+1. ユーザーがスタイルを指定したら、それに従う（「Organic で」「ニュー・ナチュラルで」「`--style organic`」など）
+2. 指定が無く、話題が上の `organic` の向く話題に当たるなら `organic` にする。それ以外は `standard`
+3. 指定なしで選んだときは、最後の報告に「スタイル: Organic（話題から選択）」のように 1 行で書く
+
+選んだら:
+
+- `<html data-style>` を書き換える
+- `<head>` のフォントの `<link>` は、そのスタイルの行だけを残し、もう 1 行は消す
+- 検査は `--style` を付けずに回してよい（ファイルの `data-style` のまま描く）
+
+### Organic のトークン
+
+| トークン | ライト | ダーク |
+|---|---|---|
+| `--slide` / `--page` | `#faf8f4` / `#e9e4dc` | `#1a1b18` / `#0f100e` |
+| `--ink` / `--ink-2` / `--muted` | `#23221f` / `#4a463f` / `#635e56` | `#ece8e0` / `#cfc9be` / `#a39d92` |
+| `--accent` / `--accent-fill` | `#4d6b4f`（セージ） | `#a8c3a2` / `#3d5440` |
+| `--soft` / `--accent-soft` | `#efebe4` / `#e6ece2` | `#24261f` / `#263024` |
+| `--s2` / `--s3` | `#a0502f`（テラコッタ）/ `#86651a`（オーカー） | `#e3a283` / `#d8b864` |
+
+Organic では、カードの地がアクセントの淡い面になり、結論文の上に短い丸い棒、表紙と中扉に円の飾りが入る。飾りはスライドの端で切れてよい（検査は飾りを数えない）。自分で飾りを足すときは擬似要素か `class="deco"` の要素にする。
+
+### スタイルを足すとき
+
+1. `template.html` の Organic のブロックを写して、`:root[data-style="<名前>"]`（ライト）、`:root[data-style="<名前>"][data-theme="dark"]`、`@media (prefers-color-scheme: dark)` の `:root[data-style="<名前>"]:not([data-theme="light"])` の 3 か所にトークンを書く
+2. 書体は `--font-body` と `--font-head` で持つ。サンセリフだけにし、ラテン書体を先、和文書体を次に並べる。Google Fonts の `<link>` を 1 行足す
+3. 形は `--radius`、`--marker-radius`、`--rule`、`--head-track` で変える
+4. `check_slides.cjs template.html --style <名前>` を通し、上の表とこの節に 1 行足す
+
+## 5. 配色とブランド
+
+色はすべて `:root`（ライト）と `:root[data-theme="dark"]`（ダーク）、`@media (prefers-color-scheme: dark)` のトークンで持つ。スライドの中で色を直に書かない。下の表は Standard の値。
 
 | トークン | 用途 | ライト（白地との比） | ダーク |
 |---|---|---|---|
@@ -90,10 +130,10 @@ description: プロフェッショナルなスライドを、日英バイリン�
 | `--line` | 罫線、枠 | `#d1d5db` | `#334155` |
 | `--s2` / `--s3` | 2・3 番目の系列 | `#0f766e` / `#b45309` | `#5eead4` / `#fbbf24` |
 
-- 会社や製品のデッキは、そのブランド色を `--accent` と `--accent-fill` に入れる。ライトとダークの両方の値を決め、3 か所（ライト、ダーク、media query）すべてを書き換える
+- 会社や製品のデッキは、そのブランド色を `--accent` と `--accent-fill` に入れる。ライトとダークの両方の値を決め、使っているスタイルの 3 か所（ライト、ダーク、media query）すべてを書き換える
 - 差し替えたら、検査の `low-contrast` が出ないことを確かめる（小さい文字は 4.5、40px 以上か 32px 以上の太字は 3）
 
-## 5. 検査して直す（公開の前に）
+## 6. 検査して直す（公開の前に）
 
 ローカルに保存して、同梱の検査を通す（Chromium と Playwright を使う）。
 
@@ -101,9 +141,9 @@ description: プロフェッショナルなスライドを、日英バイリン�
 NODE_PATH="$(npm root -g)" node <このスキルのディレクトリ>/scripts/check_slides.cjs deck.html --shots <scratchpad>/shots
 ```
 
-全スライドを JA / EN / Both × ライト / ダークで 1280×720 に描いて、次を報告する。何か見つかると exit 1 で終わる。
+`--style <名前>` を付けると、ファイルの `data-style` を上書きして描く（テンプレートを各スタイルで試すとき）。全スライドを JA / EN / Both × ライト / ダークで 1280×720 に描いて、次を報告する。何か見つかると exit 1 で終わる。
 
-- `slide-overflow` / `body-overflow`: スライドや本文の領域からあふれている
+- `slide-overflow` / `body-overflow`: スライドや本文の領域からあふれている（擬似要素と `.deco` の飾りは除く）
 - `text-outside-slide`: 文字がスライドの端から 40px の内側に収まっていない
 - `text-overlap` / `text-overflow-box`: 文字どうしの重なり、箱からのはみ出し
 - `line-count`: 見出しや箇条書きが 2 行を超えた（結論文は 3 行）
@@ -117,11 +157,11 @@ NODE_PATH="$(npm root -g)" node <このスキルのディレクトリ>/scripts/c
 
 検査は見た目の良し悪しまでは判断しない。`--shots` の PNG（Both のライト、Both のダーク、EN のライト）を見て、余白の偏り、のっぺりした面、同じ型の連続がないかを目で確かめる。Playwright が無い環境では、各モードのスクリーンショットを撮って同じ項目を目で確かめる。
 
-## 6. 公開する
+## 7. 公開する
 
 `artifact-design` スキルを読んでから、手書きの HTML ページとして Artifact ツールで公開する（`icon: "slides"`）。Slides 型のアーティファクトからは作らない。JA / EN / Both の切り替えを持てないため。
 
-## 7. 棚に追加する
+## 8. 棚に追加する
 
 公開したら、索引のアーティファクト「Artifact Shelf」(https://claude.ai/artifact/5Yk2Pzs2hRmdho9zCQJeQb) に追加する。
 

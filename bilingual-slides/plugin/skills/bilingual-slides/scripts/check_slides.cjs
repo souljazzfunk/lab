@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Usage: NODE_PATH="$(npm root -g)" node check_slides.cjs deck.html [--shots DIR]
+// Usage: NODE_PATH="$(npm root -g)" node check_slides.cjs deck.html [--shots DIR] [--style NAME]
 //
 // Renders every slide of a bilingual-slides deck in JA / EN / Both and in
 // light / dark on the 1280×720 stage, then reports layout issues:
@@ -8,6 +8,7 @@
 //   font-too-small (< 22 stage px), low-contrast, svg-label-* (from eli5),
 //   page-hscroll / stage-not-fit at phone and laptop widths.
 // Exits 1 when anything is found. --shots DIR saves one PNG per slide/mode/theme.
+// --style NAME overrides <html data-style> (e.g. to check every style of the template).
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
@@ -94,8 +95,15 @@ async function audit(opts) {
     (el) => !(el instanceof SVGElement) && ownText(el) && visible(el));
 
   if (checkLayout) {
-    if (slide.scrollHeight > slide.clientHeight + 1 || slide.scrollWidth > slide.clientWidth + 1)
-      out.push(`slide-overflow: content is ${slide.scrollWidth}×${slide.scrollHeight}, slide ${slide.clientWidth}×${slide.clientHeight}`);
+    // Real elements only: pseudo-element and .deco decorations may bleed off the edge (the slide clips them).
+    for (const el of slide.querySelectorAll('*')) {
+      if (el.closest('.deco') || el.closest('svg') && el.tagName.toLowerCase() !== 'svg' || !visible(el)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.right > sr.right + 1 || r.bottom > sr.bottom + 1 || r.left < sr.left - 1 || r.top < sr.top - 1) {
+        out.push(`slide-overflow: <${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).split(' ')[0] : ''}> ${q(el.textContent)} reaches outside the slide`);
+        break;
+      }
+    }
     const body = slide.querySelector('.body');
     if (body && (body.scrollHeight > body.clientHeight + 1)) out.push(`body-overflow: .body needs ${body.scrollHeight}px, has ${body.clientHeight}px`);
   }
@@ -235,9 +243,11 @@ async function prep(page, mode, theme) {
 
 (async () => {
   const args = process.argv.slice(2);
-  const file = args.find((a) => !a.startsWith('--'));
+  const file = args.find((a, i) => !a.startsWith('--') && !['--shots', '--style'].includes(args[i - 1]));
   const si = args.indexOf('--shots');
   const shots = si >= 0 ? args[si + 1] : null;
+  const yi = args.indexOf('--style');
+  const style = yi >= 0 ? args[yi + 1] : null;
   if (!file) { console.error('Usage: node check_slides.cjs deck.html [--shots DIR]'); process.exit(2); }
   if (shots) fs.mkdirSync(shots, { recursive: true });
   const url = 'file://' + path.resolve(file);
@@ -249,7 +259,9 @@ async function prep(page, mode, theme) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 768 } });
   page.on('pageerror', (e) => { console.log(`[js] page-error: ${e.message}`); total++; });
   await page.goto(url);
+  if (style) await page.evaluate((s) => { document.documentElement.dataset.style = s; }, style);
   await page.evaluate(() => document.fonts && document.fonts.ready);
+  const styleName = await page.evaluate(() => document.documentElement.dataset.style || 'standard');
   const count = await page.evaluate(() => (window.deck ? window.deck.count : document.querySelectorAll('.slide').length));
   if (!count) { console.log('no slides found (.slide)'); process.exit(1); }
   for (const theme of THEMES) {
@@ -273,6 +285,7 @@ async function prep(page, mode, theme) {
   for (const [w, h] of [[400, 800], [1024, 700], [1440, 900]]) {
     const p = await browser.newPage({ viewport: { width: w, height: h } });
     await p.goto(url);
+    if (style) await p.evaluate((s) => { document.documentElement.dataset.style = s; }, style);
     await p.waitForTimeout(150);
     const issues = await p.evaluate(() => {
       const o = [];
@@ -291,6 +304,6 @@ async function prep(page, mode, theme) {
   }
 
   await browser.close();
-  if (total === 0) console.log(`No layout issues found. (${count} slides × ${MODES.length} languages × ${THEMES.length} themes)`);
+  if (total === 0) console.log(`No layout issues found. (style ${styleName}: ${count} slides × ${MODES.length} languages × ${THEMES.length} themes)`);
   else { console.log(`\n${total} issue(s).`); process.exit(1); }
 })();

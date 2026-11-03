@@ -39,7 +39,7 @@
     {
       "name": "bilingual-slides",
       "source": "./bilingual-slides/plugin",
-      "description": "プロフェッショナルなスライドを、日英バイリンガル（JA / EN / Both）とライト / ダーク切り替えつきの HTML アーティファクト 1 枚で作るスキル。eli5 と同じ切り替えの仕組みと、全スライドを検査するスクリプトつき。"
+      "description": "プロフェッショナルなスライドを、日英バイリンガル（JA / EN / Both）とライト / ダーク切り替えつきの HTML アーティファクト 1 枚で作るスキル。Standard と Organic & Tech のスタイルを選べる。eli5 と同じ切り替えの仕組みと、全スライドを検査するスクリプトつき。"
     }
   ]
 }

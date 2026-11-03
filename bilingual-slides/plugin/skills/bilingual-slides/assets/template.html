@@ -1,12 +1,16 @@
 <!doctype html>
-<html lang="ja" data-lang="both">
+<html lang="ja" data-lang="both" data-style="standard">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Agent Rollout</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fonts: keep only the line for the style on <html data-style>. -->
+<!-- style: standard -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- style: organic -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
   // Set theme and language before first paint so the page never flashes.
   (function () {
@@ -36,6 +40,13 @@
   --s2: #0f766e;            /* 2nd series        5.5 */
   --s3: #b45309;            /* 3rd series        5.0 */
   --bar: #f9fafb;
+  /* type and shape (overridden per style) */
+  --font-body: "Inter", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-head: var(--font-body);
+  --head-track: -.01em;
+  --radius: 16px;
+  --marker-radius: 3px;
+  --rule: 6px;              /* accent rules on cards, KPIs, statements */
   color-scheme: light;
 }
 /* ===== Tokens (dark) ===== */
@@ -71,10 +82,10 @@ html, body { margin: 0; height: 100%; }
 body {
   display: flex; flex-direction: column; height: 100dvh;
   background: var(--page); color: var(--ink);
-  font-family: "Inter", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
-:lang(ja) { font-family: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+:lang(ja) { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 .viewport { flex: 1; min-height: 0; position: relative; overflow: hidden; touch-action: pan-y; }
 .deck {
   position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px;
@@ -125,7 +136,7 @@ body {
 .kicker .t > [lang] { display: inline; } /* kicker stays one line */
 :root[data-lang="both"] .kicker [lang="en"] { font-size: 22px; color: var(--accent); margin: 0; }
 :root[data-lang="both"] .kicker [lang="en"]::before { content: " / "; }
-.title { font-size: 52px; line-height: 1.2; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+.title { font-family: var(--font-head); font-size: 52px; line-height: 1.2; font-weight: 700; letter-spacing: var(--head-track); margin: 0; }
 .body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 28px; margin-top: 32px; }
 .body.center { justify-content: center; margin-top: 0; }
 .foot {
@@ -140,40 +151,40 @@ strong, .em { color: var(--accent); font-weight: 700; }
 /* Bullets */
 .points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 26px; }
 .points li { position: relative; padding-left: 40px; }
-.points li::before { content: ""; position: absolute; left: 0; top: .5em; width: 14px; height: 14px; background: var(--accent); border-radius: 3px; }
+.points li::before { content: ""; position: absolute; left: 0; top: .5em; width: 14px; height: 14px; background: var(--accent); border-radius: var(--marker-radius); }
 
 /* Numbered agenda */
 .agenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: ag; }
 .agenda li { counter-increment: ag; display: grid; grid-template-columns: 96px 1fr; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .agenda li:first-child { border-top: 1px solid var(--line); }
-.agenda li::before { content: counter(ag, decimal-leading-zero); font-size: 40px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.agenda li::before { content: counter(ag, decimal-leading-zero); font-family: var(--font-head); font-size: 40px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 /* Cover */
 .slide.cover { padding: 96px 96px 84px; justify-content: center; }
 .slide.cover::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: var(--accent-fill); }
-.cover h1 { font-size: 72px; line-height: 1.15; font-weight: 700; letter-spacing: -.02em; margin: 0 0 28px; max-width: 1040px; }
+.cover h1 { font-family: var(--font-head); font-size: 72px; line-height: 1.15; font-weight: 700; letter-spacing: calc(var(--head-track) - .01em); margin: 0 0 28px; max-width: 1040px; }
 .cover .sub { font-size: 32px; color: var(--ink-2); margin: 0 0 56px; max-width: 980px; }
 .cover .meta { font-size: 24px; color: var(--muted); margin: 0; }
 
 /* Section divider */
 .slide.section { background: var(--accent-fill); color: var(--on-accent); justify-content: center; }
-.slide.section .num { font-size: 120px; font-weight: 700; line-height: 1; opacity: .7; margin: 0 0 24px; font-variant-numeric: tabular-nums; }
+.slide.section .num { font-family: var(--font-head); font-size: 120px; font-weight: 700; line-height: 1; opacity: .7; margin: 0 0 24px; font-variant-numeric: tabular-nums; }
 .slide.section .title { font-size: 64px; }
 .slide.section .foot { color: var(--on-accent); border-top-color: rgba(255, 255, 255, .35); }
 
 /* Columns & cards */
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 .cols.three { grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.card { background: var(--soft); border-radius: 16px; padding: 32px 36px; border-top: 6px solid var(--accent); }
+.card { background: var(--soft); border-radius: var(--radius); padding: 32px 36px; border-top: var(--rule) solid var(--accent); }
 .card.alt { border-top-color: var(--line); }
-.card h3 { font-size: 32px; line-height: 1.3; margin: 0 0 16px; }
+.card h3 { font-family: var(--font-head); letter-spacing: var(--head-track); font-size: 32px; line-height: 1.3; margin: 0 0 16px; }
 .card p, .card li { font-size: 26px; line-height: 1.45; margin: 0; color: var(--ink-2); }
 .card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 10px; }
 
 /* KPI tiles */
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.kpi { border-left: 6px solid var(--accent); padding: 8px 0 8px 28px; }
-.kpi .v { font-size: 88px; font-weight: 700; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.kpi { border-left: var(--rule) solid var(--accent); padding: 8px 0 8px 28px; }
+.kpi .v { font-family: var(--font-head); font-size: 88px; font-weight: 700; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .kpi .v small { font-size: 40px; margin-left: 4px; }
 .kpi .l { font-size: 26px; color: var(--ink-2); margin-top: 16px; line-height: 1.35; }
 .kpi:nth-child(2) { border-color: var(--s2); } .kpi:nth-child(2) .v { color: var(--s2); }
@@ -193,8 +204,62 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 26px; line-height
 .tbl tr.hl td { background: var(--accent-soft); }
 
 /* Key message */
-.statement { font-size: 48px; line-height: 1.3; font-weight: 700; margin: 0; padding-left: 40px; border-left: 10px solid var(--accent); max-width: 1060px; }
+.statement { font-family: var(--font-head); letter-spacing: var(--head-track); font-size: 48px; line-height: 1.3; font-weight: 700; margin: 0; padding-left: 40px; border-left: calc(var(--rule) + 4px) solid var(--accent); max-width: 1060px; }
 .statement + .cap { padding-left: 50px; }
+
+/* =====================================================================
+   Style: organic — Organic & Tech (ニュー・ナチュラル)
+   Earth tones, sage green and warm grey, set with a sharp grotesk.
+   ===================================================================== */
+:root[data-style="organic"] {
+  --page: #e9e4dc; --slide: #faf8f4; --ink: #23221f; --ink-2: #4a463f; --muted: #635e56;
+  --accent: #4d6b4f; --accent-fill: #4d6b4f; --on-accent: #ffffff; --accent-soft: #e6ece2;
+  --soft: #efebe4; --line: #d8d0c4; --s2: #a0502f; --s3: #86651a; --bar: #f3efe8;
+  --font-body: "Inter", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-head: "Space Grotesk", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --head-track: -.025em; --radius: 28px; --marker-radius: 50%; --rule: 2px;
+  color-scheme: light;
+}
+:root[data-style="organic"][data-theme="dark"] {
+  --page: #0f100e; --slide: #1a1b18; --ink: #ece8e0; --ink-2: #cfc9be; --muted: #a39d92;
+  --accent: #a8c3a2; --accent-fill: #3d5440; --on-accent: #ffffff; --accent-soft: #263024;
+  --soft: #24261f; --line: #3a3b34; --s2: #e3a283; --s3: #d8b864; --bar: #141512;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-style="organic"]:not([data-theme="light"]) {
+    --page: #0f100e; --slide: #1a1b18; --ink: #ece8e0; --ink-2: #cfc9be; --muted: #a39d92;
+    --accent: #a8c3a2; --accent-fill: #3d5440; --on-accent: #ffffff; --accent-soft: #263024;
+    --soft: #24261f; --line: #3a3b34; --s2: #e3a283; --s3: #d8b864; --bar: #141512;
+    color-scheme: dark;
+  }
+}
+/* soft organic forms + hairline "tech" details */
+:root[data-style="organic"] .kicker { letter-spacing: .16em; font-weight: 500; }
+:root[data-style="organic"] .kicker::before { content: ""; display: inline-block; width: 36px; height: 2px; background: var(--accent); vertical-align: middle; margin-right: 14px; }
+:root[data-style="organic"] .slide.cover::before {
+  left: auto; right: -260px; top: -220px; bottom: auto; width: 700px; height: 700px;
+  border-radius: 58% 42% 55% 45% / 48% 56% 44% 52%; background: var(--accent-soft);
+}
+:root[data-style="organic"] .slide.cover::after {
+  content: ""; position: absolute; right: 120px; bottom: -180px; width: 360px; height: 360px;
+  border-radius: 50%; border: 1px solid var(--accent); opacity: .45;
+}
+:root[data-style="organic"] .slide.section::after {
+  content: ""; position: absolute; right: -140px; top: 50%; width: 560px; height: 560px; transform: translateY(-50%);
+  border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); box-shadow: 0 0 0 60px rgba(255, 255, 255, .05);
+}
+:root[data-style="organic"] .card { border: 1px solid var(--line); }
+:root[data-style="organic"] .card:not(.alt) { background: var(--accent-soft); border-color: transparent; }
+:root[data-style="organic"] .kpi .v small { font-weight: 500; }
+:root[data-style="organic"] .tbl thead th { letter-spacing: .02em; }
+:root[data-style="organic"] .tbl tr.hl td:first-child { border-radius: 14px 0 0 14px; }
+:root[data-style="organic"] .tbl tr.hl td:last-child { border-radius: 0 14px 14px 0; }
+:root[data-style="organic"] .statement { border-left: 0; padding-left: 0; }
+:root[data-style="organic"] .statement::before { content: ""; display: block; width: 72px; height: 6px; border-radius: 3px; background: var(--accent); margin-bottom: 28px; }
+:root[data-style="organic"] .statement + .cap { padding-left: 0; }
+:root[data-style="organic"] figure.fig rect { rx: 28px; }
+:root[data-style="organic"] figure.fig svg text { font-family: var(--font-head); }
 
 /* ===== Print / PDF: one slide per page ===== */
 @page { size: 1280px 720px; margin: 0; }
