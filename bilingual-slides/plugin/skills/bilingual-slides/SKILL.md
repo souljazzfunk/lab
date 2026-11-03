@@ -17,13 +17,25 @@ description: プロフェッショナルなスライドを、日英バイリン�
 - 結論を最初に言う構成（ピラミッド型）を既定にする。`pyramid-principle` スキルがあれば筋立てに使ってよい
 - 数字には出典か前提を添える。素材にない数字を作らない。仮の数字はそれと分かる書き方にする
 
-## 2. テンプレートから作る
+## 2. スライドだけを書く
 
-このスキルの `assets/template.html` をコピーして、`<section class="slide">` を差し替える。`<head>` の CSS、下の `<nav class="bar">`、末尾の `<script>` は残す。この 3 つがステージの縮尺、送り操作、言語とテーマの切り替え、印刷を受け持つ。
+テンプレート（`assets/template.html`、約 32KB）を丸ごと Read したり、コピーして Write したりしない。CSS・バー・スクリプトはスクリプトが差し込む。書くのは `<section class="slide">` の並びだけ。
 
-- `<title>` は 2〜4 語の名前にする（例: `AI Agent Rollout`）
+1. 見本のスライドを一度だけ読む（約 11KB）。CSS とスクリプトは読まない
+   ```bash
+   sed -n '/SLIDES:BEGIN/,/SLIDES:END/p' <このスキルのディレクトリ>/assets/template.html
+   ```
+2. スライドの断片を scratchpad に Write する（例: `<scratchpad>/slides.html`。`<section class="slide">` だけを並べる）
+3. 組み立てと検査を 1 回のコマンドで回す
+   ```bash
+   SK=<このスキルのディレクトリ>; node $SK/scripts/build_deck.cjs <scratchpad>/slides.html -o <scratchpad>/deck.html --style standard --title "AI Agent Rollout" && NODE_PATH="$(npm root -g)" node $SK/scripts/check_slides.cjs <scratchpad>/deck.html
+   ```
+   `build_deck.cjs` が `<html data-style>`、`<title>`（2〜4 語の名前）、そのスタイルのフォントの `<link>` だけを残す処理を受け持つ
+4. 直すときは `slides.html` を Edit で部分的に直し、3 のコマンドをもう一度回す。`deck.html` は Read も Edit もしない
+
 - 表紙の日付は JST で書く（`2026-11-03 (JST)`）
 - 各スライドの `<footer class="foot">` にはデッキの短い名前を入れる。ページ番号は JS が入れる
+- 言語（JA / EN / Both、既定 Both）とテーマ（ライト / ダーク）の切り替え、← → / スワイプ / `L` `D` `F` のキー、`#3` での頁指定、1 スライド 1 ページの印刷は、テンプレートが実装済み。手を入れない
 
 ### バイリンガルの書き方
 
@@ -33,18 +45,11 @@ description: プロフェッショナルなスライドを、日英バイリン�
 <h2 class="title t"><span lang="ja">人は判断に集中する</span><span lang="en">People focus on decisions</span></h2>
 ```
 
-- JA は JA だけ、EN は EN だけ、Both は JA の下に EN を小さく薄く出す（`max(22px, .62em)`）
+- Both では JA の下に EN を小さく薄く出す（`max(22px, .62em)`）
 - 1 行に並べたいもの（フッター）は `class="bi-inline"` にする。Both では「JA / EN」と並ぶ
 - 数字や固有名詞だけの要素（`120h`、KPI の値）は言語を分けなくてよい
-- SVG のラベルは `<text>` 1 つに `<tspan lang="ja">` と `<tspan lang="en">` を入れる。`setLang` が Both では EN を JA の下へ積み、EN では元の位置へ戻す。`text` には `x` を必ず書く
+- SVG のラベルは `<text>` 1 つに `<tspan lang="ja">` と `<tspan lang="en">` を入れる。Both では EN が JA の下に積まれる。`text` には `x` を必ず書く
 - 英語は意訳でよい。日本語の直訳より、短く言い切る英語を優先する
-
-### 切り替えの約束（テンプレートが実装済み）
-
-- `window.setLang(mode)`（`"ja"` / `"en"` / `"both"`、既定 `both`）と `window.setTheme(theme)`（`"light"` / `"dark"`、既定は `prefers-color-scheme`）。どちらも localStorage に覚える（try/catch 済み）
-- 送り: ← → / Space / PageUp / PageDown / Home / End、スワイプ、バーのボタン。`L` で言語、`D` でテーマ、`F` で全画面
-- URL の `#3` で 3 枚目から開く
-- 印刷すると 1 スライド 1 ページの 1280×720 で出る
 
 ## 3. スライドの型と入る量
 
@@ -75,99 +80,48 @@ description: プロフェッショナルなスライドを、日英バイリン�
 - ラベルの入る箱は、長いほうの行（EN は 0.55em/字、JA は 1em/字）＋左右 16px より広くする。Both では 2 行になるので、箱の高さは 120px 以上にする
 - グラフを描くときは `dataviz` スキルを先に読む。系列の色は `--accent` `--s2` `--s3` の順に使う
 
-## 4. スタイルを選ぶ
+## 4. スタイルと配色
 
-見た目の系統は `<html data-style="...">` で切り替える。ライト / ダークはどのスタイルにもある。
+見た目の系統は `build_deck.cjs --style` で選ぶ。ライト / ダークはどのスタイルにもある。
 
-| `data-style` | 名前 | 見た目 | 向く話題 |
-|---|---|---|---|
-| `standard`（既定） | Standard | 白地と青、Inter + Noto Sans JP、角丸 16px、太い罫 | 社内提案、報告、技術、数字中心の話 |
-| `organic` | Organic & Tech（ニュー・ナチュラル） | アースカラー（生成りの地、セージグリーン、テラコッタ、ウォームグレー）に、Space Grotesk の鋭い見出しと Zen Kaku Gothic New。角丸 28px、細い罫、有機的な円の飾り | サステナビリティ、ウェルビーイング、人や地域、ブランド、デザイン、人を中心に置くテクノロジー |
-
-選び方（ユーザーには聞かない）:
-
-1. ユーザーがスタイルを指定したら、それに従う（「Organic で」「ニュー・ナチュラルで」「`--style organic`」など）
-2. 指定が無く、話題が上の `organic` の向く話題に当たるなら `organic` にする。それ以外は `standard`
-3. 指定なしで選んだときは、最後の報告に「スタイル: Organic（話題から選択）」のように 1 行で書く
-
-選んだら:
-
-- `<html data-style>` を書き換える
-- `<head>` のフォントの `<link>` は、そのスタイルの行だけを残し、もう 1 行は消す
-- 検査は `--style` を付けずに回してよい（ファイルの `data-style` のまま描く）
-
-### Organic のトークン
-
-| トークン | ライト | ダーク |
+| `--style` | 見た目 | 向く話題 |
 |---|---|---|
-| `--slide` / `--page` | `#faf8f4` / `#e9e4dc` | `#1a1b18` / `#0f100e` |
-| `--ink` / `--ink-2` / `--muted` | `#23221f` / `#4a463f` / `#635e56` | `#ece8e0` / `#cfc9be` / `#a39d92` |
-| `--accent` / `--accent-fill` | `#4d6b4f`（セージ） | `#a8c3a2` / `#3d5440` |
-| `--soft` / `--accent-soft` | `#efebe4` / `#e6ece2` | `#24261f` / `#263024` |
-| `--s2` / `--s3` | `#a0502f`（テラコッタ）/ `#86651a`（オーカー） | `#e3a283` / `#d8b864` |
+| `standard`（既定） | 白地と青、Inter + Noto Sans JP、角丸 16px、太い罫 | 社内提案、報告、技術、数字中心の話 |
+| `organic`（Organic & Tech / ニュー・ナチュラル） | アースカラー（生成り、セージ、テラコッタ）、Space Grotesk の見出しと Zen Kaku Gothic New、角丸 28px、細い罫、円の飾り | サステナビリティ、ウェルビーイング、人や地域、ブランド、デザイン、人を中心に置くテクノロジー |
 
-Organic では、カードの地がアクセントの淡い面になり、結論文の上に短い丸い棒、表紙と中扉に円の飾りが入る。飾りはスライドの端で切れてよい（検査は飾りを数えない）。自分で飾りを足すときは擬似要素か `class="deco"` の要素にする。
+選び方（ユーザーには聞かない）: 指定（「Organic で」「ニュー・ナチュラルで」など）があれば従う。無ければ、話題が `organic` の向く話題に当たるときだけ `organic`、それ以外は `standard`。指定なしで選んだときは、最後の報告に「スタイル: Organic（話題から選択）」と 1 行書く。
 
-### スタイルを足すとき
+- 色はトークン（`--ink` `--ink-2` `--muted` `--accent` `--accent-fill` `--soft` `--accent-soft` `--line` `--s2` `--s3`）で書く。スライドの中で色を直に書かない
+- ブランド色を入れるとき、スタイルを足すときだけ `references/styles.md` を読む。それ以外では読まない
 
-1. `template.html` の Organic のブロックを写して、`:root[data-style="<名前>"]`（ライト）、`:root[data-style="<名前>"][data-theme="dark"]`、`@media (prefers-color-scheme: dark)` の `:root[data-style="<名前>"]:not([data-theme="light"])` の 3 か所にトークンを書く
-2. 書体は `--font-body` と `--font-head` で持つ。サンセリフだけにし、ラテン書体を先、和文書体を次に並べる。Google Fonts の `<link>` を 1 行足す
-3. 形は `--radius`、`--marker-radius`、`--rule`、`--head-track` で変える
-4. `check_slides.cjs template.html --style <名前>` を通し、上の表とこの節に 1 行足す
+## 5. 検査して直す
 
-## 5. 配色とブランド
+検査は 2 の 3 のコマンドで回る。全スライドを JA / EN / Both × ライト / ダークで 1280×720 に描き、400px・1024px・1440px の画面でも試す。見つかると exit 1。同じ原因の報告は 1 行にまとまり、`[slides 2,4-10 ja,both light]` のように起きた場所が付く。
 
-色はすべて `:root`（ライト）と `:root[data-theme="dark"]`（ダーク）、`@media (prefers-color-scheme: dark)` のトークンで持つ。スライドの中で色を直に書かない。下の表は Standard の値。
+報告は `slide-overflow` `body-overflow` `text-outside-slide` `text-overlap` `text-overflow-box` `line-count` `stranded-last-line` `font-too-small` `low-contrast` `svg-label-*` `page-hscroll` `stage-not-fit` `bar-overflow`。名前のとおりの意味で、直し方は 3 の「入る量」の規則に従う。文字を小さくして逃げない。`No layout issues found.` が出るまで繰り返す。
 
-| トークン | 用途 | ライト（白地との比） | ダーク |
-|---|---|---|---|
-| `--ink` | 本文 | `#111827`（17.7） | `#f3f4f6` |
-| `--ink-2` | 補足の本文 | `#374151`（10.3） | `#d1d5db` |
-| `--muted` | キャプション、Both の EN | `#4b5563`（7.6） | `#9ca3af` |
-| `--accent` | 強調の文字、小見出し | `#1d4ed8`（6.7） | `#8ab4ff` |
-| `--accent-fill` | 中扉の地、主役の箱（白文字） | `#1d4ed8` | `#1e3a8a` |
-| `--soft` / `--accent-soft` | 面 | `#f3f4f6` / `#eef2ff` | `#1a2230` / `#1c2747` |
-| `--line` | 罫線、枠 | `#d1d5db` | `#334155` |
-| `--s2` / `--s3` | 2・3 番目の系列 | `#0f766e` / `#b45309` | `#5eead4` / `#fbbf24` |
+見た目は、問題が 0 件になってから **1 回だけ** `--shots <scratchpad>/shots` を付けて回して確かめる。開くのはコンタクトシート（デッキ全体が 1 枚に入る画像）だけにする。
 
-- 会社や製品のデッキは、そのブランド色を `--accent` と `--accent-fill` に入れる。ライトとダークの両方の値を決め、使っているスタイルの 3 か所（ライト、ダーク、media query）すべてを書き換える
-- 差し替えたら、検査の `low-contrast` が出ないことを確かめる（小さい文字は 4.5、40px 以上か 32px 以上の太字は 3）
+- `sheet-both-light.png` は必ず見る。余白の偏り、のっぺりした面、同じ型の連続を探す
+- `sheet-both-dark.png` と `sheet-en-light.png` は、図や飾りを足したデッキのときだけ見る（色と文字量は検査が測っている）
+- スライド 1 枚ずつの PNG（`slide-03-both-light.png` など）は、シートで気になった枚だけ開く
 
-## 6. 検査して直す（公開の前に）
+Playwright が無い環境では、Both のライトのスクリーンショットを撮って同じ項目を目で確かめる。
 
-ローカルに保存して、同梱の検査を通す（Chromium と Playwright を使う）。
+## 6. 公開する
 
-```bash
-NODE_PATH="$(npm root -g)" node <このスキルのディレクトリ>/scripts/check_slides.cjs deck.html --shots <scratchpad>/shots
-```
+`artifact-design` スキルを読んでから、`<scratchpad>/deck.html` を手書きの HTML ページとして Artifact ツールで公開する（`icon: "slides"`）。デザインの規則はテンプレートが満たしているので、スキルを読んだあとで `deck.html` を開き直したり書き直したりしない。Slides 型のアーティファクトからは作らない。JA / EN / Both の切り替えを持てないため。
 
-`--style <名前>` を付けると、ファイルの `data-style` を上書きして描く（テンプレートを各スタイルで試すとき）。全スライドを JA / EN / Both × ライト / ダークで 1280×720 に描いて、次を報告する。何か見つかると exit 1 で終わる。
+## 7. 棚に追加する
 
-- `slide-overflow` / `body-overflow`: スライドや本文の領域からあふれている（擬似要素と `.deco` の飾りは除く）
-- `text-outside-slide`: 文字がスライドの端から 40px の内側に収まっていない
-- `text-overlap` / `text-overflow-box`: 文字どうしの重なり、箱からのはみ出し
-- `line-count`: 見出しや箇条書きが 2 行を超えた（結論文は 3 行）
-- `stranded-last-line`: 最後の行に 1〜2 文字だけが落ちた
-- `font-too-small`: 22px 未満の文字（SVG も含む）
-- `low-contrast`: 文字色と地のコントラスト比が足りない（ダークでも測る）
-- `svg-label-*`: ラベルが図の外、箱の外、ほかのラベルと重なる
-- `page-hscroll` / `stage-not-fit` / `bar-overflow`: 400px・1024px・1440px の画面で、横スクロールが出る、スライドが切れる、バーがはみ出す
+公開したら、索引のアーティファクト「Artifact Shelf」(https://claude.ai/artifact/5Yk2Pzs2hRmdho9zCQJeQb) に追加する。棚のページは読み込むたびに数千トークンかかるので、中身は手で読み書きしない。
 
-報告をすべて直して、`No layout issues found.` が出るまで繰り返す。直し方は上の「入る量」の規則に従う。文字を小さくして逃げない。
-
-検査は見た目の良し悪しまでは判断しない。`--shots` の PNG（Both のライト、Both のダーク、EN のライト）を見て、余白の偏り、のっぺりした面、同じ型の連続がないかを目で確かめる。Playwright が無い環境では、各モードのスクリーンショットを撮って同じ項目を目で確かめる。
-
-## 7. 公開する
-
-`artifact-design` スキルを読んでから、手書きの HTML ページとして Artifact ツールで公開する（`icon: "slides"`）。Slides 型のアーティファクトからは作らない。JA / EN / Both の切り替えを持てないため。
-
-## 8. 棚に追加する
-
-公開したら、索引のアーティファクト「Artifact Shelf」(https://claude.ai/artifact/5Yk2Pzs2hRmdho9zCQJeQb) に追加する。
-
-1. `path: "index.html"` で読む。生のページがローカルに保存される。`path` なしの読み取りはサービスの外枠つきで返るので、編集する元にはしない
+1. `path: "index.html"` で読む。生のページがローカルに保存される（`path` なしの読み取りはサービスの外枠つきで返るので、編集の元にはしない）
 2. 再公開が受け付けられるように、URL を `path` なしでも 1 回読む
-3. 保存したファイルの、今月の一覧の先頭に `<li>` を足す（今月の節が無ければ作る）。タイトル、`SLIDES` タグ、今日の日付（JST）を入れる。ヘッダーの件数と、フッターのスナップショット日付を更新する
+3. 保存したファイルを Read も Write もしないで、スクリプトで 1 行足す。今月の節（無ければ作る）の先頭に入り、件数とスナップショットの日付（JST）も更新される
+   ```bash
+   node <このスキルのディレクトリ>/scripts/shelf_add.cjs <保存されたファイル> --title "<タイトル>" --url <公開した URL> --tag Slides
+   ```
 4. そのファイルを `url` つきで再公開して、リンクを変えない
 
 Topic: $ARGUMENTS

@@ -7,7 +7,11 @@
 //   line-count (title / bullet / caption wraps too much), stranded-last-line,
 //   font-too-small (< 22 stage px), low-contrast, svg-label-* (from eli5),
 //   page-hscroll / stage-not-fit at phone and laptop widths.
-// Exits 1 when anything is found. --shots DIR saves one PNG per slide/mode/theme.
+// Identical messages are printed once, with every slide / language / theme they
+// hit merged into one tag. Exits 1 when anything is found.
+// --shots DIR saves one PNG per slide/mode/theme plus contact sheets
+// (sheet-both-light.png, sheet-both-dark.png, sheet-en-light.png): review the
+// sheets, and open a single slide PNG only when a sheet shows a problem.
 // --style NAME overrides <html data-style> (e.g. to check every style of the template).
 const fs = require('fs');
 const path = require('path');
@@ -254,6 +258,25 @@ async function prep(page, mode, theme) {
   const browser = await chromium.launch();
   let total = 0;
   const report = (tag, list) => { for (const i of list) console.log(`[${tag}] ${i}`); total += list.length; };
+  // Slide issues: one line per distinct message, with where it happened merged.
+  const seen = new Map();
+  const note = (slide, mode, theme, list) => {
+    for (let msg of list) {
+      msg = msg.replace(/"\d+"$/, '"<number>"'); // page numbers differ per slide but share one cause
+      if (!seen.has(msg)) seen.set(msg, { slides: new Set(), modes: new Set(), themes: new Set() });
+      const e = seen.get(msg); e.slides.add(slide); e.modes.add(mode); e.themes.add(theme);
+    }
+  };
+  const ranges = (nums) => {
+    const a = [...nums].sort((x, y) => x - y), o = [];
+    for (let i = 0; i < a.length; i++) {
+      let j = i; while (j + 1 < a.length && a[j + 1] === a[j] + 1) j++;
+      o.push(j > i ? `${a[i]}-${a[j]}` : `${a[i]}`); i = j;
+    }
+    return o.join(',');
+  };
+  const SHEETS = ['both-light', 'both-dark', 'en-light'];
+  const sheetShots = Object.fromEntries(SHEETS.map((k) => [k, []]));
 
   // Stage checks: 1280×720 stage at scale 1 (bar is 48px tall).
   const page = await browser.newPage({ viewport: { width: 1280, height: 768 } });
@@ -271,15 +294,34 @@ async function prep(page, mode, theme) {
         await page.evaluate((n) => window.deck.go(n), i);
         await page.waitForTimeout(60);
         const issues = await page.evaluate(audit, { MIN_FONT, SAFE, checkLayout: theme === 'light' });
-        report(`slide ${i + 1} ${mode} ${theme}`, issues);
+        note(i + 1, mode, theme, issues);
         if (shots && (theme === 'light' || mode === 'both')) {
           const el = await page.$('.slide.active');
-          await el.screenshot({ path: path.join(shots, `slide-${String(i + 1).padStart(2, '0')}-${mode}-${theme}.png`) });
+          const buf = await el.screenshot({ path: path.join(shots, `slide-${String(i + 1).padStart(2, '0')}-${mode}-${theme}.png`) });
+          if (sheetShots[`${mode}-${theme}`]) sheetShots[`${mode}-${theme}`].push(buf);
         }
       }
     }
   }
   await page.close();
+  for (const [msg, e] of seen) {
+    const s = e.slides.size === 1 ? `slide ${ranges(e.slides)}` : `slides ${ranges(e.slides)}`;
+    const m = e.modes.size === MODES.length ? 'all langs' : [...e.modes].join(',');
+    const t = e.themes.size === THEMES.length ? 'both themes' : [...e.themes].join(',');
+    report(`${s} ${m} ${t}`, [msg]);
+  }
+
+  // Contact sheets: 3 columns of half-size slides, so a whole deck is one image.
+  if (shots) {
+    const sp = await browser.newPage({ viewport: { width: 1000, height: 600 } });
+    for (const [key, bufs] of Object.entries(sheetShots)) {
+      if (!bufs.length) continue;
+      const cells = bufs.map((b, i) => `<figure><img src="data:image/png;base64,${b.toString('base64')}"><figcaption>${i + 1}</figcaption></figure>`).join('');
+      await sp.setContent(`<!doctype html><style>body{margin:0;padding:12px;background:#888;font:600 18px sans-serif;color:#fff;display:grid;grid-template-columns:repeat(3,480px);gap:12px;width:max-content}figure{margin:0;position:relative}img{width:480px;height:270px;display:block}figcaption{position:absolute;left:6px;top:4px;background:#000a;padding:0 6px;border-radius:4px}</style>${cells}`);
+      await sp.screenshot({ path: path.join(shots, `sheet-${key}.png`), fullPage: true });
+    }
+    await sp.close();
+  }
 
   // Frame checks: phone and laptop widths.
   for (const [w, h] of [[400, 800], [1024, 700], [1440, 900]]) {
