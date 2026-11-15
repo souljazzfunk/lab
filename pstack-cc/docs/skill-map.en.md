@@ -6,14 +6,14 @@ Diagrams of how the 58 skills and 2 agents in `pstack-cc/plugin/` (the Claude Co
 
 ## 1. Overview
 
-The entry point is `/poteto-mode`. It picks a playbook for the kind of work, and each playbook step calls workflow skills such as how and architect. Every skill reads `claude-code.md` (the Cursor → Claude Code mapping) first, and picks models from `~/.claude/pstack-models.md`.
+The entry point is `/poteto-mode`. It picks a playbook for the kind of work, and each playbook step calls workflow skills such as why and architect. Every skill reads `claude-code.md` (the Cursor → Claude Code mapping) first, and picks models from `~/.claude/pstack-models.md`.
 
 ```mermaid
 flowchart LR
   U([User]) --> PM["/poteto-mode<br/>(or via poteto-agent)"]
   PM --> PB{"Pick a playbook<br/>23 kinds"}
   PM -. large or no matching playbook .-> FIO["figure-it-out"]
-  PB --> WF["Workflow skills<br/>how / why / architect / arena<br/>interrogate / swarm / tdd"]
+  PB --> WF["Workflow skills<br/>why / architect / arena<br/>interrogate / swarm / tdd"]
   PB --> Q["Finishing skills<br/>unslop / technical-writing<br/>no-comments / show-me-your-work"]
   PM --> PR["24 principle-* skills<br/>(grounds for decisions)"]
   WF --> SA[["Subagents<br/>(parallel, worktrees)"]]
@@ -43,7 +43,6 @@ flowchart TB
   PH[poteto-help]:::entry --> PM
   PH --> SP
 
-  PM --> HOW[how]:::wf
   PM --> WHY[why]:::wf
   PM --> ARC[architect]:::wf
   PM --> ARN[arena]:::wf
@@ -62,26 +61,22 @@ flowchart TB
   FIO --> ARN
   FIO --> SMW
   ARC --> ARN
-  ARC --> HOW
   ARC --> INT
   ARC --> WHY
-  WHY --> HOW
-  TEACH[teach]:::wf --> HOW
+  TEACH[teach]:::wf --> HOW[how]:::wf
   TEACH --> WHY
   TEACH --> UN
   BR[blast-radius]:::wf --> HOW
   BR --> WHY
   BR --> ARN
   BR --> UN
-  RC[recall]:::wf --> WHY
-  RC --> UN
+  RC[recall]:::wf --> UN
   RC --> AM[automate-me]:::etc
   AM --> PM
   AM --> UN
 
   NC --> CS{{comment-sicko}}:::ag
-  CS -. checks doubtful comments .-> HOW
-  CS -.-> WHY
+  CS -. checks doubtful comments .-> WHY
   TW --> UN
   SMW --> UN
 
@@ -101,27 +96,24 @@ Models in parentheses are the role defaults from `pstack-models.md`. Every workf
 
 ### how (explaining how something works)
 
-A simple question gets one explainer. A complex one is explored from 2 to 4 angles first, then merged.
+One read-only subagent explores and explains in a single pass. poteto-mode does not call it. It runs when you send `/how`, and from teach.
 
 ```mermaid
 flowchart LR
-  A[Assess complexity] -->|simple| E1["explainer<br/>(opus)"]
-  A -->|complex| X1["explorer x2-4<br/>(sonnet, parallel)"]
-  X1 --> E2["explainer merges<br/>(opus)"]
-  E1 --> P[Present]
-  E2 --> P
+  A[Take the question] --> E["one explainer<br/>(read-only)"]
+  E --> P[Present]
 ```
 
 ### why (history and rationale)
 
-Checks which MCPs are available and starts one investigator per kind of evidence.
+Answers from the record, not the code: the commits and PR discussions that introduced the target and each later change, and other sources when that trail is thin. No subagents.
 
 ```mermaid
 flowchart LR
-  A[Pin down target and question] --> B[Find the code anchor]
-  B --> C["investigator xN (sonnet)<br/>git / tickets / docs / chat / observability"]
-  C --> D["synthesizer (opus)"]
-  D --> E[Present]
+  A[Pin down the target] --> B["Read the record<br/>commits / PR discussions"]
+  B -->|trail is thin| C[Other sources]
+  B --> D["Present<br/>citations, marked inferences, gaps"]
+  C --> D
 ```
 
 ### arena (competing candidates)
@@ -130,7 +122,7 @@ Several models solve the same task. Pick a base, then graft the best parts of th
 
 ```mermaid
 flowchart LR
-  A[Set task and rubric] --> B["candidate xN<br/>(opus / sonnet)<br/>own worktree each"]
+  A[Set task and rubric] --> B["candidate xN<br/>(fable / opus / sonnet)<br/>own worktree each"]
   B --> C["cross-judge<br/>(different model)"]
   C --> D[Pick a base]
   D --> E[Graft from the losers]
@@ -139,7 +131,7 @@ flowchart LR
 
 ### architect (design before code)
 
-Calls arena for the design sketch. If implementation breaks down, start over from how.
+Calls arena for the design sketch. If implementation breaks down, trace what was built and start over.
 
 ```mermaid
 flowchart LR
@@ -147,7 +139,7 @@ flowchart LR
   B --> C[Agree, optional]
   C --> D[Implement against the sketch]
   D -->|same friction keeps repeating| E[Scrap the sketch]
-  E -->|re-ground with how| B
+  E -->|trace what was built| B
 ```
 
 ### interrogate (adversarial review)
@@ -156,7 +148,7 @@ Reviewers attack from separate angles at once, and the parent makes the final ca
 
 ```mermaid
 flowchart LR
-  A[State scope and intent] --> B["reviewer x2<br/>(opus / sonnet)"]
+  A[State scope and intent] --> B["reviewer x3<br/>(fable / opus / sonnet)"]
   B --> C[Synthesize]
   C --> D["Lead judgment<br/>Act On / Consider / Dismissed"]
 ```
@@ -167,7 +159,7 @@ Three shapes: partition, race, or both. Runs in local worktrees instead of Curso
 
 ```mermaid
 flowchart LR
-  A["Frame<br/>done predicate, shape, N"] --> B["worker xN (sonnet)<br/>isolation: worktree"]
+  A["Frame<br/>done predicate, shape, N"] --> B["worker xN (opus)<br/>isolation: worktree"]
   B --> C["Aggregate<br/>PASS / ISSUES / BLOCKED"]
   C --> D[One report]
 ```
@@ -178,7 +170,7 @@ Reads the transcript through three lenses and turns each learning into an edit t
 
 ```mermaid
 flowchart LR
-  A[Locate transcript JSONL] --> B["Judgment (opus)<br/>Tooling (sonnet)<br/>Divergent (opus)"]
+  A[Locate transcript JSONL] --> B["Judgment (opus)<br/>Tooling (opus)<br/>Divergent (opus)"]
   B --> C["synthesizer (opus)"]
   C --> D[Can structure enforce it?]
   D --> E[Edit the skill]
@@ -191,7 +183,7 @@ comment-sicko only reports. The parent makes the fixes.
 ```mermaid
 flowchart LR
   A[Diff or scope] --> B{{comment-sicko}}
-  B -->|doubtful justification| H[Check with how / why]
+  B -->|doubtful justification| H[Trace the code / check with why]
   B --> R["Report<br/>deletions, MUST KILL flags"]
   R --> F[Parent fixes]
 ```
@@ -202,9 +194,9 @@ The steps poteto-mode follows for a new feature (`plugin/skills/poteto-mode/play
 
 ```mermaid
 flowchart LR
-  S1["1. how<br/>map the affected area"] --> S2["2. architect<br/>(arena inside)"]
+  S1["1. trace the<br/>affected area"] --> S2["2. architect<br/>(arena inside)"]
   S2 --> S3["3. write the<br/>throughput checkpoint"]
-  S3 --> S4["4. delegate code<br/>poteto-agent (sonnet)"]
+  S3 --> S4["4. delegate code<br/>poteto-agent (opus)"]
   S4 --> S5["5. verify on the<br/>real surface"]
   S5 --> S6["6. split into<br/>small commits"]
   S6 --> S7["7. contested design<br/>→ interrogate"]
@@ -213,9 +205,9 @@ flowchart LR
 
 | Playbook (selection) | Main skills called |
 |---|---|
-| Investigation | how, why |
-| Bug fix | how, why → architect → tdd |
-| Feature / Refactoring | how → architect → interrogate |
+| Investigation | why |
+| Bug fix | why → architect → tdd |
+| Feature / Refactoring | architect → interrogate |
 | Autonomous run / Orchestrate | swarm, show-me-your-work |
 | No matching playbook, or large | figure-it-out (architect, arena, show-me-your-work) |
 

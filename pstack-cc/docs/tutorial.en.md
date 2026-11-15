@@ -166,13 +166,13 @@ Read the restatement. If the agent fixed on a red herring, correct it now, befor
 /how is <subsystem> implemented?
 ```
 
-The agent judges how complex the question is. For a complex one, it runs two to four explorers in parallel and merges their findings into one explanation. The headings are Overview, Key Concepts, How It Works, Where Things Live, and Gotchas.
+One read-only subagent reads the code and writes an explanation that someone new to the subsystem can build a working mental model from.
 
 ```
 /why are we still stuck on <an old dependency or an odd implementation>?
 ```
 
-`/why` reads git history and PRs, plus the MCP servers connected to Claude Code, such as Slack, Linear, Notion, and Sentry. It skips sources that are not connected and says so in the answer. The answer cites the commits and PRs it used.
+`/why` answers from the record, not the code. It reads the commits and PR discussions that introduced the target and each later change, and when that trail is thin, other sources connected to Claude Code, such as Slack or Linear. The answer quotes what the authors wrote, marks its own inferences, and says what the record does not answer.
 
 ### 9. Have `/teach` explain
 
@@ -221,8 +221,8 @@ For a change that crosses function boundaries, design before you build. This is 
 
 `/architect` runs in five phases:
 
-1. **Ground.** It runs `/how` and `/why` over the systems involved.
-2. **Sketch.** Several models (opus and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
+1. **Ground.** It traces the code of the systems involved, and runs `/why` when the rationale matters.
+2. **Sketch.** Several models (fable, opus, and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
 3. **Agree.** The prompt ends with "let me review before proceeding", so it stops here and shows you the design.
 4. **Implement.** When you approve, it fills in the sketch.
 5. **Scrap.** If the same kind of workaround keeps appearing, or the types need `any` or casts, it throws the sketch away and designs again.
@@ -310,7 +310,7 @@ Fix a problem reported on Slack:
 /poteto-mode repro this with /verify-<app>. if it repros on main, fix it and show me a video as proof
 ```
 
-Most of the time `/poteto-mode` alone is enough. It calls `/how`, `/architect`, and the other skills on its own when the work needs them.
+Most of the time `/poteto-mode` alone is enough. It calls `/why`, `/architect`, and the other skills on its own when the work needs them.
 
 ## Clean up
 

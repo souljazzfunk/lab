@@ -6,14 +6,14 @@ Cursor 用プラグイン pstack を Claude Code 向けに変換したもの(`ps
 
 ## 1. 全体像
 
-入口は `/poteto-mode`。仕事の種類で playbook を選び、各ステップから how / architect などのワークフロースキルを呼ぶ。どのスキルも最初に `claude-code.md`(Cursor → Claude Code 対応表)を読み、モデル選択は `~/.claude/pstack-models.md` に従う。
+入口は `/poteto-mode`。仕事の種類で playbook を選び、各ステップから why / architect などのワークフロースキルを呼ぶ。どのスキルも最初に `claude-code.md`(Cursor → Claude Code 対応表)を読み、モデル選択は `~/.claude/pstack-models.md` に従う。
 
 ```mermaid
 flowchart LR
   U([ユーザー]) --> PM["/poteto-mode<br/>(poteto-agent 経由も可)"]
   PM --> PB{"playbook を選ぶ<br/>23 種"}
   PM -. 大規模・当てはまる型なし .-> FIO["figure-it-out"]
-  PB --> WF["ワークフロースキル<br/>how / why / architect / arena<br/>interrogate / swarm / tdd"]
+  PB --> WF["ワークフロースキル<br/>why / architect / arena<br/>interrogate / swarm / tdd"]
   PB --> Q["仕上げスキル<br/>unslop / technical-writing<br/>no-comments / show-me-your-work"]
   PM --> PR["principle-* 24 個<br/>(判断の根拠)"]
   WF --> SA[["サブエージェント群<br/>(並列・worktree)"]]
@@ -43,7 +43,6 @@ flowchart TB
   PH[poteto-help]:::entry --> PM
   PH --> SP
 
-  PM --> HOW[how]:::wf
   PM --> WHY[why]:::wf
   PM --> ARC[architect]:::wf
   PM --> ARN[arena]:::wf
@@ -62,26 +61,22 @@ flowchart TB
   FIO --> ARN
   FIO --> SMW
   ARC --> ARN
-  ARC --> HOW
   ARC --> INT
   ARC --> WHY
-  WHY --> HOW
-  TEACH[teach]:::wf --> HOW
+  TEACH[teach]:::wf --> HOW[how]:::wf
   TEACH --> WHY
   TEACH --> UN
   BR[blast-radius]:::wf --> HOW
   BR --> WHY
   BR --> ARN
   BR --> UN
-  RC[recall]:::wf --> WHY
-  RC --> UN
+  RC[recall]:::wf --> UN
   RC --> AM[automate-me]:::etc
   AM --> PM
   AM --> UN
 
   NC --> CS{{comment-sicko}}:::ag
-  CS -. 疑わしい注釈を調べる .-> HOW
-  CS -.-> WHY
+  CS -. 疑わしい注釈を調べる .-> WHY
   TW --> UN
   SMW --> UN
 
@@ -101,27 +96,24 @@ poteto-help は質問に応じてほぼ全スキルを案内するので、図�
 
 ### how(仕組みの説明)
 
-単純な質問は explainer 1 体だけ。複雑なら 2〜4 観点で探索してから統合。
+読み取り専用のサブエージェント 1 体が、探索と説明を一度に済ませる。poteto-mode からは呼ばれず、人が `/how` と送ったときと teach から使う。
 
 ```mermaid
 flowchart LR
-  A[複雑さを判定] -->|単純| E1["explainer<br/>(opus)"]
-  A -->|複雑| X1["explorer ×2〜4<br/>(sonnet, 並列)"]
-  X1 --> E2["explainer が統合<br/>(opus)"]
-  E1 --> P[提示]
-  E2 --> P
+  A[問いを受け取る] --> E["explainer 1 体<br/>(読み取り専用)"]
+  E --> P[提示]
 ```
 
 ### why(経緯・理由の調査)
 
-使える MCP を調べ、証拠の種類ごとに調査役を 1 体ずつ立てる。
+コードではなく記録から答える。対象を入れたコミットと PR の議論、その後の変更を読み、足りなければ他の情報源も見る。サブエージェントは使わない。
 
 ```mermaid
 flowchart LR
-  A[対象と問いを確定] --> B[コード上の起点を特定]
-  B --> C["investigator ×N (sonnet)<br/>git / チケット / 文書 / チャット / 監視"]
-  C --> D["synthesizer (opus)"]
-  D --> E[提示]
+  A[対象を特定] --> B["記録を読む<br/>コミット / PR の議論"]
+  B -->|記録が薄い| C[他の情報源]
+  B --> D["提示<br/>引用・推測の明示・記録に無いこと"]
+  C --> D
 ```
 
 ### arena(案の競作)
@@ -130,7 +122,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[課題と採点基準を決める] --> B["候補 ×N<br/>(opus / sonnet)<br/>各自の worktree"]
+  A[課題と採点基準を決める] --> B["候補 ×N<br/>(fable / opus / sonnet)<br/>各自の worktree"]
   B --> C["cross-judge<br/>(別モデル)"]
   C --> D[土台を選ぶ]
   D --> E[負けた案から移植]
@@ -139,7 +131,7 @@ flowchart LR
 
 ### architect(実装前の設計)
 
-設計スケッチの段階で arena を呼ぶ。実装が破綻したら how からやり直し。
+設計スケッチの段階で arena を呼ぶ。実装が破綻したら作ったものを追い直してやり直し。
 
 ```mermaid
 flowchart LR
@@ -147,7 +139,7 @@ flowchart LR
   B --> C[合意 任意]
   C --> D[スケッチに沿って実装]
   D -->|同じ歪みが繰り返す| E[スケッチを捨てる]
-  E -->|how で再把握| B
+  E -->|作ったものを追い直す| B
 ```
 
 ### interrogate(敵対的レビュー)
@@ -156,7 +148,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[範囲と意図を明示] --> B["reviewer ×2<br/>(opus / sonnet)"]
+  A[範囲と意図を明示] --> B["reviewer ×3<br/>(fable / opus / sonnet)"]
   B --> C[統合]
   C --> D["親の判断<br/>Act On / Consider / Dismissed"]
 ```
@@ -167,7 +159,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A["枠組み<br/>完了条件・形・N"] --> B["worker ×N (sonnet)<br/>isolation: worktree"]
+  A["枠組み<br/>完了条件・形・N"] --> B["worker ×N (opus)<br/>isolation: worktree"]
   B --> C["集約<br/>PASS / ISSUES / BLOCKED"]
   C --> D[報告 1 本]
 ```
@@ -178,7 +170,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  A[会話ログ JSONL を特定] --> B["Judgment (opus)<br/>Tooling (sonnet)<br/>Divergent (opus)"]
+  A[会話ログ JSONL を特定] --> B["Judgment (opus)<br/>Tooling (opus)<br/>Divergent (opus)"]
   B --> C["synthesizer (opus)"]
   C --> D[構造で縛れるか確認]
   D --> E[スキルを修正]
@@ -191,7 +183,7 @@ comment-sicko は報告だけ。修正は親がする。
 ```mermaid
 flowchart LR
   A[差分・範囲] --> B{{comment-sicko}}
-  B -->|怪しい理由付け| H[how / why で確認]
+  B -->|怪しい理由付け| H[コードを追う / why で確認]
   B --> R["報告<br/>削除数・MUST KILL"]
   R --> F[親が修正]
 ```
@@ -202,9 +194,9 @@ poteto-mode が「新機能」と判定したときの手順(`plugin/skills/pote
 
 ```mermaid
 flowchart LR
-  S1["1. how<br/>影響範囲を把握"] --> S2["2. architect<br/>(内部で arena)"]
+  S1["1. 影響範囲を<br/>追って把握"] --> S2["2. architect<br/>(内部で arena)"]
   S2 --> S3["3. 進捗チェック<br/>ポイントを書く"]
-  S3 --> S4["4. 実装を委譲<br/>poteto-agent (sonnet)"]
+  S3 --> S4["4. 実装を委譲<br/>poteto-agent (opus)"]
   S4 --> S5["5. 実物で検証"]
   S5 --> S6["6. 小さな<br/>コミットに整理"]
   S6 --> S7["7. 設計に異論<br/>→ interrogate"]
@@ -213,9 +205,9 @@ flowchart LR
 
 | playbook(一部) | 主に呼ぶスキル |
 |---|---|
-| Investigation | how, why |
-| Bug fix | how, why → architect → tdd |
-| Feature / Refactoring | how → architect → interrogate |
+| Investigation | why |
+| Bug fix | why → architect → tdd |
+| Feature / Refactoring | architect → interrogate |
 | Autonomous run / Orchestrate | swarm, show-me-your-work |
 | 当てはまる型なし・大規模 | figure-it-out(architect, arena, show-me-your-work) |
 
