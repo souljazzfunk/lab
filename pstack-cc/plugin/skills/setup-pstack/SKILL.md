@@ -19,7 +19,15 @@ List the values the Agent tool's `model` parameter accepts in this session (typi
 
 ### 2. Load current state
 
-If `~/.claude/pstack-models.md` exists, read it and treat its role values as the current choices. Otherwise start from the defaults in step 4. Drop any line whose role is not in step 4 and tell the user.
+If `~/.claude/pstack-models.md` exists, read it and treat its role values as the current choices. Otherwise start from the defaults in step 4. Drop any line whose role is not in step 4, such as `how explorer` or `why investigators` (retired roles), and tell the user.
+
+A file without the `# defaults: 2` line comes from an older setup. That setup wrote a line for every role, so some of its values are old defaults, not choices. Before step 3, replace these values:
+
+- `sonnet` in `feature, refactoring`, `bug-fix`, `perf-issue`, `hillclimb`, `reflect tooling`, or `swarm workers` takes the role's step 4 default.
+- `opus` in `hardest tasks` takes the role's step 4 default.
+- In a panel role (`arena runners`, `arena cross-judge pool`, `architect runners`, `interrogate reviewers`), a list of exactly `opus` and `sonnet`, in either order, takes the role's step 4 list.
+
+Every other value is the user's choice and stays, including every `inherit-parent` or `auto` value. Tell the user which values you replaced.
 
 ### 3. Show the roles and confirm
 
@@ -27,28 +35,25 @@ Show every role with its model. Ask with AskUserQuestion whether to accept as-is
 
 ### 4. Write the file
 
-Overwrite the whole file so re-runs stay idempotent. Shape:
+Overwrite the whole file so re-runs stay idempotent. Always write the `# defaults: 2` line. If `fable` is not in the step 1 list, write `opus` wherever the shape below has `fable`. Shape:
 
 ```
 # pstack model configuration (Claude Code). One line per role. Delete a line to fall back to the skill default.
 # `inherit-parent`: omit the Agent tool's `model`, so the role runs on the parent model.
-feature, refactoring: sonnet
-bug-fix: sonnet
-perf-issue: sonnet
-hillclimb: sonnet
+# defaults: 2
+feature, refactoring: opus
+bug-fix: opus
+perf-issue: opus
+hillclimb: opus
 judgment and prose: opus
-hardest tasks: opus
-how explorer: sonnet
-how explainer: opus
-why investigators: sonnet
-why synthesizer: opus
-reflect tooling: sonnet
+hardest tasks: fable
+reflect tooling: opus
 reflect judgment, divergent, synthesizer: opus
-arena runners: opus, sonnet
-arena cross-judge pool: opus, sonnet
-swarm workers: sonnet
-architect runners: opus, sonnet
-interrogate reviewers: opus, sonnet
+arena runners: fable, opus, sonnet
+arena cross-judge pool: fable, opus, sonnet
+swarm workers: opus
+architect runners: fable, opus, sonnet
+interrogate reviewers: fable, opus, sonnet
 ```
 
 ### 5. Confirm

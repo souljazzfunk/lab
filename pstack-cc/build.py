@@ -131,10 +131,10 @@ RULES = [
     # --- 全体の置き換え ---
     # pstack リポジトリ内のパス(claude-code.md の "Paths to pstack's own files" を参照)
     Rule("`git show origin/main:pstack/skills/", "`cat <pstack plugin root>/skills/", min_hits=4),
-    Rule("`pstack/skills/", "`<pstack plugin root>/skills/", min_hits=5),
+    Rule("`pstack/skills/", "`<pstack plugin root>/skills/", min_hits=4),
     # モデル設定ファイル
     Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md", min_hits=4),
-    Rule("the `pstack-models.mdc` rule", "`~/.claude/pstack-models.md`", min_hits=3),
+    Rule("the `pstack-models.mdc` rule", "`~/.claude/pstack-models.md`", min_hits=2),
     # 会話ログの場所
     Rule("`agent-transcripts/` directory", "transcript directory", min_hits=4),
     Rule(r"the system prompt names (?:the|this) path", TRANSCRIPTS_NOTE, min_hits=3, regex=True),
@@ -161,12 +161,16 @@ RULES = [
         regex=True,
     ),
     # モデル名(対応表は claude-code.md)
-    Rule(r"claude-opus-5-5-(?:max|xhigh|medium)", "opus", min_hits=10, regex=True),
-    Rule("grok-4.7-xhigh-fast", "sonnet", min_hits=10),
+    # 上流の既定は fable 5.2(最難関)/ opus 5.5(コード・判断・速い作業)/ gemini(パネルの別ベンダー枠)。
+    # 努力度や -fast の違いは Claude Code に無いので落とす。gemini の枠は sonnet にしてパネルを 3 つの別モデルに保つ
+    Rule(r"claude-fable-5-2(?:-(?:max|xhigh|high|medium|low))+", "fable", min_hits=6, regex=True),
+    Rule(r"claude-opus-5-5(?:-(?:max|xhigh|high|medium|low|fast))+", "opus", min_hits=19, regex=True),
+    Rule("gemini-4-carbon-high", "sonnet", min_hits=6),
 ]
 
 # 変換後に残っていたら build を失敗させる文字列
-FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4.7", "claude-opus-5-5", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
+FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4", "claude-opus-5-5", "claude-fable-5-2",
+             "gemini-4-carbon", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
 
 SKILL_NOTICE = (
     "> **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read "
