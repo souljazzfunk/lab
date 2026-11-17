@@ -23,14 +23,14 @@ The build replaced Cursor model slugs with Claude Code aliases:
 | Cursor default | Here |
 |---|---|
 | `claude-fable-5-2-max` / `-high` (and other effort levels) | `fable` |
-| `claude-opus-5-5-xhigh` / `-high-fast` (and other effort levels, fast or not) | `opus` |
+| `claude-opus-5-5-xhigh-fast` / `-high-fast` (and other effort levels, fast or not) | `opus` |
 | `gemini-4-carbon-high` | `sonnet` |
 
 - Pass the alias as the Agent tool's `model`.
 - If the tool rejects `fable` (not every plan has it), use `opus` instead. If it rejects any other alias, omit `model` for that subagent so it runs on the parent model. Say so once either way.
-- Upstream's reasoning budgets (`unlimited`, `large`, `medium`, `small`), effort suffixes such as `-xhigh`, and fast versus standard speed have no Claude Code equivalent. Ignore them.
+- Upstream's reasoning budgets (`large`, `medium`, `small`), effort suffixes such as `-xhigh`, and fast versus standard speed have no Claude Code equivalent. Ignore them.
 - A skill that talks about model families, vendors or slug prefixes (`claude-fable-*`, `claude-*`, `gemini-*`) means these aliases. Each alias counts as its own family and its own vendor, so a cross-judge only has to differ from the parent's alias.
-- Panels (arena, architect, interrogate) were designed for different vendors. Here they are different Claude models, so candidates will be less diverse. The rest of each workflow is unchanged.
+- Panels (arena, interrogate) were designed for different vendors. Here they are different Claude models, so candidates will be less diverse. The rest of each workflow is unchanged.
 
 Per-role overrides live in `~/.claude/pstack-models.md`, written by `/setup-pstack`. A value of `inherit-parent` or `auto` means omit `model`.
 

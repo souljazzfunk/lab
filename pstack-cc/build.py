@@ -63,9 +63,10 @@ RULES = [
         '`"type":"user"` or `"type":"assistant"`.',
         only="skills/recall/SKILL.md",
     ),
+    # 上流は会話ログの場所を Cursor の system prompt 任せにしている。Claude Code の置き場所を示す
     Rule(
-        "find this conversation's transcript in the `agent-transcripts/` directory the system prompt names.",
-        "find this conversation's transcript in the active project's transcript directory, "
+        "Read the whole transcript.",
+        "Read this conversation's whole transcript, in the active project's transcript directory "
         "`~/.claude/projects/<slug>/` (`claude-code.md` at the plugin root explains the slug).",
         only="skills/reflect/SKILL.md",
     ),
@@ -105,15 +106,6 @@ RULES = [
         "check it out in its worktree first.",
         only="skills/swarm/SKILL.md",
     ),
-    # 上流は pstack リポジトリの中から実行する前提のパス。プラグインとして入れた場合はスキルの場所から辿る
-    Rule(
-        "`node pstack/skills/poteto-mode/scripts/check-plan.mjs <plan.md>`",
-        "`node <poteto-mode base directory>/scripts/check-plan.mjs <plan.md>` "
-        "(the base directory Claude Code reported when it loaded the `poteto-mode` skill)",
-        only="skills/poteto-mode/playbooks/multi-phase-plan.md",
-    ),
-    Rule("Read these from trunk at program start.", "Read these at program start.",
-         only="skills/poteto-mode/playbooks/multi-phase-plan.md"),
     # 上流は tick のたびに playbook を trunk から読み直す。プラグインに trunk は無いので、入れたファイルを cat する。
     # autopilot-full / autopilot-stack で文言が分かれた (旧: 両方とも `git show origin/main:pstack/skills/...`)。
     Rule(
@@ -121,20 +113,9 @@ RULES = [
         "re-reads this playbook with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md`",
         only="skills/poteto-mode/playbooks/autopilot-full.md",
     ),
-    # 計画に「trunk から読み直す」手順があるかの検査。pstack のファイルは trunk から読まなくなったので、
-    # 同じ手順の文言「Re-read them at every tick」を目印にする
-    Rule('"git show origin/main:",', '"Re-read them at every tick",',
-         only="skills/poteto-mode/scripts/check-plan.mjs"),
-    # 同じ目印。テスト台本はテンプレートリテラル内なのでバッククォートがエスケープされている。
-    Rule("\\`git show origin/main:\\`", "Re-read them at every tick",
-         only="skills/poteto-mode/scripts/check-plan.test.ts"),
     # --- 全体の置き換え ---
-    # pstack リポジトリ内のパス(claude-code.md の "Paths to pstack's own files" を参照)
-    Rule("`git show origin/main:pstack/skills/", "`cat <pstack plugin root>/skills/", min_hits=4),
-    Rule("`pstack/skills/", "`<pstack plugin root>/skills/", min_hits=4),
     # モデル設定ファイル
     Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md", min_hits=4),
-    Rule("the `pstack-models.mdc` rule", "`~/.claude/pstack-models.md`", min_hits=2),
     # 会話ログの場所
     Rule("`agent-transcripts/` directory", "transcript directory", min_hits=4),
     Rule(r"the system prompt names (?:the|this) path", TRANSCRIPTS_NOTE, min_hits=3, regex=True),
@@ -145,12 +126,11 @@ RULES = [
     Rule(".cursor/skills/", ".claude/skills/", min_hits=5),
     Rule(".cursor/worktrees", ".claude/worktrees", min_hits=1),
     # ツール名
-    Rule("Task tool", "Agent tool", min_hits=5),
+    Rule("Task tool", "Agent tool", min_hits=4),
     Rule(r"\bTask subagent", "Agent-tool subagent", min_hits=1, regex=True),
-    Rule("`Task`", "`Agent`", min_hits=5),
+    Rule("`Task`", "`Agent`", min_hits=2),
     Rule("generalPurpose", "general-purpose", min_hits=5),
     Rule(r"\bAskQuestion\b", "AskUserQuestion", min_hits=3, regex=True),
-    Rule("(Shell, Grep, MCP", "(Bash, Grep, MCP", min_hits=3),
     Rule("Comment Sicko", "comment-sicko", min_hits=2),
     # poteto-help が指す上流の記事と README は plugin/ に入れないので、上流の公開版にリンクする
     Rule(
@@ -161,11 +141,11 @@ RULES = [
         regex=True,
     ),
     # モデル名(対応表は claude-code.md)
-    # 上流の既定は fable 5.2(最難関)/ opus 5.5(コード・判断・速い作業)/ gemini(パネルの別ベンダー枠)。
+    # 上流の既定は opus 5.5(コード・判断・速い作業。常に -fast)/ fable 5.2 と gemini(パネルの枠)。
     # 努力度や -fast の違いは Claude Code に無いので落とす。gemini の枠は sonnet にしてパネルを 3 つの別モデルに保つ
-    Rule(r"claude-fable-5-2(?:-(?:max|xhigh|high|medium|low))+", "fable", min_hits=6, regex=True),
-    Rule(r"claude-opus-5-5(?:-(?:max|xhigh|high|medium|low|fast))+", "opus", min_hits=19, regex=True),
-    Rule("gemini-4-carbon-high", "sonnet", min_hits=6),
+    Rule(r"claude-fable-5-2(?:-(?:max|xhigh|high|medium|low))+", "fable", min_hits=2, regex=True),
+    Rule(r"claude-opus-5-5(?:-(?:max|xhigh|high|medium|low|fast))+", "opus", min_hits=14, regex=True),
+    Rule("gemini-4-carbon-high", "sonnet", min_hits=4),
 ]
 
 # 変換後に残っていたら build を失敗させる文字列

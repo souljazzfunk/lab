@@ -219,15 +219,9 @@ For a change that crosses function boundaries, design before you build. This is 
 /poteto-mode we need to add <feature>. /architect this first, and answer any open questions with prototypes. let me review before proceeding.
 ```
 
-`/architect` runs in five phases:
+`/architect` first traces every system the change touches. Then it sketches two designs with different shapes (types, function signatures, module boundaries) and picks the one where each piece of state has one owner and callers need to know least. The prompt ends with "let me review before proceeding", so it stops there and shows you the design. If the same kind of workaround keeps appearing during implementation, it redesigns instead of patching.
 
-1. **Ground.** It traces the code of the systems involved, and runs `/why` when the rationale matters.
-2. **Sketch.** Several models (fable, opus, and sonnet) each draft a design on their own. A design is a usage sketch, types, function signatures, and a rationale. It needs at least two designs with different structures.
-3. **Agree.** The prompt ends with "let me review before proceeding", so it stops here and shows you the design.
-4. **Implement.** When you approve, it fills in the sketch.
-5. **Scrap.** If the same kind of workaround keeps appearing, or the types need `any` or casts, it throws the sketch away and designs again.
-
-In the Claude Code version, every designer is a Claude model. The Cursor version mixes models from different vendors, so expect less variety here.
+For a large or contested design, it runs `/arena` instead, where several models (fable, opus, and sonnet) each draft a design. In the Claude Code version, every designer is a Claude model. The Cursor version mixes models from different vendors, so expect less variety here.
 
 ### 13. Write the README first
 
@@ -247,7 +241,7 @@ Once the design is settled, turn it into a plan to execute.
 /poteto-mode turn this design into a plan
 ```
 
-The agent follows the **Multi-phase plan** playbook. The plan file has one section per PR, and every checkbox names the evidence that checks it. Every PR includes steps that drive the real app. The playbook's rule is that passing tests alone do not count as verified.
+The agent follows the **Multi-phase plan** playbook. The plan file opens with the PRs in landing order and which depend on which, then has one section per PR with checkboxes for its files, its change, and its verification. Every PR's verification includes a step that drives the real app. The playbook's rule is that passing tests alone do not count as verified.
 
 When the plan is written, the agent stops. It starts executing only when you tell it to go.
 
