@@ -131,15 +131,13 @@ flowchart LR
 
 ### architect (design before code)
 
-Calls arena for the design sketch. If implementation breaks down, trace what was built and start over.
+Traces every system the change touches, sketches two different shapes, and picks the one where each piece of state has one owner. A large or contested design goes to arena instead. If workarounds keep repeating, redesign instead of patching.
 
 ```mermaid
 flowchart LR
-  A[Ground the problem] --> B["Sketch = arena<br/>(architect runners)"]
-  B --> C[Agree, optional]
-  C --> D[Implement against the sketch]
-  D -->|same friction keeps repeating| E[Scrap the sketch]
-  E -->|trace what was built| B
+  A[Trace the affected systems] --> B["Sketch two shapes<br/>(arena if large or contested)"]
+  B --> C[Pick the simpler one]
+  C -->|workarounds repeat| B
 ```
 
 ### interrogate (adversarial review)
@@ -166,14 +164,14 @@ flowchart LR
 
 ### reflect (retrospective)
 
-Reads the transcript through three lenses and turns each learning into an edit to an existing skill.
+Reads the whole transcript and turns each durable learning into an edit to an existing skill.
 
 ```mermaid
 flowchart LR
-  A[Locate transcript JSONL] --> B["Judgment (opus)<br/>Tooling (opus)<br/>Divergent (opus)"]
-  B --> C["synthesizer (opus)"]
-  C --> D[Can structure enforce it?]
-  D --> E[Edit the skill]
+  A[Read the transcript] --> B[Keep durable learnings]
+  B --> C{Can a check enforce it?}
+  C -->|yes| D[Backlog]
+  C -->|no| E[Edit the skill, after approval]
 ```
 
 ### no-comments (comment removal)
