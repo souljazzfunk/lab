@@ -145,12 +145,12 @@ RULES = [
     # 努力度や -fast の違いは Claude Code に無いので落とす。gemini の枠は sonnet にしてパネルを 3 つの別モデルに保つ
     Rule(r"claude-fable-5-2(?:-(?:max|xhigh|high|medium|low))+", "fable", min_hits=2, regex=True),
     Rule(r"claude-opus-5-5(?:-(?:max|xhigh|high|medium|low|fast))+", "opus", min_hits=14, regex=True),
-    Rule("gemini-4-carbon-high", "sonnet", min_hits=4),
+    Rule("gemini-4-neon-xhigh", "sonnet", min_hits=4),
 ]
 
 # 変換後に残っていたら build を失敗させる文字列
 FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4", "claude-opus-5-5", "claude-fable-5-2",
-             "gemini-4-carbon", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
+             "gemini-4-", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
 
 SKILL_NOTICE = (
     "> **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read "
