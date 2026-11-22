@@ -2,40 +2,74 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  z-index: 2147483647;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(15, 23, 30, 0.92);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
-  font-size: 13px;
-  color: #fff;
+  z-index: 2147483646;
 }
-#pwf-bar button {
+#pwf-bar button,
+#pwf-panel button {
   border: 0;
   border-radius: 999px;
-  padding: 6px 14px;
-  font: inherit;
-  font-weight: 600;
+  padding: 8px 16px;
+  font: 600 13px "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   cursor: pointer;
-  background: #33373d;
-  color: #fff;
-}
-#pwf-bar button[aria-pressed="true"] {
   background: #1a98ff;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
-#pwf-bar button:disabled {
-  opacity: 0.5;
-  cursor: wait;
+#pwf-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  background: #0a0e14;
+  color: #fff;
+  font: 14px "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
 }
-#pwf-count {
-  min-width: 64px;
-  text-align: center;
+#pwf-panel .pwf-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-bottom: 1px solid #2a3038;
+}
+#pwf-panel .pwf-header > span:first-child {
+  margin-right: auto;
+  font-weight: 600;
+}
+#pwf-panel .pwf-header button:last-child {
+  background: #33373d;
+}
+#pwf-panel .pwf-error {
+  color: #ff8a80;
+}
+#pwf-panel .pwf-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+#pwf-panel .pwf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#pwf-panel .pwf-grid a {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   color: #c7ccd1;
+  text-decoration: none;
 }
-.pwf-hidden {
-  display: none !important;
+#pwf-panel .pwf-grid img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #1b2027;
+}
+#pwf-panel .pwf-grid a:hover span {
+  color: #fff;
 }

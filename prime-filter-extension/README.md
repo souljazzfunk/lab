@@ -1,6 +1,6 @@
 # prime-filter-extension
 
-Amazon Prime Video のウォッチリスト(`https://www.amazon.co.jp/gp/video/mystuff/watchlist`)を、プライム見放題の作品だけに絞り込む Chrome 拡張機能。
+Amazon Prime Video のウォッチリスト(`https://www.amazon.co.jp/gp/video/mystuff/watchlist`)から、プライム見放題の作品だけを一覧で表示する Chrome 拡張機能。
 
 ## 入れ方
 
@@ -9,12 +9,28 @@ Amazon Prime Video のウォッチリスト(`https://www.amazon.co.jp/gp/video/m
 
 ## 使い方
 
-ウォッチリストを開くと右下にボタンが出る。
+ウォッチリストを開くと右下に「プライム見放題だけ見る」ボタンが出る。押すと、ウォッチリスト全件を Amazon から読み込み、プライム見放題の作品だけを画面全体の一覧で表示する。Esc か「閉じる」で戻る。
 
-- **プライムのみ**: プライム見放題以外の作品を隠す。ON/OFF の状態は次に開いたときも残る
-- **件数**(例: `12 / 48`): 読み込み済みの作品のうち、プライム見放題の数 / 全体の数
-- **CSV**: 最後まで自動でスクロールしてから CSV を書き出す。「プライムのみ」が ON ならプライム見放題だけを書き出す
+- 見出しに `プライム見放題 N 件 / ウォッチリスト M 件` を出す
+- **CSV**: 一覧に出ている作品(タイトル、種類、ASIN、URL)を書き出す
+- 読み込んだ件数が Amazon の示す件数(`estimatedTotal`)と合わないときは、赤字で警告を出す
 
-## 判定のしかた
+## 仕組み
 
-カードの `data-card-entitlement` が `Entitled` で、かつサムネイル画像の URL にプライムのロゴを重ねる指定(`benefit-id/.../Prime/logos/`)が入っているものを、プライム見放題とみなす。レンタル作品やチャンネル作品は、このどちらかが当てはまらない。
+Amazon のウォッチリスト画面は、表示位置の近くのカードしか描画しない。スクロールに合わせて続きを読み込み、描画するカードも入れ替える。そのため画面のカードを数えたり隠したりする方式では、描画されていない作品を判定できず、隠すと Amazon 側の描画も崩れる。
+
+この拡張は画面のカードを使わず、Amazon のデータを直接読む(`watchlist.js`)。
+
+1. `/gp/video/mystuff/watchlist` の HTML に埋め込まれた JSON から、最初の 20 件と続きを取るためのトークンを読む
+2. `/gp/video/api/paginateCollection` に POST し、応答の `pagination` を辿って `hasMoreItems` が false になるまで取る
+3. ASIN で重複を除き、`estimatedTotal` と件数を突き合わせる
+
+`entitlementType` が `Entitled` で、画像 URL のロゴ指定(`benefit-id/.../Prime/logos/`)が Prime のものを、プライム見放題とみなす。チャンネル作品は Entitled でもロゴが別の名前になる。
+
+`paginateCollection` に送る値は、Amazon の画面がスクロール時に送る値を写したもの。Amazon が変えると応答が JSON でなくなり、一覧の代わりにエラーが出る。そのときは画面がスクロール時に送る値を見直して `watchlist.js` の `PAGE_PARAMS` を直す。
+
+## テスト
+
+```bash
+node --test test/watchlist.test.mjs
+```
