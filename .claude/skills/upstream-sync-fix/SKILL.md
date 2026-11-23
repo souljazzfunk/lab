@@ -43,12 +43,13 @@ GitHub は MCP の `mcp__github__*` ツールで触る(`gh` は使えない)。�
 ### pstack
 
 - 取り込み: `pstack-cc/sync-upstream.sh` → `python3 pstack-cc/build.py`
-- **build 失敗**: 表示されたルールの上流側の文章を `git diff vendor/pstack/<ファイル>` で確かめ、`build.py` の `RULES` を新しい文章に合わせる。置き換え後の文章も、上流の変更(手順番号、言い回し)に合わせて直す。Claude Code での意味(`pstack-cc/claude-code.md` の対応表)は変えない。上流から該当箇所が消えたルールは消してよい。
+- **build 失敗**: build は Cursor 固有の記述 (`CURSOR_ONLY_PATTERNS`) が出力に残ったときだけ止まり、そのファイルと行を表示する。上流側の文を `git diff vendor/pstack/<ファイル>` で確かめ、その記述が消えるように `build.py` の `RULES` を直す(既存のルールを新しい文に合わせるか、ルールを足す)。Claude Code での意味(`pstack-cc/claude-code.md` の対応表)は変えない。警告に出た「どこにも当たらなくなったルール」は消す。
 - **overrides の上流版が変わった**: `git diff` で上流の変更点を見て、`pstack-cc/overrides/` の同じファイルに反映する。
 - **スキルが増えた・消えた**: `pstack-cc/docs/skill-map.{ja,en}.md` のスキル数(`ls pstack-cc/plugin/skills | wc -l`)と、名前の出てくる箇所を直す。消えたスキルを `build.py` の `MODEL_INVOCABLE` などが参照していたら外す。
 - 検査:
   ```bash
   python3 pstack-cc/build.py --check
+  python3 -m unittest discover -s pstack-cc -p 'test_*.py'
   python3 -m venv "$TMPDIR/ruff" && "$TMPDIR/ruff/bin/pip" install -q ruff==0.15.8 && "$TMPDIR/ruff/bin/ruff" check pstack-cc/
   claude plugin validate --strict pstack-cc/plugin
   ```

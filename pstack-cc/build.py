@@ -4,9 +4,6 @@
 使い方:
   python3 pstack-cc/build.py          生成して plugin/ を置き換える
   python3 pstack-cc/build.py --check  生成結果が plugin/ と一致するか確かめる(CI 用)
-
-置き換えルールは RULES にまとめてある。ルールごとに「最低何回当たるはずか」を持たせ、
-上流の文章が変わって当たらなくなったら build を失敗させる。気づかないまま変換が抜けるのを防ぐため。
 """
 
 import filecmp
@@ -44,15 +41,13 @@ MODEL_INVOCABLE = {"create-verification-skill"}
 class Rule:
     pattern: str
     repl: str
-    min_hits: int = 1
-    only: str | None = None  # plugin/ からの相対パス。指定があればそのファイルだけ
+    only_file: str | None = None
     regex: bool = False
 
 
 TRANSCRIPTS_NOTE = "`claude-code.md` explains where Claude Code keeps it"
 
 RULES = [
-    # --- 個別ファイルの書き換え(上流の文章が変わったら当たらなくなり、build が止まる) ---
     Rule(
         "Transcripts live at `~/.cursor/projects/<slug>/agent-transcripts/<uuid>/<uuid>.jsonl`, "
         'where `<slug>` is the workspace path with the leading slash dropped and each "/" turned into "-" '
@@ -61,14 +56,14 @@ RULES = [
         'where `<slug>` is the workspace path with each "/" (and any other non-alphanumeric character) turned into "-" '
         "(so `/Users/you/proj` becomes `-Users-you-proj`). Every line is one JSON event; chat messages have "
         '`"type":"user"` or `"type":"assistant"`.',
-        only="skills/recall/SKILL.md",
+        only_file="skills/recall/SKILL.md",
     ),
     # 上流は会話ログの場所を Cursor の system prompt 任せにしている。Claude Code の置き場所を示す
     Rule(
         "Read the whole transcript.",
         "Read this conversation's whole transcript, in the active project's transcript directory "
         "`~/.claude/projects/<slug>/` (`claude-code.md` at the plugin root explains the slug).",
-        only="skills/reflect/SKILL.md",
+        only_file="skills/reflect/SKILL.md",
     ),
     # 上流の公式 Claude Code 版の入れ方を案内しているので、この変換版の入れ方と対応表に差し替える
     Rule(
@@ -79,7 +74,7 @@ RULES = [
         "pstack is built for Cursor. This copy is the Claude Code conversion installed with `/plugin install pstack@lab`. "
         "There, each command takes a `pstack:` prefix, such as `/pstack:poteto-mode`. "
         "`claude-code.md` at the plugin root maps the Cursor names.",
-        only="skills/poteto-help/SKILL.md",
+        only_file="skills/poteto-help/SKILL.md",
     ),
     Rule(
         "# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.\n"
@@ -88,7 +83,7 @@ RULES = [
         "# Transcripts dir: ~/.claude/projects/<slugified-repo-path> (Claude Code).\n"
         "slug=$(printf '%s' \"$main_wt\" | sed 's#[^A-Za-z0-9]#-#g')\n"
         'transcripts="$HOME/.claude/projects/$slug"',
-        only="skills/poteto-mode/scripts/worktree-audit.sh",
+        only_file="skills/poteto-mode/scripts/worktree-audit.sh",
     ),
     Rule(
         'Spawn all N workers in one message with `subagent_type: generalPurpose`, `environment: "cloud"`, '
@@ -98,59 +93,54 @@ RULES = [
         "`run_in_background: true`, and the step 3 model, left unset for `auto` or `inherit-parent`. "
         "Omit `isolation` only when the worker must see the parent's working tree. Workers run on this machine "
         "(Claude Code has no Cursor cloud), so start at most about 5 at once and queue the rest.",
-        only="skills/swarm/SKILL.md",
+        only_file="skills/swarm/SKILL.md",
     ),
     Rule(
         "When a worker must start from a non-default pushed branch, pass `cloud_base_branch`.",
         "When a worker must start from a non-default pushed branch, name it in the brief and have the worker "
         "check it out in its worktree first.",
-        only="skills/swarm/SKILL.md",
+        only_file="skills/swarm/SKILL.md",
     ),
     # 上流は tick のたびに playbook を trunk から読み直す。プラグインに trunk は無いので、入れたファイルを cat する。
     # autopilot-full / autopilot-stack で文言が分かれた (旧: 両方とも `git show origin/main:pstack/skills/...`)。
     Rule(
         "re-reads this playbook from trunk",
         "re-reads this playbook with `cat <pstack plugin root>/skills/poteto-mode/playbooks/autopilot-full.md`",
-        only="skills/poteto-mode/playbooks/autopilot-full.md",
+        only_file="skills/poteto-mode/playbooks/autopilot-full.md",
     ),
-    # --- 全体の置き換え ---
-    # モデル設定ファイル
-    Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md", min_hits=4),
-    # 会話ログの場所
-    Rule("`agent-transcripts/` directory", "transcript directory", min_hits=4),
-    Rule(r"the system prompt names (?:the|this) path", TRANSCRIPTS_NOTE, min_hits=3, regex=True),
-    Rule("~/.cursor/projects/*/", "~/.claude/projects/*/", min_hits=4),
-    # スキル・プラグイン・worktree の置き場所
-    Rule("~/.cursor/skills/", "~/.claude/skills/", min_hits=2),
-    Rule("~/.cursor/plugins/", "~/.claude/plugins/", min_hits=1),
-    Rule(".cursor/skills/", ".claude/skills/", min_hits=5),
-    Rule(".cursor/worktrees", ".claude/worktrees", min_hits=1),
-    # ツール名
-    Rule("Task tool", "Agent tool", min_hits=4),
-    Rule(r"\bTask subagent", "Agent-tool subagent", min_hits=1, regex=True),
-    Rule("`Task`", "`Agent`", min_hits=2),
-    Rule("generalPurpose", "general-purpose", min_hits=5),
-    Rule(r"\bAskQuestion\b", "AskUserQuestion", min_hits=3, regex=True),
-    Rule("Comment Sicko", "comment-sicko", min_hits=2),
-    # poteto-help が指す上流の記事と README は plugin/ に入れないので、上流の公開版にリンクする
+    Rule("~/.cursor/rules/pstack-models.mdc", "~/.claude/pstack-models.md"),
+    Rule("`agent-transcripts/` directory", "transcript directory"),
+    Rule(r"the system prompt names (?:the|this) path", TRANSCRIPTS_NOTE, regex=True),
+    Rule("~/.cursor/projects/*/", "~/.claude/projects/*/"),
+    Rule("~/.cursor/skills/", "~/.claude/skills/"),
+    Rule("~/.cursor/plugins/", "~/.claude/plugins/"),
+    Rule(".cursor/skills/", ".claude/skills/"),
+    Rule(".cursor/worktrees", ".claude/worktrees"),
+    Rule("Task tool", "Agent tool"),
+    Rule(r"\bTask subagent", "Agent-tool subagent", regex=True),
+    Rule("`Task`", "`Agent`"),
+    Rule("generalPurpose", "general-purpose"),
+    Rule(r"\bAskQuestion\b", "AskUserQuestion", regex=True),
+    Rule("Comment Sicko", "comment-sicko"),
     Rule(
         r"\]\(\.\./\.\./(docs/guide/[^)]+|README\.md)\)",
         r"](https://github.com/cursor/plugins/blob/main/pstack/\1)",
-        min_hits=5,
-        only="skills/poteto-help/SKILL.md",
+        only_file="skills/poteto-help/SKILL.md",
         regex=True,
     ),
-    # モデル名(対応表は claude-code.md)
-    # 上流の既定は opus 5.5(コード・判断・速い作業。常に -fast)/ fable 5.2 と gemini(パネルの枠)。
-    # 努力度や -fast の違いは Claude Code に無いので落とす。gemini の枠は sonnet にしてパネルを 3 つの別モデルに保つ
-    Rule(r"claude-fable-5-2(?:-(?:max|xhigh|high|medium|low))+", "fable", min_hits=2, regex=True),
-    Rule(r"claude-opus-5-5(?:-(?:max|xhigh|high|medium|low|fast))+", "opus", min_hits=14, regex=True),
-    Rule("gemini-4-neon-xhigh", "sonnet", min_hits=4),
+    # 上流は既定のモデルをよく替えるので、版や努力度によらず系統名に落とす。
+    # gemini の枠は sonnet にして、パネルを 3 つの別モデルに保つ
+    Rule(r"claude-(fable|opus|sonnet|haiku)-\d+(?:-\d+)?(?:-(?:max|xhigh|high|medium|low|fast))*", r"\1", regex=True),
+    Rule(r"gemini-\d+(?:\.\d+)?(?:-[a-z]+)*-(?:max|xhigh|high|medium|low)\b", "sonnet", regex=True),
 ]
 
-# 変換後に残っていたら build を失敗させる文字列
-FORBIDDEN = ["~/.cursor/", "pstack-models.mdc", "generalPurpose", "grok-4", "claude-opus-5-5", "claude-fable-5-2",
-             "gemini-4-", "gpt-5.6", "origin/main:pstack/", "`pstack/skills/"]
+CURSOR_ONLY_PATTERNS = [
+    r"\.cursor/", r"pstack-models\.mdc", r"generalPurpose", r"agent-transcripts", r"cursor-plugins",
+    r"environment: \"cloud\"", r"cloud_base_branch", r"\bTask (?:tool|subagent)\b", r"`Task`", r"\bAskQuestion\b",
+    r"Comment Sicko", r"claude-(?:fable|opus|sonnet|haiku)-\d", r"gemini-\d", r"(?:grok|gpt)-\d[\w.]*-(?:max|xhigh|high|medium|low)",
+    r"origin/main:pstack/", r"`pstack/skills/", r"re-reads? (?:this|both) playbooks? from trunk",
+    r"\]\(\.\./\.\./(?:docs/guide/|README\.md)",
+]
 
 SKILL_NOTICE = (
     "> **Claude Code:** converted from the Cursor version of pstack. Before running this skill, read "
@@ -211,7 +201,7 @@ def apply_rules(out: Path) -> None:
         rel = path.relative_to(out).as_posix()
         text = orig = path.read_text()
         for i, r in enumerate(RULES):
-            if r.only and r.only != rel:
+            if r.only_file and r.only_file != rel:
                 continue
             if r.regex:
                 text, n = re.subn(r.pattern, r.repl, text)
@@ -222,22 +212,22 @@ def apply_rules(out: Path) -> None:
         if text != orig:
             path.write_text(text)
 
-    stale = [(r, n) for r, n in zip(RULES, hits) if n < r.min_hits]
-    if stale:
-        print("上流の文章が変わったため、当たらなくなったルールがあります:", file=sys.stderr)
-        for r, n in stale:
-            where = f" ({r.only})" if r.only else ""
-            print(f"  {n}/{r.min_hits} 回: {r.pattern[:90]!r}{where}", file=sys.stderr)
-        sys.exit(1)
+    unused = [r for r, n in zip(RULES, hits) if n == 0]
+    if unused:
+        print("警告: 上流のどこにも当たらなくなったルールがあります。消してよいか確かめてください:", file=sys.stderr)
+        for r in unused:
+            where = f" ({r.only_file})" if r.only_file else ""
+            print(f"  {r.pattern[:90]!r}{where}", file=sys.stderr)
 
     leftovers = [
-        f"  {p.relative_to(out)}: {w}"
+        f"  {p.relative_to(out)}:{text.count(chr(10), 0, m.start()) + 1}: {m.group(0)!r}"
         for p in files
-        for w in FORBIDDEN
-        if w in p.read_text()
+        for text in [p.read_text()]
+        for w in CURSOR_ONLY_PATTERNS
+        for m in re.finditer(w, text)
     ]
     if leftovers:
-        print("変換しきれなかった Cursor 固有の記述があります:", file=sys.stderr)
+        print("Cursor 固有の記述が変換されずに残りました。RULES に置き換えを足すか、既存のルールを上流の新しい文に合わせてください:", file=sys.stderr)
         print("\n".join(leftovers), file=sys.stderr)
         sys.exit(1)
 

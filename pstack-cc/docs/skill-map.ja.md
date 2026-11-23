@@ -216,11 +216,11 @@ flowchart LR
   UP["cursor/plugins<br/>pstack"] -->|sync-upstream.sh| V["vendor/pstack/<br/>無改造"]
   V --> B["build.py<br/>パス・Task→Agent・<br/>モデル名を置換"]
   O["overrides/<br/>setup-pstack"] --> B
-  B -->|当たり回数を検査| P["pstack-cc/plugin/<br/>生成物"]
+  B -->|Cursor 固有の記述が残らないか検査| P["pstack-cc/plugin/<br/>生成物"]
   P --> M["/plugin install<br/>pstack@lab"]
 ```
 
-置換ルールが上流の文章変更で当たらなくなると build が失敗する。
+Cursor 固有の記述(`.cursor/` のパスや Cursor のモデル名など)が変換されずに残ると build が失敗する。上流が文を言い換えただけなら止まらない。
 
 ---
 
