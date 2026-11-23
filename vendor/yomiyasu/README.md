@@ -178,6 +178,8 @@ gh skill update yomiyasu
 
 導入先のエージェントを指定する場合は、`--agent codex` や `--agent claude-code` を追加してください。
 
+3.0.1 までに入れたものを新しいバージョンに上げるときは、入れた先の `yomiyasu` フォルダを消してから、`gh skill install` で入れ直してください。フォルダを消さずに上から入れ直すと、前のバージョンにしかないファイルは消えずに残ります。3.1.0 で外した `.codex-plugin` フォルダが残っていると、Codex の一覧に出る名前が `yomiyasu` にならず `yomiyasu:yomiyasu` のままになります。
+
 ### 3. `npx openskills install`
 
 ```bash
@@ -410,7 +412,7 @@ claude -p "draft.md を yomiyasu で読みやすくして" --allowedTools "Read"
 
 ## 付属ツール
 
-文章の表現と書式を見る `yomiyasu_lint.py`、推敲の前後を比べる `yomiyasu_diff.py`、2つをまとめて実行して記録を残す `yomiyasu_check.py` を同梱しています。設定に貼ったときだけ動く任意のフック `yomiyasu_hook.py` もあります。どれも外部ライブラリは要らず、Python の標準ライブラリだけで動きます（テストは Python 3.9 と 3.14 で実行しています）。
+文章の表現と書式を見る `yomiyasu_lint.py`、推敲の前後を比べる `yomiyasu_diff.py`、2つをまとめて実行して記録を残す `yomiyasu_check.py` を同梱しています。設定に貼ったときだけ動く任意のフック `yomiyasu_hook.py` もあります。どれも外部ライブラリは要らず、Python の標準ライブラリだけで動きます（テストは Python 3.9、3.13、3.14 で実行しています）。
 
 検査は見直し候補と変わった箇所を出すだけで、意味が保たれたかどうかや、読みやすいかどうかは判定しません。候補が出た所を直すかどうかは、元の文や文脈と照らし合わせて決めてください。
 
