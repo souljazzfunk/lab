@@ -216,11 +216,11 @@ flowchart LR
   UP["cursor/plugins<br/>pstack"] -->|sync-upstream.sh| V["vendor/pstack/<br/>unmodified"]
   V --> B["build.py<br/>rewrites paths,<br/>Task→Agent, model names"]
   O["overrides/<br/>setup-pstack"] --> B
-  B -->|checks hit counts| P["pstack-cc/plugin/<br/>generated"]
+  B -->|checks no Cursor-only text is left| P["pstack-cc/plugin/<br/>generated"]
   P --> M["/plugin install<br/>pstack@lab"]
 ```
 
-If upstream wording changes so a rewrite rule stops matching, the build fails.
+If Cursor-only text (`.cursor/` paths, Cursor model slugs, and so on) is left in the output, the build fails. If upstream only rewords a sentence, the build keeps going.
 
 ---
 

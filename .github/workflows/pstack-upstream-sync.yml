@@ -1,8 +1,5 @@
 name: pstack 上流の同期
 
-# 毎日 cursor/plugins の pstack を確認し、更新があれば取り込んで build し直した PR を出す。
-# 手作業の要る変更(スキルの削除、overrides の上流版の変更)がなければ、検査が通りしだい自動で merge する。
-# build が通らない(置き換えルールが上流の新しい文章に当たらない)ときは PR ではなく issue を立てる。
 on:
   schedule:
     - cron: '47 23 * * *' # 毎日 8:47 JST
@@ -84,7 +81,7 @@ jobs:
           {
             echo "上流 cursor/plugins の \`$NEW\` を取り込んだところ、\`pstack-cc/build.py\` が失敗しました。"
             echo
-            echo "上流の文章が変わって \`RULES\` の置き換えが当たらなくなった可能性があります。手元で \`pstack-cc/sync-upstream.sh\` → \`python3 pstack-cc/build.py\` を実行し、表示されたルールを直してください。"
+            echo "上流の新しい文に Cursor 固有の記述が入り、\`RULES\` で変換されないまま残りました。手元で \`pstack-cc/sync-upstream.sh\` → \`python3 pstack-cc/build.py\` を実行し、表示された記述が消えるように \`RULES\` を直してください。"
             echo
             echo "実行ログ: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo
@@ -139,6 +136,14 @@ jobs:
               else
                 echo "スキルの追加だけなら自動 merge は止めない。\`pstack-cc/docs/skill-map.{ja,en}.md\` の図とスキル数は後で直せばよい。"
               fi
+            fi
+            if grep -q '^警告:' "$RUNNER_TEMP/build.log"; then
+              echo
+              echo '## どこにも当たらなくなった置き換えルール'
+              echo '上流から該当の文が消えたので、`pstack-cc/build.py` の `RULES` から消してよい(自動 merge は止めない)。'
+              echo '```'
+              sed -n '/^警告:/,$p' "$RUNNER_TEMP/build.log" | sed 1d | grep '^  '
+              echo '```'
             fi
             touched=""
             for f in $(cd pstack-cc/overrides && find . -type f | sed 's|^\./||'); do

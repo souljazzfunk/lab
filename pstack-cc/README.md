@@ -40,12 +40,12 @@ pstack-cc/
 
 1. `vendor/pstack/` から `skills/`・`agents/`・`LICENSE` を写す(`automations/` と `docs/` は Cursor 専用か記事なので入れない)
 2. `overrides/` のファイルで差し替える
-3. 置き換えルールを当てる: `~/.cursor/...` のパス、`Task` → `Agent`、`generalPurpose` → `general-purpose`、モデル名(`claude-fable-5-2-max` などの Fable → `fable`、`claude-opus-5-5-xhigh-fast` などの Opus → `opus`、`gemini-4-carbon-high` → `sonnet`)、会話ログの場所、`/swarm` のクラウド実行 → ローカルの worktree、など
+3. 置き換えルールを当てる: `~/.cursor/...` のパス、`Task` → `Agent`、`generalPurpose` → `general-purpose`、モデル名(`claude-fable-5-2-max` などの Fable → `fable`、`claude-opus-5-5-xhigh-fast` などの Opus → `opus`、`gemini-4-neon-xhigh` などの Gemini → `sonnet`。版や努力度が変わっても当たる)、会話ログの場所、`/swarm` のクラウド実行 → ローカルの worktree、など
 4. frontmatter を Claude Code の形に揃える(スキル名をディレクトリ名に。Cursor 専用のキーを外す。`MODEL_INVOCABLE` のスキルは `disable-model-invocation` を外し、Claude からも呼べるようにする。今は `create-verification-skill` だけ)
 5. 各スキルの先頭に「`claude-code.md` を読んで」という一文を入れる
 6. `plugin.json` と README を生成する(版は `<上流の版>-cc.<上流のコミット>.<生成物のハッシュ>`。こちらの変換だけを変えても版が変わる)
 
-**安全装置**: ルールごとに「最低何回当たるはずか」を決めてある。上流の文章が変わってルールが当たらなくなったり、`~/.cursor/` などが変換されずに残ったりしたら、build は失敗して該当箇所を表示する。
+**安全装置**: `build.py` の `CURSOR_ONLY_PATTERNS` (`.cursor/`、`environment: "cloud"`、Cursor のモデル名など) が出力に残ったら、build は失敗してファイルと行を表示する。ルールが何回当たったかは数えない。上流が文を言い換えたり消したりしただけなら build は通り、どこにも当たらなくなったルールを警告として表示する。`pstack-cc/test_build.py` は、過去に同期を止めた上流の実際の変更でこの振る舞いを確かめる。
 
 ## 上流の更新を取り込む
 
@@ -57,7 +57,7 @@ claude plugin validate --strict pstack-cc/plugin
 git add vendor/pstack pstack-cc && git commit
 ```
 
-build が失敗したら、表示されたルール(`build.py` の `RULES`)を新しい文章に合わせて直す。`overrides/` にあるファイルの上流版が変わったときは、変更点を手で反映する。
+build が失敗したら、表示された Cursor 固有の記述が消えるように `build.py` の `RULES` を直す(既存のルールを新しい文に合わせるか、ルールを足す)。`overrides/` にあるファイルの上流版が変わったときは、変更点を手で反映する。
 
 ### 毎日の自動チェック
 

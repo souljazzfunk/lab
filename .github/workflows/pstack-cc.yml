@@ -44,7 +44,8 @@ jobs:
           ruff check pstack-cc/
           command -v shellcheck || sudo apt-get install -y -q shellcheck
           shellcheck pstack-cc/sync-upstream.sh
-      # vendor/pstack や build.py を変えたのに plugin/ を作り直し忘れていないか
+      - name: 過去に同期を止めた上流の変更で build を試す
+        run: python3 -m unittest discover -s pstack-cc -p 'test_*.py'
       - name: 生成物が最新か
         run: python3 pstack-cc/build.py --check
       - name: プラグインと marketplace の検証
