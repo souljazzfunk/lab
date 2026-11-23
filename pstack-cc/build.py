@@ -152,6 +152,8 @@ AGENT_NOTICE = (
     "maps Cursor tools, models and paths to Claude Code.\n\n"
 )
 
+HAND_WRITTEN_MODEL_SLUG = re.compile(r"\b(?:claude-(?:fable|opus|sonnet|haiku)|gemini|grok|gpt)-\d[\w.-]*")
+
 FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 
 
@@ -277,7 +279,22 @@ def write_readme(out: Path) -> None:
     )
 
 
+def check_hand_written(paths: list[Path]) -> None:
+    found = [
+        f"  {p.name}:{text.count(chr(10), 0, m.start()) + 1}: {m.group(0)}"
+        for p in paths
+        for text in [p.read_text()]
+        for m in HAND_WRITTEN_MODEL_SLUG.finditer(text)
+    ]
+    if found:
+        print("手書きの文書に上流のモデル名がそのまま書いてあります。上流が名前を替えると古くなるので、"
+              "`claude-opus-<version>-<effort>` のように版と努力度を伏せた形で書いてください:", file=sys.stderr)
+        print("\n".join(found), file=sys.stderr)
+        sys.exit(1)
+
+
 def build(out: Path) -> None:
+    check_hand_written([ADAPTER, HERE / "README.md", *sorted((HERE / "docs").glob("*.md"))])
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
