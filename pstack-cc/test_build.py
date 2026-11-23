@@ -77,5 +77,23 @@ class UpstreamChange(unittest.TestCase):
         self.assertIn('environment: "cloud"', err)
 
 
+class HandWrittenDocs(unittest.TestCase):
+    def test_issue_88_table_naming_one_upstream_slug_fails_with_the_fix(self):
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp)
+        adapter = tmp / "claude-code.md"
+        adapter.write_text(build.ADAPTER.read_text() + "\n| `gemini-4-carbon-high` | `sonnet` |\n")
+        original = build.ADAPTER
+        build.ADAPTER = adapter
+        err = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(err), self.assertRaises(SystemExit):
+                build.build(tmp / "plugin")
+        finally:
+            build.ADAPTER = original
+        self.assertIn("gemini-4-carbon-high", err.getvalue())
+        self.assertIn("claude-opus-<version>-<effort>", err.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -22,9 +22,9 @@ The build replaced Cursor model slugs with Claude Code aliases:
 
 | Cursor default | Here |
 |---|---|
-| `claude-fable-5-2-max` / `-high` (and other effort levels) | `fable` |
-| `claude-opus-5-5-xhigh-fast` / `-high-fast` (and other effort levels, fast or not) | `opus` |
-| `gemini-4-neon-xhigh` | `sonnet` |
+| `claude-fable-<version>-<effort>`, any version and effort, fast or not | `fable` |
+| `claude-opus-<version>-<effort>`, likewise (and `sonnet`, `haiku`) | `opus` (or that family's alias) |
+| `gemini-<version>-<name>-<effort>` | `sonnet` |
 
 - Pass the alias as the Agent tool's `model`.
 - If the tool rejects `fable` (not every plan has it), use `opus` instead. If it rejects any other alias, omit `model` for that subagent so it runs on the parent model. Say so once either way.
